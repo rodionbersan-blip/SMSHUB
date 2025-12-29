@@ -95,8 +95,13 @@ class CryptoPayClient:
         data = response.json()
         if not data.get("ok"):
             raise RuntimeError(f"Crypto Pay error: {data}")
+        result = data.get("result") or []
+        if isinstance(result, dict):
+            items = result.get("items", [])
+        else:
+            items = result
         invoices: List[CryptoInvoice] = []
-        for item in data.get("result", []):
+        for item in items:
             invoices.append(
                 CryptoInvoice(
                     invoice_id=str(item["invoice_id"]),

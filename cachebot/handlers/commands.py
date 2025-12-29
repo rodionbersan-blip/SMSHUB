@@ -290,7 +290,13 @@ async def merchant_photos(message: Message, state: FSMContext) -> None:
         await message.answer("Нужно отправить фото. Попробуй снова.")
         return
     deps = get_deps()
-    data = await state.get_data()
+    data = await state.get_data() or {}
+    if not data.get("user_id"):
+        await state.clear()
+        await message.answer(
+            "Похоже, заявка была сброшена. Напишите /start и выберите «Стать мерчантом» заново."
+        )
+        return
     photo_id = max(message.photo, key=lambda ph: ph.file_size or 0).file_id
     photo_ids = list(data.get("photo_file_ids") or [])
     photo_ids.append(photo_id)

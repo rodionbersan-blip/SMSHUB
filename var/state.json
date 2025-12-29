@@ -1,0 +1,222 @@
+{
+  "deals": [
+    {
+      "id": "3b769fa2-c92d-421a-9c86-42063a3a9890",
+      "seller_id": 7894624488,
+      "usd_amount": "200",
+      "rate": "1.02",
+      "fee_percent": "0.5",
+      "fee_amount": "1.02000",
+      "usdt_amount": "205.02000",
+      "created_at": "2025-12-27T21:57:08.347672+00:00",
+      "expires_at": "2025-12-27T22:14:27.994996+00:00",
+      "status": "canceled",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "D3B769FA2"
+    },
+    {
+      "id": "9bfa385e-21d1-4b58-a312-698ad4de3555",
+      "seller_id": 5212761967,
+      "usd_amount": "10",
+      "rate": "1.02",
+      "fee_percent": "0.5",
+      "fee_amount": "0.05100",
+      "usdt_amount": "10.25100",
+      "created_at": "2025-12-27T22:00:28.794728+00:00",
+      "expires_at": "2025-12-27T22:16:08.194692+00:00",
+      "status": "expired",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "D9BFA385E"
+    },
+    {
+      "id": "068be810-f43b-46d0-8ad6-15bd489b104f",
+      "seller_id": 6171834060,
+      "usd_amount": "150",
+      "rate": "1.02",
+      "fee_percent": "0.5",
+      "fee_amount": "0.76500",
+      "usdt_amount": "153.76500",
+      "created_at": "2025-12-28T03:00:55.516752+00:00",
+      "expires_at": "2025-12-28T03:15:55.516752+00:00",
+      "status": "expired",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "C00003"
+    },
+    {
+      "id": "f625ec0e-8215-4480-8b23-0fecceb27cdd",
+      "seller_id": 7894624488,
+      "usd_amount": "1",
+      "rate": "1.02",
+      "fee_percent": "0.5",
+      "fee_amount": "0.00510",
+      "usdt_amount": "1.02510",
+      "created_at": "2025-12-28T04:12:30.113634+00:00",
+      "expires_at": "2025-12-28T04:27:30.113634+00:00",
+      "status": "canceled",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "C00004"
+    },
+    {
+      "id": "45845dcf-af83-4883-b514-dec4b8ad9d5c",
+      "seller_id": 7894624488,
+      "usd_amount": "7400",
+      "rate": "74",
+      "fee_percent": "2.5",
+      "fee_amount": "2.500",
+      "usdt_amount": "102.500",
+      "created_at": "2025-12-28T04:27:19.900566+00:00",
+      "expires_at": "2025-12-28T04:44:26.027995+00:00",
+      "status": "expired",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "C00005"
+    },
+    {
+      "id": "df9b7a1d-5756-4b29-8d16-731c51041d82",
+      "seller_id": 5212761967,
+      "usd_amount": "100",
+      "rate": "74",
+      "fee_percent": "2.5",
+      "fee_amount": "0.03378378378378378378378378378",
+      "usdt_amount": "1.385135135135135135135135135",
+      "created_at": "2025-12-28T04:30:48.082671+00:00",
+      "expires_at": "2025-12-28T04:46:10.264610+00:00",
+      "status": "expired",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "C00006"
+    },
+    {
+      "id": "d6757e78-753e-4599-a66c-aff5c5897cfa",
+      "seller_id": 7894624488,
+      "usd_amount": "72.19512195121951219512195122",
+      "rate": "74",
+      "fee_percent": "2.5",
+      "fee_amount": "0.02439024390243902439024390244",
+      "usdt_amount": "1.000000000000000000000000000",
+      "created_at": "2025-12-28T04:38:40.616800+00:00",
+      "expires_at": "2025-12-28T04:54:01.400607+00:00",
+      "status": "expired",
+      "buyer_id": null,
+      "invoice_id": null,
+      "invoice_url": null,
+      "comment": null,
+      "public_id": "C00007"
+    }
+  ],
+  "balances": {},
+  "settings": {
+    "usd_rate": "74",
+    "fee_percent": "2.5"
+  },
+  "user_roles": {
+    "7894624488": "buyer",
+    "5212761967": "seller",
+    "6171834060": "seller"
+  },
+  "applications": [
+    {
+      "id": "5ced4d83-cdd7-4500-b44b-75f0bda6bca7",
+      "user_id": 7894624488,
+      "username": "royal_bastard52",
+      "banks": [
+        "alpha",
+        "sber"
+      ],
+      "uses_personal_bank": true,
+      "accepts_risk": true,
+      "photo_file_ids": [
+        "AgACAgIAAxkBAAMtaVBgEGk2hi8raPXVXVus954rpVcAAtUNaxvUFIhKZlE8gwABKyQlAQADAgADeAADNgQ"
+      ],
+      "created_at": "2025-12-27T22:39:11.969360+00:00",
+      "status": "rejected"
+    },
+    {
+      "id": "bd032161-faba-4b66-95e2-0fc1aee434e1",
+      "user_id": 5212761967,
+      "username": "rodion_ggvp",
+      "banks": [
+        "sber",
+        "ozon",
+        "alpha"
+      ],
+      "uses_personal_bank": true,
+      "accepts_risk": true,
+      "photo_file_ids": [
+        "AgACAgIAAxkBAANSaVBlFG_ongkD265uXQABXIrdqF6XAAJgEGsbnbWASgaCTwQORH4QAQADAgADeQADNgQ"
+      ],
+      "created_at": "2025-12-27T23:00:35.985975+00:00",
+      "status": "accepted"
+    },
+    {
+      "id": "3d780b3e-6e56-4761-960d-682c8faf2206",
+      "user_id": 7894624488,
+      "username": "royal_bastard52",
+      "banks": [
+        "alpha"
+      ],
+      "uses_personal_bank": true,
+      "accepts_risk": true,
+      "photo_file_ids": [
+        "AgACAgIAAxkBAAPlaVCjG-RVeNN-h0boSCNA6TnVV-wAAlUOaxvUFIhKp7hynsnvyX0BAAMCAAN5AAM2BA"
+      ],
+      "created_at": "2025-12-28T03:25:15.675031+00:00",
+      "status": "pending"
+    },
+    {
+      "id": "c57ec778-d3f0-4c86-9e1a-5e92ab1f1fd2",
+      "user_id": 7894624488,
+      "username": "royal_bastard52",
+      "banks": [
+        "alpha"
+      ],
+      "uses_personal_bank": true,
+      "accepts_risk": true,
+      "photo_file_ids": [
+        "AgACAgIAAxkBAAPlaVCjG-RVeNN-h0boSCNA6TnVV-wAAlUOaxvUFIhKp7hynsnvyX0BAAMCAAN5AAM2BA"
+      ],
+      "created_at": "2025-12-28T03:28:05.566760+00:00",
+      "status": "accepted"
+    }
+  ],
+  "profiles": {
+    "7894624488": {
+      "user_id": 7894624488,
+      "full_name": "\ud835\udc01\ud835\udc00\ud835\udc12\ud835\udc13\ud835\udc00\ud835\udc11\ud835\udc03",
+      "username": "royal_bastard52",
+      "registered_at": "2025-12-28T02:45:41.347542+00:00"
+    },
+    "6171834060": {
+      "user_id": 6171834060,
+      "full_name": "\u1d04\u029c\u0280\u026as\u1d1b / \u0445\u1d29\u0438\u1d04\u1d1b /",
+      "username": "CoreChrist",
+      "registered_at": "2025-12-28T02:59:42.019202+00:00"
+    },
+    "5212761967": {
+      "user_id": 5212761967,
+      "full_name": "Rodion",
+      "username": "rodion_ggvp",
+      "registered_at": "2025-12-28T03:42:45.611376+00:00"
+    }
+  },
+  "deal_sequence": 7,
+  "merchant_since": {
+    "7894624488": "2025-12-28T04:38:48.686763+00:00"
+  }
+}

@@ -815,19 +815,22 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
     if not received_hash:
         return None
     data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
-    secret_key = hashlib.sha256(bot_token.encode()).digest()
-    expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+    webapp_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+    expected_hash = hmac.new(webapp_key, data_check_string.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(received_hash, expected_hash):
-        legacy_hash = hmac.new(bot_token.encode(), data_check_string.encode(), hashlib.sha256).hexdigest()
+        legacy_key = hashlib.sha256(bot_token.encode()).digest()
+        legacy_hash = hmac.new(legacy_key, data_check_string.encode(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(received_hash, legacy_hash):
-            logger.warning(
-                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
-                received_hash[:12],
-                expected_hash[:12],
-                legacy_hash[:12],
-                ",".join(sorted(data.keys())),
-            )
-            return None
+            legacy_plain = hmac.new(bot_token.encode(), data_check_string.encode(), hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(received_hash, legacy_plain):
+                logger.warning(
+                    "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
+                    received_hash[:12],
+                    expected_hash[:12],
+                    legacy_hash[:12],
+                    ",".join(sorted(data.keys())),
+                )
+                return None
     try:
         user_raw = data.get("user")
         return json.loads(user_raw) if user_raw else {}

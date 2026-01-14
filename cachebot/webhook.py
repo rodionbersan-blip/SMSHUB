@@ -1017,6 +1017,16 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
     if not init_data:
         raise web.HTTPUnauthorized(text="Missing initData")
     user = _validate_init_data(init_data, deps.config.telegram_bot_token)
+    if not user and deps.config.allow_unsafe_initdata:
+        try:
+            pairs = parse_qsl(init_data, keep_blank_values=True)
+            data = dict(pairs)
+            user_raw = data.get("user")
+            user = json.loads(user_raw) if user_raw else {}
+            if user:
+                logger.warning("Unsafe initData accepted for user_id=%s", user.get("id"))
+        except Exception:
+            user = None
     if not user or "id" not in user:
         raise web.HTTPUnauthorized(text="Invalid initData")
     full_name = " ".join(

@@ -178,12 +178,7 @@
     }
     try {
       const method = options.method || "GET";
-      let url = path;
-      if (method === "GET") {
-        const join = url.includes("?") ? "&" : "?";
-        url = `${url}${join}initData=${encodeURIComponent(state.initData)}`;
-      }
-      const res = await fetch(url, {
+      const res = await fetch(path, {
         method,
         headers: {
           "Content-Type": "application/json",

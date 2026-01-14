@@ -22,6 +22,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app["deps"] = deps
     app.router.add_post(deps.config.webhook_path, _crypto_pay_handler)
     app.router.add_get("/app", _webapp_index)
+    app.router.add_get("/app/", _webapp_index)
     app.router.add_get("/app/{path:.*}", _webapp_static)
     app.router.add_get("/api/me", _api_me)
     app.router.add_get("/api/ping", _api_ping)

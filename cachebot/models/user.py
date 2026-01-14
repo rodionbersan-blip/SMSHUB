@@ -62,10 +62,10 @@ class UserProfile:
     user_id: int
     full_name: str | None
     username: str | None
-    display_name: str | None = None
-    avatar_path: str | None = None
     registered_at: datetime
     last_seen_at: datetime
+    display_name: str | None = None
+    avatar_path: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {

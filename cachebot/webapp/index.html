@@ -21,13 +21,18 @@
 
       <section class="hero">
         <div class="hero-card">
-          <h1>Мини‑приложение BC Cash</h1>
+          <h1>BC Cash WebApp</h1>
           <p>
-            Подключаем WebApp. Здесь будет весь функционал: сделки, объявления,
-            споры и баланс. Сейчас можно проверить авторизацию Telegram.
+            Удобный центр управления сделками, балансом и профилем. Вся логика
+            синхронизирована с ботом.
           </p>
           <div class="hero-actions">
-            <button id="openMenu" class="btn primary">Открыть меню</button>
+            <button class="btn primary nav-btn" data-view="profile">Профиль</button>
+            <button class="btn nav-btn" data-view="balance">Баланс</button>
+            <button class="btn nav-btn" data-view="deals">Мои сделки</button>
+            <button class="btn nav-btn" data-view="p2p">P2P</button>
+            <button class="btn nav-btn" data-view="disputes" id="disputesTab">Споры</button>
+            <button class="btn nav-btn" data-view="admin" id="adminTab">Админ</button>
           </div>
         </div>
         <div class="stats">
@@ -46,10 +51,190 @@
         </div>
       </section>
 
+      <section class="panel view active" id="view-profile">
+        <div class="panel-header">
+          <h2>Профиль</h2>
+          <span id="userBadge" class="badge">Гость</span>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-card">
+            <div class="profile-title">Данные</div>
+            <div id="profileName" class="profile-value">—</div>
+            <div id="profileUsername" class="profile-muted">—</div>
+            <div id="profileRegistered" class="profile-muted">—</div>
+          </div>
+          <div class="profile-card">
+            <div class="profile-title">Роль</div>
+            <div id="profileRole" class="profile-value">—</div>
+            <div id="profileMerchantSince" class="profile-muted">—</div>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button id="reviewsOpen" class="btn">Отзывы</button>
+        </div>
+      </section>
+
+      <section class="panel view" id="view-balance">
+        <div class="panel-header">
+          <h2>Баланс</h2>
+          <span class="badge">USDT</span>
+        </div>
+        <div class="balance-card">
+          <div class="balance-label">Доступно</div>
+          <div id="balanceAmount" class="balance-value">—</div>
+          <div class="balance-muted">Вывод оформляется через бота.</div>
+        </div>
+      </section>
+
+      <section class="panel view" id="view-deals">
+        <div class="panel-header">
+          <h2>Мои сделки</h2>
+          <span id="dealsCount" class="badge">0</span>
+        </div>
+        <div id="dealsList" class="deal-list"></div>
+      </section>
+
+      <section class="panel view" id="view-p2p">
+        <div class="panel-header">
+          <h2>P2P Маркет</h2>
+          <span id="p2pTradingBadge" class="badge">—</span>
+        </div>
+        <div class="p2p-toolbar">
+          <button id="p2pBuyBtn" class="btn primary">Купить</button>
+          <button id="p2pSellBtn" class="btn">Продать</button>
+          <button id="p2pMyAdsBtn" class="btn">Объявления</button>
+        </div>
+        <div class="p2p-actions">
+          <button id="p2pCreateBtn" class="btn">Создать объявление</button>
+          <button id="p2pTradingToggle" class="btn ghost">Торги: —</button>
+        </div>
+        <div id="p2pList" class="deal-list"></div>
+      </section>
+
+      <section class="panel view" id="view-disputes">
+        <div class="panel-header">
+          <h2>Спорные ситуации</h2>
+          <span id="disputesCount" class="badge">0</span>
+        </div>
+        <div id="disputesList" class="deal-list"></div>
+      </section>
+
+      <section class="panel view" id="view-admin">
+        <div class="panel-header">
+          <h2>Админ панель</h2>
+          <span class="badge">Управление</span>
+        </div>
+        <div class="admin-grid">
+          <div class="admin-card">
+            <div class="profile-title">Управление ценой</div>
+            <label>Курс USDT/RUB
+              <input id="adminRate" type="number" step="0.01" />
+            </label>
+            <label>Комиссия пополнения (%)
+              <input id="adminFee" type="number" step="0.01" />
+            </label>
+            <label>Комиссия на вывод (%)
+              <input id="adminWithdrawFee" type="number" step="0.01" />
+            </label>
+            <button id="adminSaveRates" class="btn primary">Сохранить</button>
+          </div>
+          <div class="admin-card">
+            <div class="profile-title">Модераторы</div>
+            <div class="admin-row">
+              <input id="adminModeratorUsername" placeholder="@username" />
+              <button id="adminAddModerator" class="btn">Добавить</button>
+            </div>
+            <div id="adminModerators" class="admin-list"></div>
+          </div>
+          <div class="admin-card">
+            <div class="profile-title">Мерчанты</div>
+            <div id="adminMerchants" class="admin-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="modal" id="dealModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div id="dealModalTitle" class="modal-title">Сделка</div>
+            <button id="dealModalClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div id="dealModalBody" class="modal-body"></div>
+          <div id="dealModalActions" class="modal-actions"></div>
+          <div class="modal-note">
+            Для отправки QR используйте бот. В WebApp доступны подтверждения и управление.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="p2pModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div id="p2pModalTitle" class="modal-title">Объявление</div>
+            <button id="p2pModalClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div id="p2pModalBody" class="modal-body"></div>
+          <div id="p2pModalActions" class="modal-actions"></div>
+        </div>
+      </div>
+
+      <div class="modal" id="p2pCreateModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Новое объявление</div>
+            <button id="p2pCreateClose" class="btn ghost">Закрыть</button>
+          </div>
+          <form id="p2pCreateForm" class="p2p-form">
+            <label>Сторона
+              <select id="p2pSide">
+                <option value="sell">Продать USDT</option>
+                <option value="buy">Купить USDT</option>
+              </select>
+            </label>
+            <label>Объем (USDT)
+              <div class="p2p-input-row">
+                <input id="p2pVolume" type="number" step="0.001" min="0" placeholder="Например: 100" />
+                <button type="button" id="p2pVolumeMax" class="btn ghost">Макс объем</button>
+              </div>
+              <div class="p2p-hint" id="p2pBalanceHint">Баланс: —</div>
+            </label>
+            <label>Цена за 1 USDT (RUB)
+              <input id="p2pPrice" type="number" step="0.01" min="0" placeholder="Например: 74" />
+            </label>
+            <label>Лимиты RUB
+              <input id="p2pLimits" type="text" placeholder="1000-10000" />
+              <div class="p2p-hint">Формат: минимум-максимум</div>
+            </label>
+            <label>Банки
+              <div id="p2pBanks" class="p2p-banks"></div>
+            </label>
+            <label>Условия сделки
+              <textarea id="p2pTerms" rows="3" placeholder="Опционально"></textarea>
+            </label>
+            <button type="submit" class="btn primary">Создать</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal" id="reviewsModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Отзывы</div>
+            <button id="reviewsClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="reviews-tabs">
+            <button class="btn tab-btn active" data-tab="positive">👍 Положительные</button>
+            <button class="btn tab-btn" data-tab="negative">👎 Отрицательные</button>
+          </div>
+          <div id="reviewsSummary" class="reviews-summary">—</div>
+          <div id="reviewsList" class="deal-list"></div>
+        </div>
+      </div>
+
       <section class="panel">
         <div class="panel-header">
-          <h2>Панель</h2>
-          <span id="userBadge" class="badge">Гость</span>
+          <h2>Системные сообщения</h2>
+          <span class="badge">Лог</span>
         </div>
         <div id="log" class="log"></div>
       </section>

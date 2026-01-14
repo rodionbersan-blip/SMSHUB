@@ -127,6 +127,15 @@
     }
   };
 
+  const updateThemeToggle = (theme) => {
+    if (!themeToggle) return;
+    const label = themeToggle.querySelector(".theme-switch-label");
+    const icon = themeToggle.querySelector(".theme-switch-icon");
+    if (label) label.textContent = theme === "dark" ? "Ночь" : "День";
+    if (icon) icon.textContent = theme === "dark" ? "🌙" : "☀️";
+    themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+  };
+
   const detectTheme = () => {
     if (tg?.colorScheme) return tg.colorScheme;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -783,9 +792,13 @@
       tg.ready();
       tg.expand();
       state.initData = tg.initData || "";
-      applyTheme(detectTheme());
+      const theme = detectTheme();
+      applyTheme(theme);
+      updateThemeToggle(theme);
     } else {
-      applyTheme(detectTheme());
+      const theme = detectTheme();
+      applyTheme(theme);
+      updateThemeToggle(theme);
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
     }
     const user = await fetchMe();
@@ -841,7 +854,9 @@
 
   themeToggle?.addEventListener("click", () => {
     const current = document.documentElement.dataset.theme || "light";
-    applyTheme(current === "light" ? "dark" : "light");
+    const next = current === "light" ? "dark" : "light";
+    applyTheme(next);
+    updateThemeToggle(next);
   });
 
   navButtons.forEach((btn) => {

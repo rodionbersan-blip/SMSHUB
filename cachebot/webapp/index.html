@@ -32,18 +32,16 @@
         </div>
       </header>
 
-      <section class="hero">
-        <div class="hero-card">
-          <div class="hero-actions">
-            <button class="btn primary nav-btn" data-view="profile">Профиль</button>
-            <button class="btn nav-btn" data-view="deals">Мои сделки</button>
-            <button class="btn nav-btn" data-view="p2p">P2P</button>
-            <button class="btn nav-btn" data-view="disputes" id="disputesTab">Споры</button>
-            <button class="btn nav-btn" data-view="admin" id="adminTab">Админ</button>
-            <button id="sellQuick" class="btn">Продать</button>
-          </div>
+      <nav class="tabs">
+        <button class="tab nav-btn" data-view="p2p">P2P</button>
+        <button class="tab nav-btn" data-view="deals">Сделки</button>
+        <button class="tab nav-btn" data-view="profile">Профиль</button>
+        <button class="tab nav-btn" data-view="support">Поддержка</button>
+        <div class="tabs-extra">
+          <button class="tab nav-btn" data-view="disputes" id="disputesTab">Споры</button>
+          <button class="tab nav-btn" data-view="admin" id="adminTab">Админ</button>
         </div>
-      </section>
+      </nav>
 
       <section class="panel view active" id="view-profile">
         <div class="panel-header">
@@ -84,7 +82,7 @@
 
       <section class="panel view" id="view-deals">
         <div class="panel-header">
-          <h2>Мои сделки</h2>
+          <h2>Сделки</h2>
           <span id="dealsCount" class="badge">0</span>
         </div>
         <div id="dealsList" class="deal-list"></div>
@@ -105,6 +103,19 @@
           <button id="p2pTradingToggle" class="btn ghost">Торги: —</button>
         </div>
         <div id="p2pList" class="deal-list"></div>
+      </section>
+
+      <section class="panel view" id="view-support">
+        <div class="panel-header">
+          <h2>Поддержка</h2>
+        </div>
+        <div class="panel-body">
+          <div class="support-card">
+            <div class="support-title">Нужна помощь?</div>
+            <div class="support-text">Опиши проблему — мы ответим как можно быстрее.</div>
+            <button class="btn ghost">Написать в поддержку</button>
+          </div>
+        </div>
       </section>
 
       <section class="panel view" id="view-disputes">

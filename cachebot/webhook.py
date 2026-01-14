@@ -956,6 +956,16 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
     data_check_sorted = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
     raw_pairs = [(k, v) for k, v in pairs if k not in {"hash", "signature"}]
     data_check_raw = "\n".join(f"{k}={v}" for k, v in raw_pairs)
+    raw_items = []
+    for chunk in init_data.split("&"):
+        if not chunk:
+            continue
+        key, _, value = chunk.partition("=")
+        if key in {"hash", "signature"}:
+            continue
+        raw_items.append((key, value))
+    data_check_raw_unsorted = "\n".join(f"{k}={v}" for k, v in raw_items)
+    data_check_raw_sorted = "\n".join(f"{k}={v}" for k, v in sorted(raw_items))
     webapp_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
 
     def _hashes(data_check: str) -> tuple[str, str, str]:
@@ -971,10 +981,20 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
         or hmac.compare_digest(received_hash, legacy_plain)
     ):
         raw_expected, raw_legacy, raw_plain = _hashes(data_check_raw)
+        raw_unsorted_expected, raw_unsorted_legacy, raw_unsorted_plain = _hashes(
+            data_check_raw_unsorted
+        )
+        raw_sorted_expected, raw_sorted_legacy, raw_sorted_plain = _hashes(data_check_raw_sorted)
         if not (
             hmac.compare_digest(received_hash, raw_expected)
             or hmac.compare_digest(received_hash, raw_legacy)
             or hmac.compare_digest(received_hash, raw_plain)
+            or hmac.compare_digest(received_hash, raw_unsorted_expected)
+            or hmac.compare_digest(received_hash, raw_unsorted_legacy)
+            or hmac.compare_digest(received_hash, raw_unsorted_plain)
+            or hmac.compare_digest(received_hash, raw_sorted_expected)
+            or hmac.compare_digest(received_hash, raw_sorted_legacy)
+            or hmac.compare_digest(received_hash, raw_sorted_plain)
         ):
             logger.warning(
                 "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",

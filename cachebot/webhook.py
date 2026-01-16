@@ -16,6 +16,7 @@ from cachebot.deps import AppDeps
 from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -37,6 +38,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/avatar/{user_id}", _api_avatar)
     app.router.add_get("/api/balance", _api_balance)
     app.router.add_post("/api/balance/topup", _api_balance_topup)
+    app.router.add_post("/api/balance/withdraw", _api_balance_withdraw)
     app.router.add_get("/api/my-deals", _api_my_deals)
     app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
@@ -134,7 +136,11 @@ def _webapp_root() -> Path:
 async def _webapp_index(_: web.Request) -> web.Response:
     root = _webapp_root()
     index_path = root / "index.html"
-    return web.FileResponse(index_path)
+    response = web.FileResponse(index_path)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 async def _webapp_static(request: web.Request) -> web.Response:
@@ -143,7 +149,11 @@ async def _webapp_static(request: web.Request) -> web.Response:
     safe_path = (root / rel_path).resolve()
     if not safe_path.exists() or root not in safe_path.parents:
         raise web.HTTPNotFound()
-    return web.FileResponse(safe_path)
+    response = web.FileResponse(safe_path)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 async def _api_ping(_: web.Request) -> web.Response:
@@ -275,7 +285,60 @@ async def _api_balance_topup(request: web.Request) -> web.Response:
         payload=f"topup:{user_id}",
     )
     await deps.topup_service.create(user_id=user_id, amount=amount, invoice_id=invoice.invoice_id)
+    amount_str = f"{amount.quantize(Decimal('0.01')):f}"
+    bot = request.app.get("bot")
+    if bot:
+        markup = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="💳 Оплатить", url=invoice.pay_url)]
+            ]
+        )
+        await bot.send_message(
+            user_id,
+            f"Новое пополнение на {amount_str} USDT.\n"
+            "Нажмите на кнопку ниже для оплаты счета.",
+            reply_markup=markup,
+        )
     return web.json_response({"ok": True, "invoice_id": invoice.invoice_id, "pay_url": invoice.pay_url})
+
+
+async def _api_balance_withdraw(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    user, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    try:
+        amount = Decimal(str(body.get("amount")))
+    except (InvalidOperation, TypeError):
+        raise web.HTTPBadRequest(text="Некорректная сумма")
+    if amount <= 0:
+        raise web.HTTPBadRequest(text="Сумма должна быть больше нуля")
+    fee_percent = deps.config.withdraw_fee_percent
+    fee = (amount * fee_percent / Decimal("100")).quantize(Decimal("0.00000001"))
+    total = (amount + fee).quantize(Decimal("0.00000001"))
+    balance = await deps.deal_service.balance_of(user_id)
+    if balance < total:
+        raise web.HTTPBadRequest(text="Недостаточно средств")
+    try:
+        await deps.deal_service.withdraw_balance(user_id, total)
+    except Exception as exc:
+        raise web.HTTPBadRequest(text=f"Не удалось списать средства: {exc}")
+    try:
+        await deps.crypto_pay.transfer(user_id=user_id, amount=amount, currency="USDT")
+    except Exception as exc:
+        await deps.deal_service.deposit_balance(user_id, total)
+        raise web.HTTPBadRequest(text=f"Перевод не выполнен: {exc}")
+    return web.json_response(
+        {
+            "ok": True,
+            "amount": str(amount),
+            "fee": str(fee),
+            "total": str(total),
+            "username": user.username or "",
+        }
+    )
 
 
 async def _api_summary(request: web.Request) -> web.Response:

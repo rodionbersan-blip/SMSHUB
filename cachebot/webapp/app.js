@@ -11,6 +11,10 @@
   const topupClose = document.getElementById("topupClose");
   const topupForm = document.getElementById("topupForm");
   const topupAmount = document.getElementById("topupAmount");
+  const withdrawModal = document.getElementById("withdrawModal");
+  const withdrawClose = document.getElementById("withdrawClose");
+  const withdrawForm = document.getElementById("withdrawForm");
+  const withdrawAmount = document.getElementById("withdrawAmount");
   const userBadge = document.getElementById("userBadge");
   const profileNameTop = document.getElementById("profileNameTop");
   const profileAvatar = document.getElementById("profileAvatar");
@@ -119,6 +123,10 @@
 
   const openLink = (url) => {
     if (!url) return;
+    if (tg?.openTelegramLink && url.includes("t.me/")) {
+      tg.openTelegramLink(url);
+      return;
+    }
     if (tg?.openLink) {
       tg.openLink(url);
       return;
@@ -318,7 +326,7 @@
   };
 
   profileWithdraw?.addEventListener("click", () => {
-    log("Вывод доступен через бота. Открой раздел «Баланс».", "info");
+    withdrawModal?.classList.add("open");
   });
 
   const renderDealsPage = () => {
@@ -1280,6 +1288,30 @@
       topupModal.classList.remove("open");
       topupForm.reset();
       openLink(payload.pay_url);
+      log("Счёт создан. Если не открылось, используй кнопку в сообщении.", "info");
+    }
+  });
+
+  withdrawClose?.addEventListener("click", () => {
+    withdrawModal?.classList.remove("open");
+  });
+
+  withdrawForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const amount = Number(withdrawAmount?.value);
+    if (!amount || amount <= 0) {
+      log("Введите сумму в USDT", "warn");
+      return;
+    }
+    const payload = await fetchJson("/api/balance/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    });
+    if (payload?.ok) {
+      withdrawModal?.classList.remove("open");
+      withdrawForm?.reset();
+      await loadBalance();
+      log("Вывод выполнен. Средства отправлены в Crypto Bot.", "info");
     }
   });
 

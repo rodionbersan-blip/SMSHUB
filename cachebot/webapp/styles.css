@@ -65,14 +65,8 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 30;
   padding: 16px 0 12px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
 }
 
 .topbar-actions {
@@ -215,12 +209,6 @@ h2 {
   border: 1px solid rgba(15, 17, 21, 0.2);
 }
 
-:root[data-theme="light"] .topbar {
-  background: rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(15, 17, 21, 0.12);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-}
 
 @media (min-width: 900px) {
   .brand-mark {

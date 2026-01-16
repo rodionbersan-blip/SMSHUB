@@ -65,6 +65,11 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 12px 0;
+  background: var(--bg);
 }
 
 .topbar-actions {
@@ -263,6 +268,9 @@ h2 {
   display: flex;
   align-items: center;
   gap: 20px;
+  position: sticky;
+  top: 64px;
+  z-index: 25;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 18px;
   padding: 6px 14px;

@@ -137,20 +137,21 @@
       });
     }
     successAnim.classList.add("show");
-    if (successAnimInstance.isLoaded) {
+    const startFromMid = () => {
       const totalFrames = successAnimInstance.getDuration(true) || 0;
       const midFrame = Math.floor(totalFrames / 2);
       successAnimInstance.goToAndPlay(midFrame, true);
+    };
+    if (successAnimInstance.isLoaded) {
+      startFromMid();
     } else {
-      successAnimInstance.addEventListener("DOMLoaded", () => {
-        const totalFrames = successAnimInstance.getDuration(true) || 0;
-        const midFrame = Math.floor(totalFrames / 2);
-        successAnimInstance.goToAndPlay(midFrame, true);
-      });
+      successAnimInstance.addEventListener("DOMLoaded", startFromMid, { once: true });
     }
     window.setTimeout(() => {
+      const totalFrames = successAnimInstance.getDuration(true) || 0;
+      const midFrame = Math.floor(totalFrames / 2);
       successAnim.classList.remove("show");
-      successAnimInstance?.stop();
+      successAnimInstance?.goToAndStop(midFrame, true);
     }, 3000);
   };
 

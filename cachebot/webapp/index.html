@@ -59,15 +59,25 @@
             <div id="profileUsername" class="profile-muted">—</div>
             <div id="profileRegistered" class="profile-muted">—</div>
           </div>
-          <div class="profile-card">
+          <div class="profile-card" id="profileRoleCard">
             <div class="profile-title">Роль</div>
             <div id="profileRole" class="profile-value">—</div>
             <div id="profileMerchantSince" class="profile-muted">—</div>
           </div>
           <div class="profile-card">
             <div class="profile-title">Баланс</div>
-            <div id="profileBalance" class="profile-value">—</div>
+            <div class="profile-balance-row">
+              <div id="profileBalance" class="profile-value">—</div>
+              <button id="profileWithdraw" class="btn pill">Вывести</button>
+            </div>
             <div class="profile-muted">USDT</div>
+          </div>
+          <div class="profile-card" id="profileStatsCard">
+            <div class="profile-title">Статистика</div>
+            <div id="profileDealsTotal" class="profile-value">Сделок: —</div>
+            <div id="profileDealsSuccess" class="profile-muted">Успешные: —%</div>
+            <div id="profileDealsFailure" class="profile-muted">Неуспешные: —%</div>
+            <div id="profileReviewsCount" class="profile-muted">Отзывы: —</div>
           </div>
         </div>
         <div class="profile-actions">

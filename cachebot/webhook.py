@@ -15,6 +15,7 @@ from aiohttp import web
 from cachebot.deps import AppDeps
 from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
+from cachebot.models.deal import DealStatus
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -167,12 +168,25 @@ async def _api_profile(request: web.Request) -> web.Response:
     profile = await deps.user_service.profile_of(user_id)
     role = await deps.user_service.role_of(user_id)
     merchant_since = await deps.user_service.merchant_since_of(user_id)
+    deals = await deps.deal_service.list_user_deals(user_id)
+    total_deals = len(deals)
+    success_deals = sum(1 for deal in deals if deal.status == DealStatus.COMPLETED)
+    failed_deals = sum(1 for deal in deals if deal.status in {DealStatus.CANCELED, DealStatus.EXPIRED})
+    success_percent = round((success_deals / total_deals) * 100) if total_deals else 0
+    fail_percent = round((failed_deals / total_deals) * 100) if total_deals else 0
+    reviews = await deps.review_service.list_for_user(user_id)
     include_private = _is_admin(user_id, deps)
     payload = {
         "user": user,
         "profile": _profile_payload(profile, request=request, include_private=include_private),
         "role": role.value if role else None,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
+        "stats": {
+            "total_deals": total_deals,
+            "success_percent": success_percent,
+            "fail_percent": fail_percent,
+            "reviews_count": len(reviews),
+        },
     }
     return web.json_response({"ok": True, "data": payload})
 

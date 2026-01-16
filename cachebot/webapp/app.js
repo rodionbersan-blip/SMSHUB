@@ -37,8 +37,14 @@
   const profileUsername = document.getElementById("profileUsername");
   const profileRegistered = document.getElementById("profileRegistered");
   const profileRole = document.getElementById("profileRole");
+  const profileRoleCard = document.getElementById("profileRoleCard");
   const profileMerchantSince = document.getElementById("profileMerchantSince");
   const profileBalance = document.getElementById("profileBalance");
+  const profileWithdraw = document.getElementById("profileWithdraw");
+  const profileDealsTotal = document.getElementById("profileDealsTotal");
+  const profileDealsSuccess = document.getElementById("profileDealsSuccess");
+  const profileDealsFailure = document.getElementById("profileDealsFailure");
+  const profileReviewsCount = document.getElementById("profileReviewsCount");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
   const dealModal = document.getElementById("dealModal");
@@ -254,10 +260,31 @@
     profileRegistered.textContent = profile?.registered_at
       ? `Регистрация: ${formatDate(profile.registered_at)}`
       : "Регистрация: —";
-    profileRole.textContent = data?.role === "buyer" ? "Мерчант" : "—";
-    profileMerchantSince.textContent = data?.merchant_since
-      ? `Мерчант с: ${formatDate(data.merchant_since)}`
-      : "Мерчант с: —";
+    const isMerchant = data?.role === "buyer";
+    if (profileRoleCard) {
+      profileRoleCard.style.display = isMerchant ? "" : "none";
+    }
+    if (profileRole) {
+      profileRole.textContent = isMerchant ? "Мерчант" : "";
+    }
+    if (profileMerchantSince) {
+      profileMerchantSince.textContent = isMerchant && data?.merchant_since
+        ? `Мерчант с: ${formatDate(data.merchant_since)}`
+        : "";
+    }
+    const stats = data?.stats || {};
+    if (profileDealsTotal) {
+      profileDealsTotal.textContent = `Сделок: ${stats.total_deals ?? 0}`;
+    }
+    if (profileDealsSuccess) {
+      profileDealsSuccess.textContent = `Успешные: ${stats.success_percent ?? 0}%`;
+    }
+    if (profileDealsFailure) {
+      profileDealsFailure.textContent = `Неуспешные: ${stats.fail_percent ?? 0}%`;
+    }
+    if (profileReviewsCount) {
+      profileReviewsCount.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
+    }
     setAvatarNode(profileAvatar, display, profile?.avatar_url);
     setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
   };
@@ -270,6 +297,10 @@
       profileBalance.textContent = `${formatAmount(payload.balance)} USDT`;
     }
   };
+
+  profileWithdraw?.addEventListener("click", () => {
+    log("Вывод доступен через бота. Открой раздел «Баланс».", "info");
+  });
 
   const loadDeals = async () => {
     const payload = await fetchJson("/api/my-deals");

@@ -142,15 +142,17 @@
       if (!totalFrames) {
         return;
       }
+      const startFrame = Math.min(160, Math.max(0, totalFrames - 1));
       const endFrame = Math.max(1, totalFrames - 1);
       const handleComplete = () => {
+        successAnimInstance.goToAndStop(startFrame, true);
         successAnim.classList.remove("show");
         successAnimInstance.removeEventListener("complete", handleComplete);
       };
       successAnimInstance.removeEventListener("complete", handleComplete);
       successAnimInstance.addEventListener("complete", handleComplete);
       successAnimInstance.setSpeed(1);
-      successAnimInstance.playSegments([0, endFrame], true);
+      successAnimInstance.playSegments([startFrame, endFrame], true);
     };
     if (successAnimInstance.isLoaded) {
       startSegment();

@@ -47,6 +47,7 @@
   const profileReviewsCount = document.getElementById("profileReviewsCount");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
+  const dealsPagination = document.getElementById("dealsPagination");
   const dealModal = document.getElementById("dealModal");
   const dealModalTitle = document.getElementById("dealModalTitle");
   const dealModalBody = document.getElementById("dealModalBody");
@@ -312,12 +313,72 @@
     log("Вывод доступен через бота. Открой раздел «Баланс».", "info");
   });
 
+  const renderDealsPage = () => {
+    const deals = state.deals || [];
+    const page = state.dealsPage || 0;
+    const perPage = 5;
+    const totalPages = Math.max(1, Math.ceil(deals.length / perPage));
+    const safePage = Math.max(0, Math.min(page, totalPages - 1));
+    state.dealsPage = safePage;
+    const start = safePage * perPage;
+    const chunk = deals.slice(start, start + perPage);
+    dealsList.innerHTML = "";
+    if (!deals.length) {
+      dealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
+      if (dealsPagination) {
+        dealsPagination.innerHTML = "";
+      }
+      return;
+    }
+    chunk.forEach((deal) => {
+      const item = document.createElement("div");
+      item.className = "deal-item";
+      item.innerHTML = `
+        <div class="deal-header">
+          <div class="deal-id">Сделка #${deal.public_id}</div>
+          <div class="deal-status">${statusLabel(deal)}</div>
+        </div>
+        <div class="deal-row">Сумма: ₽${formatAmount(deal.cash_rub, 2)} | ${formatAmount(
+          deal.usdt_amount
+        )} USDT</div>
+        <div class="deal-row">Курс: 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
+        <div class="deal-row">Создано: ${formatDate(deal.created_at)}</div>
+      `;
+      item.addEventListener("click", () => openDealModal(deal.id));
+      dealsList.appendChild(item);
+    });
+    if (dealsPagination) {
+      const prevDisabled = safePage <= 0;
+      const nextDisabled = safePage >= totalPages - 1;
+      dealsPagination.innerHTML = `
+        <button class="btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
+        <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
+        <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
+      `;
+      const prevBtn = dealsPagination.querySelector("[data-page=\"prev\"]");
+      const nextBtn = dealsPagination.querySelector("[data-page=\"next\"]");
+      prevBtn?.addEventListener("click", () => {
+        if (state.dealsPage > 0) {
+          state.dealsPage -= 1;
+          renderDealsPage();
+        }
+      });
+      nextBtn?.addEventListener("click", () => {
+        if (state.dealsPage < totalPages - 1) {
+          state.dealsPage += 1;
+          renderDealsPage();
+        }
+      });
+    }
+  };
+
   const loadDeals = async () => {
     const payload = await fetchJson("/api/my-deals");
     if (!payload?.ok) return;
     const deals = payload.deals || [];
     dealsCount.textContent = `${deals.length}`;
-    dealsList.innerHTML = "";
+    state.deals = deals;
+    state.dealsPage = 0;
     const totalDeals = deals.length;
     const successDeals = deals.filter((deal) => deal.status === "completed").length;
     const failedDeals = deals.filter(
@@ -338,32 +399,7 @@
       reviews_count: currentStats.reviews_count ?? 0,
     };
     applyProfileStats(state.profileStats);
-    if (!deals.length) {
-      dealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
-      return;
-    }
-    deals.forEach((deal) => {
-      const item = document.createElement("div");
-      item.className = "deal-item";
-      const counterparty =
-        deal.counterparty?.display_name ||
-        deal.counterparty?.full_name ||
-        deal.counterparty?.username ||
-        "—";
-      item.innerHTML = `
-        <div class="deal-header">
-          <div class="deal-id">Сделка #${deal.public_id}</div>
-          <div class="deal-status">${statusLabel(deal)}</div>
-        </div>
-        <div class="deal-row">Наличные: ₽${formatAmount(deal.cash_rub, 2)}</div>
-        <div class="deal-row">USDT к оплате: ${formatAmount(deal.usdt_amount)} USDT</div>
-        <div class="deal-row">Курс: 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
-        <div class="deal-row">Создано: ${formatDate(deal.created_at)}</div>
-        <div class="deal-row">Контрагент: ${counterparty}</div>
-      `;
-      item.addEventListener("click", () => openDealModal(deal.id));
-      dealsList.appendChild(item);
-    });
+    renderDealsPage();
   };
 
   const loadSummary = async () => {

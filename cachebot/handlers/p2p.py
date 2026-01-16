@@ -148,7 +148,8 @@ def _p2p_menu_keyboard(active: int, total: int) -> InlineKeyboardBuilder:
     builder.button(text="Мои сделки", callback_data=P2P_MY_DEALS)
     builder.button(text=f"Объявления {active}/{total}", callback_data=P2P_ADS)
     builder.button(text="Мой профиль", callback_data=P2P_PROFILE)
-    builder.adjust(2, 2, 1)
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(2, 2, 1, 1)
     return builder
 
 
@@ -169,7 +170,8 @@ def _ad_manage_keyboard(trading_enabled: bool) -> InlineKeyboardBuilder:
     builder.button(text="🚀 Создать объявление", callback_data=P2P_AD_CREATE)
     toggle_text = "🌙 Приостановить торги" if trading_enabled else "🚀 Возобновить торги"
     builder.button(text=toggle_text, callback_data=P2P_TRADING_TOGGLE)
-    builder.adjust(1)
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(1, 1, 1)
     return builder
 
 
@@ -255,6 +257,8 @@ async def _show_p2p_menu(callback: CallbackQuery, *, state: FSMContext | None = 
     active, total = await deps.advert_service.counts_for_user(user.id)
     with suppress(TelegramBadRequest):
         await callback.message.delete()
+    if state:
+        await state.update_data(back_action=None)
     await callback.message.answer(
         _p2p_menu_text(),
         reply_markup=_p2p_menu_keyboard(active, total).as_markup(),
@@ -270,6 +274,7 @@ async def send_p2p_menu(bot, chat_id: int, user_id: int, *, state: FSMContext | 
         reply_markup=_p2p_menu_keyboard(active, total).as_markup(),
     )
     if state:
+        await state.update_data(back_action=None)
         await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
 
 
@@ -317,6 +322,7 @@ async def send_p2p_list(
         # back navigation via reply keyboard
         if state:
             await state.update_data(back_action=P2P_MENU, p2p_last_list=back_action)
+        builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
         sent = await bot.send_message(
             chat_id, "Пока нет доступных объявлений.", reply_markup=builder.as_markup()
         )
@@ -338,6 +344,7 @@ async def send_p2p_list(
     if not builder._buttons:
         if state:
             await state.update_data(back_action=P2P_MENU, p2p_last_list=back_action)
+        builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
         sent = await bot.send_message(
             chat_id, "Пока нет доступных объявлений.", reply_markup=builder.as_markup()
         )
@@ -347,6 +354,12 @@ async def send_p2p_list(
     # back navigation via reply keyboard
     if state:
         await state.update_data(back_action=P2P_MENU, p2p_last_list=back_action)
+    builder.row(
+        InlineKeyboardButton(
+            text="⬅️ Назад",
+            callback_data=MenuAction.BACK.value,
+        )
+    )
     sent = await bot.send_message(chat_id, title, reply_markup=builder.as_markup())
     if state:
         await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
@@ -362,6 +375,7 @@ async def send_p2p_my_deals(
         # back navigation via reply keyboard
         if state:
             await state.update_data(back_action=P2P_MENU)
+        builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
         sent = await bot.send_message(chat_id, "У тебя пока нет сделок", reply_markup=builder.as_markup())
         if state:
             await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
@@ -410,6 +424,12 @@ async def send_p2p_my_deals(
     # back navigation via reply keyboard
     if state:
         await state.update_data(back_action=P2P_MENU)
+    builder.row(
+        InlineKeyboardButton(
+            text="⬅️ Назад",
+            callback_data=MenuAction.BACK.value,
+        )
+    )
     sent = await bot.send_message(chat_id, text, reply_markup=builder.as_markup())
     if state:
         await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
@@ -436,7 +456,7 @@ async def p2p_profile(callback: CallbackQuery, state: FSMContext) -> None:
         return
     await state.update_data(back_action=P2P_MENU)
     await _delete_callback_message(callback)
-    await _send_profile(user, callback.message.chat.id, callback.bot)
+    await _send_profile(user, callback.message.chat.id, callback.bot, state=state)
     await callback.answer()
 
 
@@ -481,6 +501,7 @@ async def _render_p2p_deals(
         if state:
             await state.update_data(back_action=P2P_MENU)
         await _delete_callback_message(callback)
+        builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
         sent = await callback.message.answer("У тебя пока нет сделок", reply_markup=builder.as_markup())
         if state:
             await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
@@ -529,6 +550,12 @@ async def _render_p2p_deals(
     # back navigation via reply keyboard
     if state:
         await state.update_data(back_action=P2P_MENU)
+    builder.row(
+        InlineKeyboardButton(
+            text="⬅️ Назад",
+            callback_data=MenuAction.BACK.value,
+        )
+    )
     await _delete_callback_message(callback)
     sent = await callback.message.answer(text, reply_markup=builder.as_markup())
     if state:

@@ -338,48 +338,52 @@ async def open_menu(message: Message, state: FSMContext) -> None:
         return
     title = "Меню продавца" if role == UserRole.SELLER else "Меню покупателя"
     sent = await message.answer(title, reply_markup=inline_menu(role))
-    await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
+    await state.update_data(back_action=None, last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
 
 
-@router.message(F.text == MenuButtons.BACK.value)
-async def open_back(message: Message, state: FSMContext) -> None:
+async def _handle_back_action(
+    *,
+    bot,
+    chat_id: int,
+    user,
+    state: FSMContext,
+    delete_message: Message | None = None,
+) -> None:
     deps = get_deps()
-    user = message.from_user
-    if not user:
-        return
     data = await state.get_data()
-    with suppress(TelegramBadRequest):
-        await message.delete()
+    if delete_message:
+        with suppress(TelegramBadRequest):
+            await delete_message.delete()
     last_message_id = data.get("last_menu_message_id")
     last_chat_id = data.get("last_menu_chat_id")
-    if last_message_id and last_chat_id == message.chat.id:
+    if last_message_id and last_chat_id == chat_id:
         with suppress(TelegramBadRequest):
-            await message.bot.delete_message(message.chat.id, last_message_id)
+            await bot.delete_message(chat_id, last_message_id)
     action = data.get("back_action")
     if isinstance(action, str) and action.startswith("p2p:"):
         from cachebot.handlers import p2p as p2p_handlers
 
         if action == p2p_handlers.P2P_MENU:
-            await p2p_handlers.send_p2p_menu(message.bot, message.chat.id, user.id, state=state)
+            await p2p_handlers.send_p2p_menu(bot, chat_id, user.id, state=state)
             return
         if action == p2p_handlers.P2P_ADS:
-            await p2p_handlers.send_p2p_ads(message.bot, message.chat.id, user.id, state=state)
+            await p2p_handlers.send_p2p_ads(bot, chat_id, user.id, state=state)
             return
         if action == p2p_handlers.P2P_BUY:
-            await p2p_handlers.send_p2p_list(message.bot, message.chat.id, user.id, side="buy", state=state)
+            await p2p_handlers.send_p2p_list(bot, chat_id, user.id, side="buy", state=state)
             return
         if action == p2p_handlers.P2P_SELL:
-            await p2p_handlers.send_p2p_list(message.bot, message.chat.id, user.id, side="sell", state=state)
+            await p2p_handlers.send_p2p_list(bot, chat_id, user.id, side="sell", state=state)
             return
         if action.startswith(p2p_handlers.P2P_MY_DEALS_PAGE_PREFIX):
             page_str = action[len(p2p_handlers.P2P_MY_DEALS_PAGE_PREFIX) :]
             if page_str.isdigit():
                 await p2p_handlers.send_p2p_my_deals(
-                    message.bot, message.chat.id, user.id, page=int(page_str), state=state
+                    bot, chat_id, user.id, page=int(page_str), state=state
                 )
                 return
         if action == p2p_handlers.P2P_MY_DEALS:
-            await p2p_handlers.send_p2p_my_deals(message.bot, message.chat.id, user.id, page=0, state=state)
+            await p2p_handlers.send_p2p_my_deals(bot, chat_id, user.id, page=0, state=state)
             return
     if isinstance(action, str) and action.startswith(MY_DEALS_PAGE_PREFIX):
         page_str = action[len(MY_DEALS_PAGE_PREFIX) :]
@@ -387,18 +391,48 @@ async def open_back(message: Message, state: FSMContext) -> None:
             await _render_my_deals(
                 user.id,
                 page=int(page_str),
-                chat_id=message.chat.id,
-                bot=message.bot,
+                chat_id=chat_id,
+                bot=bot,
                 state=state,
             )
             return
     role = await deps.user_service.role_of(user.id)
     if not role:
-        await message.answer("Сначала выбери роль через /start")
+        await bot.send_message(chat_id, "Сначала выбери роль через /start")
         return
     title = "Меню продавца" if role == UserRole.SELLER else "Меню покупателя"
-    sent = await message.answer(title, reply_markup=inline_menu(role))
+    sent = await bot.send_message(chat_id, title, reply_markup=inline_menu(role))
     await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
+
+
+@router.message(F.text == "⬅️ Назад")
+async def open_back(message: Message, state: FSMContext) -> None:
+    user = message.from_user
+    if not user:
+        return
+    await _handle_back_action(
+        bot=message.bot,
+        chat_id=message.chat.id,
+        user=user,
+        state=state,
+        delete_message=message,
+    )
+
+
+@router.callback_query(F.data == MenuAction.BACK.value)
+async def inline_back(callback: CallbackQuery, state: FSMContext) -> None:
+    user = callback.from_user
+    if not user:
+        await callback.answer()
+        return
+    await _handle_back_action(
+        bot=callback.bot,
+        chat_id=callback.message.chat.id if callback.message else user.id,
+        user=user,
+        state=state,
+        delete_message=callback.message,
+    )
+    await callback.answer()
 
 
 @router.callback_query(F.data.startswith("bank:"), MerchantApplicationState.choosing_banks)
@@ -606,6 +640,7 @@ async def balance_from_menu(callback: CallbackQuery, state: FSMContext) -> None:
     if not user:
         await callback.answer()
         return
+    await state.update_data(back_action=None)
     chat_id = callback.message.chat.id if callback.message else user.id
     await _delete_callback_message(callback)
     await _send_balance(user.id, chat_id, callback.bot, state=state)
@@ -638,6 +673,7 @@ async def profile_from_menu(callback: CallbackQuery, state: FSMContext) -> None:
     if not user:
         await callback.answer()
         return
+    await state.update_data(back_action=None)
     chat_id = callback.message.chat.id if callback.message else user.id
     await _delete_callback_message(callback)
     await _send_profile(user, chat_id, callback.bot, state=state)
@@ -737,12 +773,15 @@ async def settings_from_menu(callback: CallbackQuery, state: FSMContext) -> None
     if not user:
         await callback.answer()
         return
+    await state.update_data(back_action=None)
     role = await deps.user_service.role_of(user.id)
     builder = InlineKeyboardBuilder()
     if role == UserRole.BUYER:
         builder.button(text="Продать USDT", callback_data=MenuAction.SETTINGS_SELLER.value)
     else:
         builder.button(text="Стать мерчантом", callback_data=MenuAction.SETTINGS_MERCHANT.value)
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(1, 1)
     chat_id = callback.message.chat.id if callback.message else user.id
     await _delete_callback_message(callback)
     text = (
@@ -803,6 +842,7 @@ async def my_deals_from_menu(callback: CallbackQuery, state: FSMContext) -> None
     if not user:
         await callback.answer()
         return
+    await state.update_data(back_action=None)
     chat_id = callback.message.chat.id if callback.message else user.id
     await _delete_callback_message(callback)
     await _render_my_deals(
@@ -2862,6 +2902,8 @@ async def _send_balance(
     balance = await deps.deal_service.balance_of(user_id)
     builder = InlineKeyboardBuilder()
     builder.button(text="⬇️ Вывод", callback_data=BALANCE_WITHDRAW)
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(1, 1)
     sent = await bot.send_message(
         chat_id,
         f"Твой баланс: {_format_decimal(balance)} USDT\n"
@@ -2891,6 +2933,8 @@ async def _send_profile(
     reviews = await deps.review_service.list_for_user(user.id)
     builder = InlineKeyboardBuilder()
     builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{user.id}:pos")
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(1, 1)
     sent = await bot.send_message(
         chat_id,
         _format_profile(
@@ -2921,9 +2965,13 @@ async def _render_my_deals(
         text = "У тебя пока нет сделок"
         if message:
             with suppress(TelegramBadRequest):
-                await message.edit_text(text, reply_markup=None)
+                builder = InlineKeyboardBuilder()
+                builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+                await message.edit_text(text, reply_markup=builder.as_markup())
         elif bot and chat_id is not None:
-            sent = await bot.send_message(chat_id, text, reply_markup=None)
+            builder = InlineKeyboardBuilder()
+            builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+            sent = await bot.send_message(chat_id, text, reply_markup=builder.as_markup())
             if state:
                 await state.update_data(
                     last_menu_message_id=sent.message_id,
@@ -3028,6 +3076,12 @@ def _build_my_deals_keyboard(
             )
         if nav_buttons:
             builder.row(*nav_buttons)
+    builder.row(
+        InlineKeyboardButton(
+            text="⬅️ Назад",
+            callback_data=MenuAction.BACK.value,
+        )
+    )
     return builder.as_markup()
 
 

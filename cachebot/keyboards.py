@@ -7,7 +7,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
-    WebAppInfo,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -16,7 +15,6 @@ from cachebot.models.user import UserRole
 
 class MenuButtons(str, Enum):
     SHOW_MENU = "📋 Меню"
-    BACK = "⬅️ Назад"
     ADMIN_PANEL = "🛠 Админ панель"
     DISPUTES = "⚖️ Спорные ситуации"
 
@@ -31,18 +29,11 @@ class MenuAction(str, Enum):
     SETTINGS_MERCHANT = "menu:settings:merchant"
     SETTINGS_SELLER = "menu:settings:seller"
     BALANCE = "menu:balance"
+    BACK = "menu:back"
 
 
 def base_keyboard(is_admin: bool, is_moderator: bool = False) -> ReplyKeyboardMarkup:
-    rows = [[KeyboardButton(text=MenuButtons.BACK.value), KeyboardButton(text=MenuButtons.SHOW_MENU.value)]]
-    rows.append(
-        [
-            KeyboardButton(
-                text="🟦 Открыть мини‑апп",
-                web_app=WebAppInfo(url="https://cashnowshop.ru/app"),
-            )
-        ]
-    )
+    rows = [[KeyboardButton(text=MenuButtons.SHOW_MENU.value)]]
     if is_admin:
         rows.append(
             [

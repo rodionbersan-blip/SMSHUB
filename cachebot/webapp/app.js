@@ -1044,8 +1044,13 @@
     const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
     const indicator = reviewsTabs.querySelector(".tab-indicator");
     if (!activeBtn || !indicator) return;
-    indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+    const containerRect = reviewsTabs.getBoundingClientRect();
+    const buttonRect = activeBtn.getBoundingClientRect();
+    const styles = window.getComputedStyle(reviewsTabs);
+    const padLeft = parseFloat(styles.paddingLeft) || 0;
+    const offset = buttonRect.left - containerRect.left - padLeft;
+    indicator.style.width = `${buttonRect.width}px`;
+    indicator.style.transform = `translateX(${offset}px)`;
   };
 
   const renderReviewsPage = () => {

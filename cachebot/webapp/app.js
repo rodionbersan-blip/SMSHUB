@@ -101,7 +101,8 @@
   const reviewsList = document.getElementById("reviewsList");
   const reviewsSummary = document.getElementById("reviewsSummary");
   const reviewsPagination = document.getElementById("reviewsPagination");
-  const reviewTabButtons = document.querySelectorAll(".tab-btn");
+  const reviewsTabs = document.querySelector(".reviews-tabs");
+  const reviewTabButtons = document.querySelectorAll(".reviews-tabs .tab-btn");
 
   const state = {
     user: null,
@@ -112,7 +113,7 @@
     myAds: [],
     reviews: [],
     reviewsPage: 0,
-    reviewsRating: 1,
+    reviewsRating: "all",
   };
 
   const log = (message, type = "info") => {
@@ -1021,10 +1022,23 @@
     }
   };
 
+  const updateReviewsIndicator = () => {
+    if (!reviewsTabs) return;
+    const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
+    const indicator = reviewsTabs.querySelector(".tab-indicator");
+    if (!activeBtn || !indicator) return;
+    const containerRect = reviewsTabs.getBoundingClientRect();
+    const buttonRect = activeBtn.getBoundingClientRect();
+    const offset = buttonRect.left - containerRect.left;
+    indicator.style.width = `${buttonRect.width}px`;
+    indicator.style.transform = `translateX(${offset}px)`;
+  };
+
   const renderReviewsPage = () => {
     const reviews = state.reviews || [];
-    const rating = state.reviewsRating || 1;
-    const filtered = reviews.filter((item) => item.rating === rating);
+    const rating = state.reviewsRating || "all";
+    const filtered =
+      rating === "all" ? reviews : reviews.filter((item) => item.rating === rating);
     const perPage = 5;
     const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
     const safePage = Math.max(0, Math.min(state.reviewsPage || 0, totalPages - 1));
@@ -1078,6 +1092,7 @@
         }
       });
     }
+    updateReviewsIndicator();
   };
 
   const renderReviews = (reviews, rating) => {
@@ -1228,7 +1243,7 @@
   reviewsOpen?.addEventListener("click", async () => {
     const reviews = await loadReviews();
     if (!reviews) return;
-    renderReviews(reviews, 1);
+    renderReviews(reviews, "all");
     reviewsModal.classList.add("open");
   });
 
@@ -1242,7 +1257,8 @@
       btn.classList.add("active");
       const reviews = await loadReviews();
       if (!reviews) return;
-      const rating = btn.dataset.tab === "positive" ? 1 : -1;
+      const rating =
+        btn.dataset.tab === "positive" ? 1 : btn.dataset.tab === "negative" ? -1 : "all";
       renderReviews(reviews, rating);
     });
   });

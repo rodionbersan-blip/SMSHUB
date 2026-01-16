@@ -321,14 +321,16 @@
 
       <div class="modal" id="reviewsModal">
         <div class="modal-card">
-          <div class="modal-header">
-            <div class="modal-title">Отзывы</div>
-            <button id="reviewsClose" class="btn ghost">Закрыть</button>
-          </div>
-          <div class="reviews-tabs">
-            <button class="btn tab-btn active" data-tab="positive">👍 Положительные</button>
-            <button class="btn tab-btn" data-tab="negative">👎 Отрицательные</button>
-          </div>
+        <div class="modal-header">
+          <div class="modal-title">Отзывы</div>
+          <button id="reviewsClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="reviews-tabs" data-active="all">
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <button class="btn tab-btn active" data-tab="all">Все</button>
+          <button class="btn tab-btn" data-tab="positive">Плюс</button>
+          <button class="btn tab-btn" data-tab="negative">Минус</button>
+        </div>
           <div id="reviewsSummary" class="reviews-summary">—</div>
           <div id="reviewsList" class="deal-list"></div>
           <div id="reviewsPagination" class="reviews-pagination"></div>
@@ -340,6 +342,6 @@
 
     <script src="/app/assets/lottie.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/app/app.js?v=pay19"></script>
+    <script src="/app/app.js?v=pay20"></script>
   </body>
 </html>

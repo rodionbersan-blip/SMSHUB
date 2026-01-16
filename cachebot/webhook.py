@@ -343,7 +343,7 @@ async def _api_balance_withdraw(request: web.Request) -> web.Response:
             "amount": str(amount),
             "fee": str(fee),
             "total": str(total),
-            "username": user.username or "",
+            "username": user.get("username") or "",
         }
     )
 

@@ -290,10 +290,10 @@
     const dt = new Date(iso);
     if (Number.isNaN(dt.getTime())) return "—";
     const datePart = new Intl.DateTimeFormat("ru-RU", {
-      day: "2-digit",
+      day: "numeric",
       month: "long",
       year: "numeric",
-    }).format(dt);
+    }).format(dt).replace(" г.", "");
     const timePart = new Intl.DateTimeFormat("ru-RU", {
       hour: "2-digit",
       minute: "2-digit",
@@ -1285,6 +1285,10 @@
       renderReviews(reviews, rating);
       window.setTimeout(updateReviewsIndicator, 0);
     });
+  });
+
+  window.addEventListener("resize", () => {
+    updateReviewsIndicator();
   });
 
   profileQuick?.addEventListener("click", () => {

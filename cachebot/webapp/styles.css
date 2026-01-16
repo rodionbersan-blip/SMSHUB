@@ -71,6 +71,11 @@ h2 {
   flex-direction: column;
   gap: 20px;
   animation: fade-in 0.6s ease forwards;
+  transition: filter 0.25s ease;
+}
+
+body.modal-open #app {
+  filter: blur(8px);
 }
 
 .topbar {

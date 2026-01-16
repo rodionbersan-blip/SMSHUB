@@ -123,7 +123,6 @@
   };
 
   let successAnimInstance = null;
-  let successAnimTimer = null;
   const playSuccessAnimation = () => {
     if (!successAnim || !window.lottie) {
       return;
@@ -140,25 +139,18 @@
     successAnim.classList.add("show");
     const startSegment = () => {
       const totalFrames = successAnimInstance.getDuration(true) || 0;
-      const totalSeconds = successAnimInstance.getDuration(false) || 0;
-      if (!totalFrames || !totalSeconds) {
+      if (!totalFrames) {
         return;
       }
-      const fps = totalFrames / totalSeconds;
-      const midFrame = Math.floor(totalFrames / 2);
-      const framesFor3s = Math.max(1, Math.floor(fps * 3));
-      const endFrame = Math.min(totalFrames - 1, midFrame + framesFor3s);
-      const segmentSeconds = (endFrame - midFrame) / fps;
-      const speed = segmentSeconds > 0 ? segmentSeconds / 3 : 1;
-      successAnimInstance.setSpeed(speed);
-      successAnimInstance.playSegments([midFrame, endFrame], true);
-      if (successAnimTimer) {
-        window.clearTimeout(successAnimTimer);
-      }
-      successAnimTimer = window.setTimeout(() => {
-        successAnimInstance.goToAndStop(midFrame, true);
+      const endFrame = Math.max(1, totalFrames - 1);
+      const handleComplete = () => {
         successAnim.classList.remove("show");
-      }, 3000);
+        successAnimInstance.removeEventListener("complete", handleComplete);
+      };
+      successAnimInstance.removeEventListener("complete", handleComplete);
+      successAnimInstance.addEventListener("complete", handleComplete);
+      successAnimInstance.setSpeed(1);
+      successAnimInstance.playSegments([0, endFrame], true);
     };
     if (successAnimInstance.isLoaded) {
       startSegment();

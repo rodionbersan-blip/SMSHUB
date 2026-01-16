@@ -757,14 +757,14 @@ h2 {
 
 .review-item {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .review-header {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .review-avatar {
@@ -782,12 +782,16 @@ h2 {
 
 .review-meta {
   display: grid;
-  gap: 2px;
+  gap: 0;
 }
 
 .review-item .deal-row {
-  font-size: 13px;
+  font-size: 12px;
   margin-top: 0;
+}
+
+.review-meta .deal-id {
+  font-size: 14px;
 }
 
 .review-item .deal-header {
@@ -795,9 +799,9 @@ h2 {
 }
 
 .review-item .deal-status {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   text-transform: lowercase;

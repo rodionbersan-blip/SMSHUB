@@ -145,7 +145,7 @@
       const startFrame = Math.min(160, Math.max(0, totalFrames - 1));
       const endFrame = Math.max(1, totalFrames - 1);
       const handleComplete = () => {
-        successAnimInstance.goToAndStop(startFrame, true);
+        successAnimInstance.stop();
         successAnim.classList.remove("show");
         successAnimInstance.removeEventListener("complete", handleComplete);
       };

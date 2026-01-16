@@ -839,6 +839,7 @@ h2 {
   width: min(560px, 100%);
   max-height: calc(100dvh - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--card);
   border-radius: 12px;
   padding: 20px;

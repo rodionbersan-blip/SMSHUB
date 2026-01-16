@@ -248,6 +248,21 @@
     }
   };
 
+  const applyProfileStats = (stats) => {
+    if (profileDealsTotal) {
+      profileDealsTotal.textContent = `Сделок: ${stats.total_deals ?? 0}`;
+    }
+    if (profileDealsSuccess) {
+      profileDealsSuccess.textContent = `Успешные: ${stats.success_percent ?? 0}%`;
+    }
+    if (profileDealsFailure) {
+      profileDealsFailure.textContent = `Неуспешные: ${stats.fail_percent ?? 0}%`;
+    }
+    if (profileReviewsCount) {
+      profileReviewsCount.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
+    }
+  };
+
   const loadProfile = async () => {
     const payload = await fetchJson("/api/profile");
     if (!payload?.ok) return;
@@ -273,18 +288,13 @@
         : "";
     }
     const stats = data?.stats || {};
-    if (profileDealsTotal) {
-      profileDealsTotal.textContent = `Сделок: ${stats.total_deals ?? 0}`;
-    }
-    if (profileDealsSuccess) {
-      profileDealsSuccess.textContent = `Успешные: ${stats.success_percent ?? 0}%`;
-    }
-    if (profileDealsFailure) {
-      profileDealsFailure.textContent = `Неуспешные: ${stats.fail_percent ?? 0}%`;
-    }
-    if (profileReviewsCount) {
-      profileReviewsCount.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
-    }
+    state.profileStats = {
+      total_deals: stats.total_deals ?? 0,
+      success_percent: stats.success_percent ?? 0,
+      fail_percent: stats.fail_percent ?? 0,
+      reviews_count: stats.reviews_count ?? 0,
+    };
+    applyProfileStats(state.profileStats);
     setAvatarNode(profileAvatar, display, profile?.avatar_url);
     setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
   };
@@ -308,6 +318,26 @@
     const deals = payload.deals || [];
     dealsCount.textContent = `${deals.length}`;
     dealsList.innerHTML = "";
+    const totalDeals = deals.length;
+    const successDeals = deals.filter((deal) => deal.status === "completed").length;
+    const failedDeals = deals.filter(
+      (deal) => deal.status === "canceled" || deal.status === "expired"
+    ).length;
+    const successPercent = totalDeals ? Math.round((successDeals / totalDeals) * 100) : 0;
+    const failPercent = totalDeals ? Math.round((failedDeals / totalDeals) * 100) : 0;
+    const currentStats = state.profileStats || {
+      total_deals: 0,
+      success_percent: 0,
+      fail_percent: 0,
+      reviews_count: 0,
+    };
+    state.profileStats = {
+      total_deals: totalDeals,
+      success_percent: successPercent,
+      fail_percent: failPercent,
+      reviews_count: currentStats.reviews_count ?? 0,
+    };
+    applyProfileStats(state.profileStats);
     if (!deals.length) {
       dealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
       return;

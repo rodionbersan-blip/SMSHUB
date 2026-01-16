@@ -755,6 +755,66 @@ h2 {
   margin-bottom: 8px;
 }
 
+.review-item {
+  display: grid;
+  gap: 8px;
+}
+
+.review-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(77, 163, 255, 0.16);
+  color: var(--accent);
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+}
+
+.review-meta {
+  display: grid;
+  gap: 2px;
+}
+
+.review-item .deal-row {
+  font-size: 13px;
+  margin-top: 0;
+}
+
+.review-item .deal-header {
+  margin-bottom: 0;
+}
+
+.review-item .deal-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  text-transform: lowercase;
+}
+
+.review-item .deal-status.positive {
+  color: #4cd17b;
+  background: rgba(76, 209, 123, 0.12);
+  border: 1px solid rgba(76, 209, 123, 0.35);
+}
+
+.review-item .deal-status.negative {
+  color: #e5533d;
+  background: rgba(229, 83, 61, 0.12);
+  border: 1px solid rgba(229, 83, 61, 0.35);
+}
+
 .reviews-pagination {
   display: flex;
   align-items: center;

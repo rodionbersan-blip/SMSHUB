@@ -285,6 +285,23 @@
     return dt.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
   };
 
+  const formatReviewDate = (iso) => {
+    if (!iso) return "—";
+    const dt = new Date(iso);
+    if (Number.isNaN(dt.getTime())) return "—";
+    const datePart = new Intl.DateTimeFormat("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(dt);
+    const timePart = new Intl.DateTimeFormat("ru-RU", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(dt);
+    return `${datePart} в ${timePart}`;
+  };
+
   const statusLabel = (deal) => {
     if (deal.status === "open") return "Ожидаем Мерчанта";
     if (deal.status === "reserved") return "Ждем оплату";
@@ -1027,10 +1044,8 @@
     const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
     const indicator = reviewsTabs.querySelector(".tab-indicator");
     if (!activeBtn || !indicator) return;
-    const containerRect = reviewsTabs.getBoundingClientRect();
-    const buttonRect = activeBtn.getBoundingClientRect();
-    const offset = buttonRect.left - containerRect.left;
-    indicator.style.width = `${buttonRect.width}px`;
+    const offset = activeBtn.offsetLeft;
+    indicator.style.width = `${activeBtn.offsetWidth}px`;
     indicator.style.transform = `translateX(${offset}px)`;
   };
 
@@ -1055,17 +1070,24 @@
     }
     chunk.forEach((item) => {
       const row = document.createElement("div");
-      row.className = "deal-item";
+      row.className = "deal-item review-item";
       const author =
         item.author?.display_name || item.author?.full_name || item.author?.username || "—";
+      const avatarUrl = item.author?.avatar_url || "";
+      const initials = author.replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+      const statusLabel = item.rating > 0 ? "Положительный" : "Отрицательный";
       row.innerHTML = `
-        <div class="deal-header">
-          <div class="deal-id">${author}</div>
-          <div class="deal-status">${item.rating > 0 ? "Плюс" : "Минус"}</div>
+        <div class="review-header">
+          <div class="review-avatar" ${avatarUrl ? `style="background-image:url('${avatarUrl}')"` : ""}>
+            ${avatarUrl ? "" : initials}
+          </div>
+          <div class="review-meta">
+            <div class="deal-id">${author}</div>
+            <div class="deal-row">${formatReviewDate(item.created_at)}</div>
+          </div>
+          <div class="deal-status ${item.rating > 0 ? "positive" : "negative"}">${statusLabel}</div>
         </div>
         <div class="deal-row">${item.comment || "Без комментария"}</div>
-        <div class="deal-row">Сделка: #${item.deal_id.slice(0, 6)}</div>
-        <div class="deal-row">${formatDate(item.created_at)}</div>
       `;
       reviewsList.appendChild(row);
     });
@@ -1245,6 +1267,7 @@
     if (!reviews) return;
     renderReviews(reviews, "all");
     reviewsModal.classList.add("open");
+    window.setTimeout(updateReviewsIndicator, 0);
   });
 
   reviewsClose?.addEventListener("click", () => {
@@ -1260,6 +1283,7 @@
       const rating =
         btn.dataset.tab === "positive" ? 1 : btn.dataset.tab === "negative" ? -1 : "all";
       renderReviews(reviews, rating);
+      window.setTimeout(updateReviewsIndicator, 0);
     });
   });
 

@@ -175,8 +175,8 @@ h2 {
 }
 
 .brand-mark {
-  width: 44px;
-  height: 44px;
+  width: clamp(32px, 6vw, 44px);
+  height: clamp(32px, 6vw, 44px);
   object-fit: contain;
   display: block;
 }

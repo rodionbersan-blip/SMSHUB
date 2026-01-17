@@ -445,6 +445,7 @@
     if (deal.status === "paid") {
       if (deal.qr_stage === "awaiting_buyer_ready") return "Ожидаем готовность";
       if (deal.qr_stage === "awaiting_seller_photo") return "Прикрепление QR";
+      if (deal.qr_stage === "ready") return "Выдача наличных";
       return "Отправка QR";
     }
     if (deal.status === "dispute") return "Открыт спор";

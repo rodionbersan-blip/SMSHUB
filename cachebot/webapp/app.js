@@ -1171,9 +1171,9 @@
     `;
     dealModalActions.innerHTML = "";
     const actions = deal.actions || {};
-    const addAction = (label, handler, primary = false) => {
+    const addAction = (label, handler, primary = false, extraClass = "") => {
       const btn = document.createElement("button");
-      btn.className = `btn ${primary ? "primary" : ""}`;
+      btn.className = `btn ${primary ? "primary" : ""} ${extraClass}`.trim();
       btn.textContent = label;
       btn.addEventListener("click", handler);
       dealModalActions.appendChild(btn);
@@ -1185,7 +1185,7 @@
       addAction("Принять", () => dealAction("accept", deal.id), true);
     }
     if (actions.decline_offer) {
-      addAction("Отклонить", () => dealAction("decline", deal.id), false);
+      addAction("Отменить", () => dealAction("decline", deal.id), false, "status-bad");
     }
     if (actions.seller_ready) {
       addAction("Готов отправить QR", () => dealAction("seller-ready", deal.id), true);

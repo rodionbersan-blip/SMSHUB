@@ -1161,7 +1161,7 @@
       return;
     }
     if (disputesTab) disputesTab.style.display = "inline-flex";
-    state.canManageDisputes = !!summary.can_manage;
+    state.canManageDisputes = true;
     disputesCount.textContent = `${summary.count || 0}`;
     const payload = await fetchJson("/api/disputes");
     if (!payload?.ok) return;
@@ -1261,7 +1261,7 @@
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
     if (!payload?.ok) return;
     const dispute = payload.dispute;
-    const canManage = !!dispute.can_manage;
+    const canManage = state.canManageDisputes;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
     const seller =
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
@@ -1432,6 +1432,14 @@
         className: "deal-chat-btn",
       });
     }
+    if (deal.status === "dispute" && deal.dispute_id) {
+      addAction(
+        topRow,
+        "Добавить доказательства",
+        () => uploadDisputeEvidence(deal.dispute_id),
+        true
+      );
+    }
     if (deal.dispute_available_at && deal.status === "paid") {
       addAction(
         bottomRow,
@@ -1497,6 +1505,38 @@
         }
       } catch (err) {
         showNotice(`Ошибка: ${err.message}`);
+      }
+    };
+    input.click();
+  };
+
+  const uploadDisputeEvidence = async (disputeId) => {
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*,video/*,application/pdf";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append("file", file);
+      try {
+        const res = await fetch(`/api/disputes/${disputeId}/evidence`, {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData },
+          body: form,
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          showNotice(text || "Не удалось отправить доказательство");
+          return;
+        }
+        showNotice("Доказательства отправлены");
+      } catch {
+        showNotice("Ошибка загрузки");
       }
     };
     input.click();

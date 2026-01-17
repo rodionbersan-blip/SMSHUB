@@ -17,6 +17,7 @@ from cachebot.deps import AppDeps
 from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
+from cachebot.models.dispute import EvidenceItem
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
@@ -72,6 +73,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/disputes/{dispute_id}", _api_dispute_detail)
     app.router.add_post("/api/disputes/{dispute_id}/assign", _api_dispute_assign)
     app.router.add_post("/api/disputes/{dispute_id}/resolve", _api_dispute_resolve)
+    app.router.add_post("/api/disputes/{dispute_id}/evidence", _api_dispute_evidence_upload)
+    app.router.add_get("/api/dispute-files/{dispute_id}/{filename}", _api_dispute_file)
     app.router.add_get("/api/admin/summary", _api_admin_summary)
     app.router.add_get("/api/admin/settings", _api_admin_settings)
     app.router.add_post("/api/admin/settings", _api_admin_settings_update)
@@ -1190,6 +1193,60 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def _api_dispute_evidence_upload(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    dispute_id = request.match_info["dispute_id"]
+    dispute = await deps.dispute_service.dispute_by_id(dispute_id)
+    if not dispute:
+        raise web.HTTPNotFound(text="Спор не найден")
+    deal = await deps.deal_service.get_deal(dispute.deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and not await _has_dispute_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "file":
+        raise web.HTTPBadRequest(text="Файл не найден")
+    filename = Path(field.filename or "evidence").name
+    evidence_dir = _dispute_dir(deps) / dispute_id
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    file_path = evidence_dir / filename
+    with file_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    kind = "photo" if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")) else "document"
+    await deps.dispute_service.append_evidence(
+        dispute_id,
+        EvidenceItem(kind=kind, file_id=f"web:{dispute_id}/{filename}", author_id=user_id),
+    )
+    return web.json_response({"ok": True})
+
+
+async def _api_dispute_file(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    dispute_id = request.match_info["dispute_id"]
+    filename = request.match_info["filename"]
+    dispute = await deps.dispute_service.dispute_by_id(dispute_id)
+    if not dispute:
+        raise web.HTTPNotFound(text="Спор не найден")
+    deal = await deps.deal_service.get_deal(dispute.deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and not await _has_dispute_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    base_dir = _dispute_dir(deps).resolve()
+    path = (base_dir / dispute_id / filename).resolve()
+    if base_dir not in path.parents or not path.exists():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path)
+
+
 async def _api_admin_summary(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -1463,6 +1520,10 @@ def _qr_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "qr"
 
 
+def _dispute_dir(deps: AppDeps) -> Path:
+    return Path(deps.config.storage_path).parent / "disputes"
+
+
 async def _ensure_disputes_for_opened(deps: AppDeps) -> None:
     deals = await deps.deal_service.list_dispute_deals()
     for deal in deals:
@@ -1623,6 +1684,18 @@ async def _ad_payload(
 async def _file_url(request: web.Request, file_id: str) -> str | None:
     if not file_id:
         return None
+    if file_id.startswith("web:"):
+        payload = file_id[len("web:") :]
+        if "/" not in payload:
+            return None
+        dispute_id, filename = payload.split("/", 1)
+        query = {}
+        init_data = request.headers.get("X-Telegram-Init-Data")
+        if init_data:
+            query["initData"] = init_data
+        return str(
+            request.url.with_path(f"/api/dispute-files/{dispute_id}/{filename}").with_query(query)
+        )
     bot = request.app["bot"]
     deps: AppDeps = request.app["deps"]
     try:
@@ -1666,6 +1739,9 @@ async def _deal_payload(
         if deal.dispute_available_at
         else None,
     }
+    if deal.status == DealStatus.DISPUTE:
+        dispute = await deps.dispute_service.dispute_for_deal(deal.id)
+        payload["dispute_id"] = dispute.id if dispute else None
     last_chat = await deps.chat_service.latest_message(deal.id)
     payload["chat_last_at"] = last_chat.created_at.isoformat() if last_chat else None
     payload["chat_last_sender_id"] = last_chat.sender_id if last_chat else None

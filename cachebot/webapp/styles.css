@@ -236,16 +236,16 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .modal-card.glass .btn.pill {
-  background: rgba(77, 163, 255, 0.18);
-  border: 1px solid rgba(15, 17, 21, 0.18);
-  color: #2f7fdc;
-  box-shadow: none;
+  background: linear-gradient(135deg, rgba(77, 163, 255, 0.55), rgba(77, 163, 255, 0.3));
+  border: 1px solid rgba(59, 146, 240, 0.5);
+  color: #1f5fa8;
+  box-shadow: 0 10px 18px rgba(77, 163, 255, 0.25);
 }
 
 :root[data-theme="light"] .modal-card.glass .btn.pill:hover {
-  background: rgba(77, 163, 255, 0.24);
-  border-color: rgba(15, 17, 21, 0.24);
-  color: #2a74c8;
+  background: linear-gradient(135deg, rgba(77, 163, 255, 0.7), rgba(77, 163, 255, 0.4));
+  border-color: rgba(59, 146, 240, 0.65);
+  color: #1b5596;
 }
 
 

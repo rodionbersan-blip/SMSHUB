@@ -81,6 +81,9 @@
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
   const quickDealsClose = document.getElementById("quickDealsClose");
+  const systemNotice = document.getElementById("systemNotice");
+  const systemNoticeList = document.getElementById("systemNoticeList");
+  const systemNoticeReadAll = document.getElementById("systemNoticeReadAll");
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
@@ -148,6 +151,8 @@
     chatLastSeenAt: {},
     chatInitDone: false,
     pendingRead: {},
+    systemNotifications: [],
+    dealStatusMap: {},
     activeChatDealId: null,
     activeDealId: null,
     dealRefreshTimer: null,
@@ -162,6 +167,8 @@
   const chatUnreadStorageKey = "dealChatUnreadCounts";
   const chatSeenStorageKey = "dealChatLastSeenAt";
   const pendingReadStorageKey = "dealPendingRead";
+  const systemNoticeStorageKey = "systemNotifications";
+  const dealStatusStorageKey = "dealStatusMap";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -251,6 +258,90 @@
     }
   };
   state.pendingRead = loadPendingRead();
+  const loadSystemNotifications = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(systemNoticeStorageKey) || "[]");
+      return Array.isArray(raw) ? raw : [];
+    } catch {
+      return [];
+    }
+  };
+  const persistSystemNotifications = () => {
+    try {
+      window.localStorage.setItem(
+        systemNoticeStorageKey,
+        JSON.stringify(state.systemNotifications || [])
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  const loadDealStatusMap = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(dealStatusStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistDealStatusMap = () => {
+    try {
+      window.localStorage.setItem(
+        dealStatusStorageKey,
+        JSON.stringify(state.dealStatusMap || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.systemNotifications = loadSystemNotifications();
+  state.dealStatusMap = loadDealStatusMap();
+
+  const renderSystemNotifications = () => {
+    if (!systemNotice || !systemNoticeList) return;
+    const items = state.systemNotifications || [];
+    systemNoticeList.innerHTML = "";
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "system-notice-item";
+      row.textContent = item.message || "";
+      systemNoticeList.appendChild(row);
+    });
+    systemNotice.classList.toggle("show", items.length > 0);
+  };
+
+  const pushSystemNotification = (message, key) => {
+    if (!message) return;
+    const noticeKey = key || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    if ((state.systemNotifications || []).some((item) => item.key === noticeKey)) {
+      return;
+    }
+    const entry = {
+      key: noticeKey,
+      message,
+      created_at: new Date().toISOString(),
+    };
+    const next = [...(state.systemNotifications || []), entry];
+    state.systemNotifications = next.slice(-6);
+    persistSystemNotifications();
+    renderSystemNotifications();
+  };
+
+  const clearDealAlerts = (dealId) => {
+    if (!dealId) return;
+    state.unreadDeals?.delete?.(dealId);
+    if (state.pendingRead) {
+      state.pendingRead[dealId] = true;
+    }
+    if (state.chatUnreadCounts) {
+      state.chatUnreadCounts[dealId] = 0;
+    }
+    persistUnreadDeals();
+    persistPendingRead();
+    persistChatUnreadCounts();
+  };
+
+  renderSystemNotifications();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -646,6 +737,34 @@
     const payload = await fetchJson("/api/my-deals");
     if (!payload?.ok) return;
     const deals = payload.deals || [];
+    const previousStatusMap = state.dealStatusMap || {};
+    const nextStatusMap = {};
+    deals.forEach((deal) => {
+      nextStatusMap[deal.id] = deal.status;
+      const prev = previousStatusMap[deal.id];
+      if (prev && prev !== deal.status) {
+        const dealLabel = `#${deal.public_id || deal.id}`;
+        if (deal.status === "dispute") {
+          pushSystemNotification(`Открыт спор по сделке ${dealLabel}.`, `${deal.id}:dispute`);
+        } else if (prev === "dispute" && deal.status !== "dispute") {
+          pushSystemNotification(
+            `Спор по сделке ${dealLabel} решен.`,
+            `${deal.id}:dispute-resolved`
+          );
+        } else if (deal.status === "canceled") {
+          pushSystemNotification(`Сделка ${dealLabel} отменена.`, `${deal.id}:canceled`);
+        } else if (deal.status === "expired") {
+          pushSystemNotification(`Сделка ${dealLabel} истекла.`, `${deal.id}:expired`);
+        } else if (deal.status === "completed") {
+          pushSystemNotification(`Сделка ${dealLabel} завершена.`, `${deal.id}:completed`);
+        }
+      }
+      if (["completed", "canceled", "expired"].includes(deal.status)) {
+        clearDealAlerts(deal.id);
+      }
+    });
+    state.dealStatusMap = nextStatusMap;
+    persistDealStatusMap();
     if (!state.chatInitDone) {
       deals.forEach((deal) => {
         if (deal.chat_last_at) {
@@ -686,6 +805,8 @@
   const updateQuickDealsButton = (activeDeals) => {
     if (!quickDealsBtn) return;
     const deals = activeDeals || [];
+    const isFinalStatus = (status) =>
+      status === "completed" || status === "canceled" || status === "expired";
     const activeCount = deals.filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     ).length;
@@ -705,6 +826,7 @@
     const chatUnreadCounts = state.chatUnreadCounts || {};
     const chatSeen = state.chatLastSeenAt || {};
     deals.forEach((deal) => {
+      if (isFinalStatus(deal.status)) return;
       if (!deal.chat_last_at) return;
       if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) return;
       const lastSeen = chatSeen[deal.id];
@@ -722,6 +844,7 @@
     persistChatUnreadCounts();
     persistChatSeen();
     deals.forEach((deal) => {
+      if (isFinalStatus(deal.status)) return;
       if (isChatUnread(deal)) {
         unreadDealIds.add(deal.id);
       }
@@ -1915,6 +2038,12 @@
   quickDealsClose?.addEventListener("click", () => {
     quickDealsPanel?.classList.remove("open");
     quickDealsPanel?.setAttribute("aria-hidden", "true");
+  });
+
+  systemNoticeReadAll?.addEventListener("click", () => {
+    state.systemNotifications = [];
+    persistSystemNotifications();
+    renderSystemNotifications();
   });
 
   dealModalClose?.addEventListener("click", () => {

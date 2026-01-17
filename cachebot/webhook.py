@@ -1059,6 +1059,7 @@ async def _api_disputes_summary(request: web.Request) -> web.Response:
     can_access = await _has_dispute_access(user_id, deps)
     if not can_access:
         return web.json_response({"ok": True, "can_access": False, "count": 0})
+    await _ensure_disputes_for_opened(deps)
     disputes = await deps.dispute_service.list_open_disputes_for(user_id)
     return web.json_response({"ok": True, "can_access": True, "count": len(disputes)})
 
@@ -1068,6 +1069,7 @@ async def _api_disputes_list(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     if not await _has_dispute_access(user_id, deps):
         raise web.HTTPForbidden(text="Нет доступа")
+    await _ensure_disputes_for_opened(deps)
     disputes = await deps.dispute_service.list_open_disputes_for(user_id)
     payload = []
     for item in disputes:
@@ -1459,6 +1461,22 @@ def _chat_dir(deps: AppDeps) -> Path:
 
 def _qr_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "qr"
+
+
+async def _ensure_disputes_for_opened(deps: AppDeps) -> None:
+    deals = await deps.deal_service.list_dispute_deals()
+    for deal in deals:
+        existing = await deps.dispute_service.dispute_for_deal(deal.id)
+        if existing:
+            continue
+        opener_id = deal.dispute_opened_by or deal.seller_id or deal.buyer_id or 0
+        await deps.dispute_service.open_dispute(
+            deal_id=deal.id,
+            opened_by=opener_id,
+            reason="Открыт через WebApp",
+            comment=None,
+            evidence=[],
+        )
 
 
 def _chat_file_url(request: web.Request, msg) -> str | None:

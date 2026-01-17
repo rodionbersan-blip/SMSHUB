@@ -412,6 +412,10 @@ class DealService:
                 and not deal.dispute_notified
             ]
 
+    async def list_dispute_deals(self) -> List[Deal]:
+        async with self._lock:
+            return [deal for deal in self._deals.values() if deal.status == DealStatus.DISPUTE]
+
     async def mark_dispute_notified(self, deal_id: str) -> None:
         async with self._lock:
             deal = self._ensure_deal(deal_id)

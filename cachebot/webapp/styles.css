@@ -621,6 +621,31 @@ body.modal-open #app {
   justify-content: space-between;
 }
 
+.p2p-toolbar .btn,
+.p2p-actions .btn {
+  height: 38px;
+  border-radius: 999px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(77, 163, 255, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(77, 163, 255, 0.2);
+}
+
+.p2p-toolbar .btn.primary,
+.p2p-actions .btn.primary {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.p2p-toolbar .btn.ghost,
+.p2p-actions .btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(77, 163, 255, 0.28);
+}
+
 .p2p-form {
   display: grid;
   gap: 12px;

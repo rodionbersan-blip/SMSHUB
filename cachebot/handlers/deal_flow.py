@@ -1004,8 +1004,9 @@ def _deal_menu_markup(
         )
     if (
         deal.status == DealStatus.DISPUTE
-        and viewer_id == deal.buyer_id
-        and deal.dispute_opened_by == deal.seller_id
+        and viewer_id in {deal.seller_id, deal.buyer_id}
+        and deal.dispute_opened_by
+        and viewer_id != deal.dispute_opened_by
     ):
         builder.row(
             InlineKeyboardButton(

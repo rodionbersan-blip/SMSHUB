@@ -3207,8 +3207,9 @@ def _build_deal_detail_keyboard(deal: Deal, page: int | None, user_id: int):
         )
     if (
         deal.status == DealStatus.DISPUTE
-        and user_id == deal.buyer_id
-        and deal.dispute_opened_by == deal.seller_id
+        and user_id in {deal.seller_id, deal.buyer_id}
+        and deal.dispute_opened_by
+        and user_id != deal.dispute_opened_by
     ):
         builder.row(
             InlineKeyboardButton(

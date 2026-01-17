@@ -1815,7 +1815,12 @@ async def dispute_evidence(message: Message, state: FSMContext) -> None:
     try:
         dispute = await deps.dispute_service.dispute_for_deal(deal.id)
         if dispute:
-            await deps.dispute_service.append_evidence(dispute.id, evidence)
+            await deps.dispute_service.append_evidence_with_reason(
+                dispute.id,
+                evidence,
+                reason=reason,
+                comment=comment,
+            )
         else:
             await deps.dispute_service.open_dispute(
                 deal_id=deal.id,

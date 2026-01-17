@@ -219,6 +219,46 @@ class DisputeService:
                     return
         raise LookupError("Спор не найден")
 
+    async def append_evidence_with_reason(
+        self,
+        dispute_id: str,
+        evidence: EvidenceItem,
+        reason: str | None = None,
+        comment: str | None = None,
+    ) -> None:
+        async with self._lock:
+            for index, item in enumerate(self._disputes):
+                if item.id == dispute_id:
+                    if item.resolved:
+                        raise ValueError("Спор уже закрыт")
+                    next_reason = item.reason
+                    if reason and (not item.reason or item.reason == "Открыт через WebApp"):
+                        next_reason = reason
+                    next_comment = item.comment
+                    if comment and not item.comment:
+                        next_comment = comment
+                    updated = Dispute(
+                        id=item.id,
+                        deal_id=item.deal_id,
+                        opened_by=item.opened_by,
+                        opened_at=item.opened_at,
+                        reason=next_reason,
+                        comment=next_comment,
+                        evidence=item.evidence + [evidence],
+                        messages=item.messages,
+                        resolved=item.resolved,
+                        resolved_at=item.resolved_at,
+                        resolved_by=item.resolved_by,
+                        seller_amount=item.seller_amount,
+                        buyer_amount=item.buyer_amount,
+                        assigned_to=item.assigned_to,
+                        assigned_at=item.assigned_at,
+                    )
+                    self._disputes[index] = updated
+                    await self._repository.persist_disputes(list(self._disputes))
+                    return
+        raise LookupError("Спор не найден")
+
     async def assign(self, dispute_id: str, user_id: int) -> Dispute:
         async with self._lock:
             for index, item in enumerate(self._disputes):

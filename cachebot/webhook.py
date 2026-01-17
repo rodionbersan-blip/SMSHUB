@@ -604,6 +604,14 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         deal = await deps.deal_service.open_dispute(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    if not await deps.dispute_service.dispute_for_deal(deal_id):
+        await deps.dispute_service.open_dispute(
+            deal_id=deal_id,
+            opened_by=user_id,
+            reason="Открыт через WebApp",
+            comment=None,
+            evidence=[],
+        )
     await deps.chat_service.add_message(
         deal_id=deal_id,
         sender_id=user_id,

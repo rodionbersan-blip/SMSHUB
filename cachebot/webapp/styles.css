@@ -1301,7 +1301,7 @@ body.modal-open #app {
   max-height: 60vh;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.22s ease;
+  transition: opacity 0.15s ease;
   z-index: 60;
 }
 
@@ -1318,6 +1318,7 @@ body.modal-open #app {
   border: 1px solid var(--quick-deals-border);
   backdrop-filter: blur(18px) saturate(1.1);
   -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  will-change: backdrop-filter, opacity;
   max-height: 60vh;
   display: flex;
   flex-direction: column;

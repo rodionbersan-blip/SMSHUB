@@ -69,7 +69,8 @@
               <button id="profileWithdraw" class="btn pill">Вывести</button>
               <button id="topupOpen" class="btn pill">Пополнить</button>
             </div>
-            <div class="profile-muted">USDT</div>
+            <div class="profile-muted">Доступно для вывода</div>
+            <div id="profileBalanceReserved" class="profile-muted">В резерве: — USDT</div>
           </div>
           <div class="profile-card" id="profileStatsCard">
             <div class="profile-title">Статистика</div>
@@ -261,8 +262,9 @@
           </div>
         </div>
         <div class="modal-body profile-quick-balance">
-          <div class="profile-muted">Баланс</div>
+          <div class="profile-muted">Доступно</div>
           <div id="profileQuickBalance" class="profile-value">—</div>
+          <div id="profileQuickReserved" class="profile-muted">В резерве: — USDT</div>
         </div>
         <div class="modal-actions">
           <button id="profileModalTopup" class="btn pill">Пополнить</button>

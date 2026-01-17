@@ -477,6 +477,21 @@ class DealService:
         async with self._lock:
             return self._balances.copy()
 
+    async def reserved_of(self, user_id: int) -> Decimal:
+        async with self._lock:
+            reserved = Decimal("0")
+            for deal in self._deals.values():
+                if deal.seller_id != user_id or not deal.is_p2p:
+                    continue
+                if deal.status in {
+                    DealStatus.PENDING,
+                    DealStatus.RESERVED,
+                    DealStatus.PAID,
+                    DealStatus.DISPUTE,
+                }:
+                    reserved += deal.usd_amount / deal.rate
+            return reserved
+
     def _credit_balance_locked(self, user_id: int, amount: Decimal) -> None:
         self._balances[user_id] = self._balances.get(user_id, Decimal("0")) + amount
 

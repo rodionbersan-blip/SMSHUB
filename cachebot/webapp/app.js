@@ -29,6 +29,7 @@
   const profileQuickName = document.getElementById("profileQuickName");
   const profileQuickUsername = document.getElementById("profileQuickUsername");
   const profileQuickBalance = document.getElementById("profileQuickBalance");
+  const profileQuickReserved = document.getElementById("profileQuickReserved");
   const profileModalTopup = document.getElementById("profileModalTopup");
   const profileModalWithdraw = document.getElementById("profileModalWithdraw");
   const profileGo = document.getElementById("profileGo");
@@ -50,6 +51,7 @@
   const profileRoleCard = document.getElementById("profileRoleCard");
   const profileMerchantSince = document.getElementById("profileMerchantSince");
   const profileBalance = document.getElementById("profileBalance");
+  const profileBalanceReserved = document.getElementById("profileBalanceReserved");
   const profileWithdraw = document.getElementById("profileWithdraw");
   const profileDealsTotal = document.getElementById("profileDealsTotal");
   const profileDealsSuccess = document.getElementById("profileDealsSuccess");
@@ -121,6 +123,7 @@
     user: null,
     initData: "",
     balance: null,
+    balanceReserved: 0,
     p2pMode: "buy",
     p2pAds: [],
     myAds: [],
@@ -456,12 +459,21 @@
   const loadBalance = async () => {
     const payload = await fetchJson("/api/balance");
     if (!payload?.ok) return;
-    state.balance = payload.balance;
+    const available = Number(payload.balance ?? 0);
+    const reserved = Number(payload.reserved ?? 0);
+    state.balance = available;
+    state.balanceReserved = reserved;
     if (profileBalance) {
-      profileBalance.textContent = `${formatAmount(payload.balance, 2)} USDT`;
+      profileBalance.textContent = `${formatAmount(available, 2)} USDT`;
+    }
+    if (profileBalanceReserved) {
+      profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
     }
     if (profileQuickBalance) {
-      profileQuickBalance.textContent = `${formatAmount(payload.balance, 2)} USDT`;
+      profileQuickBalance.textContent = `${formatAmount(available, 2)} USDT`;
+    }
+    if (profileQuickReserved) {
+      profileQuickReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
     }
   };
 
@@ -1533,6 +1545,10 @@
     if (profileQuickBalance) {
       const balance = state.balance ?? 0;
       profileQuickBalance.textContent = `${formatAmount(balance, 2)} USDT`;
+    }
+    if (profileQuickReserved) {
+      const reserved = Number(state.balanceReserved ?? 0);
+      profileQuickReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
     }
     profileModal.classList.add("open");
   });

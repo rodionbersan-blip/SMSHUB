@@ -306,7 +306,11 @@ async def _api_balance(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     balance = await deps.deal_service.balance_of(user_id)
-    return web.json_response({"ok": True, "balance": str(balance)})
+    reserved = await deps.deal_service.reserved_of(user_id)
+    total = balance + reserved
+    return web.json_response(
+        {"ok": True, "balance": str(balance), "reserved": str(reserved), "total": str(total)}
+    )
 
 
 async def _api_balance_topup(request: web.Request) -> web.Response:

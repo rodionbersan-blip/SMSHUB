@@ -62,8 +62,6 @@
   const dealModalBody = document.getElementById("dealModalBody");
   const dealModalActions = document.getElementById("dealModalActions");
   const dealModalClose = document.getElementById("dealModalClose");
-  const dealFab = document.getElementById("dealFab");
-  const dealFabBadge = document.getElementById("dealFabBadge");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
@@ -129,7 +127,26 @@
     reviews: [],
     reviewsPage: 0,
     reviewsRating: "all",
+    unreadDeals: new Set(),
   };
+
+  const unreadStorageKey = "quickDealsUnread";
+  const loadUnreadDeals = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
+      return new Set(Array.isArray(raw) ? raw : []);
+    } catch {
+      return new Set();
+    }
+  };
+  const persistUnreadDeals = () => {
+    try {
+      window.localStorage.setItem(unreadStorageKey, JSON.stringify([...state.unreadDeals]));
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.unreadDeals = loadUnreadDeals();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -518,7 +535,8 @@
     dealsCount.textContent = `${deals.length}`;
     state.deals = deals;
     state.dealsPage = 0;
-    updateDealFab();
+    syncUnreadDeals(deals);
+    updateQuickDealsButton(deals);
     const totalDeals = deals.length;
     const successDeals = deals.filter((deal) => deal.status === "completed").length;
     const failedDeals = deals.filter(
@@ -542,46 +560,35 @@
     renderDealsPage();
   };
 
-  const updateDealFab = () => {
-    if (!dealFab) return;
-    const deals = state.deals || [];
-    const active = deals.filter((deal) =>
-      ["open", "pending", "reserved", "paid", "dispute"].includes(deal.status)
-    );
-    if (!active.length) {
-      dealFab.classList.remove("show");
-      dealFab.classList.remove("alert");
-      updateQuickDealsButton(active);
-      return;
-    }
-    dealFab.classList.add("show");
-    const hasIncoming = active.some(
-      (deal) =>
-        deal.status === "pending" &&
-        deal.offer_initiator_id &&
-        state.userId &&
-        deal.offer_initiator_id !== state.userId
-    );
-    dealFab.classList.toggle("alert", hasIncoming);
-    if (dealFabBadge) {
-      dealFabBadge.textContent = `${active.length}`;
-    }
-    updateQuickDealsButton(active);
-  };
-
   const updateQuickDealsButton = (activeDeals) => {
     if (!quickDealsBtn) return;
     const deals = activeDeals || [];
     if (quickDealsBadge) {
-      const hasIncoming = deals.some(
-        (deal) =>
-          deal.status === "pending" &&
-          deal.offer_initiator_id &&
-          state.userId &&
-          deal.offer_initiator_id !== state.userId
-      );
-      quickDealsBadge.classList.toggle("show", hasIncoming);
+      quickDealsBadge.classList.toggle("show", state.unreadDeals.size > 0);
     }
+  };
+
+  const syncUnreadDeals = (deals) => {
+    if (!state.userId) return;
+    const incomingPending = new Set();
+    (deals || []).forEach((deal) => {
+      const isIncoming =
+        deal.status === "pending" &&
+        deal.offer_initiator_id &&
+        deal.offer_initiator_id !== state.userId;
+      if (isIncoming) {
+        incomingPending.add(deal.id);
+        state.unreadDeals.add(deal.id);
+      }
+    });
+    const nextUnread = new Set();
+    state.unreadDeals.forEach((dealId) => {
+      if (incomingPending.has(dealId)) {
+        nextUnread.add(dealId);
+      }
+    });
+    state.unreadDeals = nextUnread;
+    persistUnreadDeals();
   };
 
   const renderQuickDeals = () => {
@@ -1328,10 +1335,6 @@
     btn.addEventListener("click", () => {
       setView(btn.dataset.view);
     });
-  });
-
-  dealFab?.addEventListener("click", () => {
-    setView("deals");
   });
 
   quickDealsBtn?.addEventListener("click", () => {

@@ -612,7 +612,14 @@
     const activeCount = deals.filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     ).length;
-    const unreadDealIds = new Set(state.unreadDeals);
+    const pendingSet = new Set();
+    deals.forEach((deal) => {
+      const isPending = deal.status === "pending" && deal.offer_initiator_id;
+      if (isPending) pendingSet.add(deal.id);
+    });
+    state.unreadDeals = pendingSet;
+    persistUnreadDeals();
+    const unreadDealIds = new Set(pendingSet);
     deals.forEach((deal) => {
       if (isChatUnread(deal)) {
         unreadDealIds.add(deal.id);

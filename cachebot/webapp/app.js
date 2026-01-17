@@ -145,6 +145,8 @@
     unreadDeals: new Set(),
     chatLastRead: {},
     activeChatDealId: null,
+    activeDealId: null,
+    dealRefreshTimer: null,
     reviewsTargetUserId: null,
   };
 
@@ -1508,6 +1510,8 @@
       }
     }
     renderDealModal(payload.deal);
+    state.activeDealId = dealId;
+    startDealAutoRefresh();
     dealModal.classList.add("open");
   };
 
@@ -1517,6 +1521,26 @@
     if (!payload?.ok) return;
     renderDealModal(payload.deal);
     await loadDeals();
+  };
+
+  const stopDealAutoRefresh = () => {
+    if (state.dealRefreshTimer) {
+      window.clearInterval(state.dealRefreshTimer);
+      state.dealRefreshTimer = null;
+    }
+  };
+
+  const startDealAutoRefresh = () => {
+    stopDealAutoRefresh();
+    state.dealRefreshTimer = window.setInterval(async () => {
+      if (!state.activeDealId || !dealModal?.classList.contains("open")) return;
+      const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
+      if (!payload?.ok) return;
+      renderDealModal(payload.deal);
+      if (["completed", "canceled", "expired"].includes(payload.deal.status)) {
+        stopDealAutoRefresh();
+      }
+    }, 5000);
   };
 
   const initTelegram = async () => {
@@ -1679,6 +1703,8 @@
 
   dealModalClose?.addEventListener("click", () => {
     dealModal.classList.remove("open");
+    state.activeDealId = null;
+    stopDealAutoRefresh();
   });
 
   chatModalClose?.addEventListener("click", () => {

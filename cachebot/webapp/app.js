@@ -147,6 +147,7 @@
     chatUnreadCounts: {},
     chatLastSeenAt: {},
     chatInitDone: false,
+    pendingRead: {},
     activeChatDealId: null,
     activeDealId: null,
     dealRefreshTimer: null,
@@ -160,6 +161,7 @@
   const chatReadStorageKey = "dealChatLastRead";
   const chatUnreadStorageKey = "dealChatUnreadCounts";
   const chatSeenStorageKey = "dealChatLastSeenAt";
+  const pendingReadStorageKey = "dealPendingRead";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -230,6 +232,25 @@
   };
   state.chatUnreadCounts = loadChatUnreadCounts();
   state.chatLastSeenAt = loadChatSeen();
+  const loadPendingRead = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(pendingReadStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistPendingRead = () => {
+    try {
+      window.localStorage.setItem(
+        pendingReadStorageKey,
+        JSON.stringify(state.pendingRead || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.pendingRead = loadPendingRead();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -670,7 +691,12 @@
     const pendingSet = new Set();
     deals.forEach((deal) => {
       const isPending = deal.status === "pending" && deal.offer_initiator_id;
-      if (isPending) pendingSet.add(deal.id);
+      if (isPending) {
+        const wasRead = state.pendingRead?.[deal.id];
+        if (!wasRead) {
+          pendingSet.add(deal.id);
+        }
+      }
     });
     state.unreadDeals = pendingSet;
     persistUnreadDeals();
@@ -1648,6 +1674,9 @@
         renderQuickDeals();
       }
     }
+    state.pendingRead = state.pendingRead || {};
+    state.pendingRead[dealId] = true;
+    persistPendingRead();
     renderDealModal(payload.deal);
     state.activeDealId = dealId;
     startDealAutoRefresh();

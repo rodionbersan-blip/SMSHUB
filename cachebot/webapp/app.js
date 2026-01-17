@@ -1480,6 +1480,7 @@
     }
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
+    quickDealsBtn?.classList.add("dimmed");
     chatModal.classList.add("open");
   };
 
@@ -1682,6 +1683,7 @@
 
   chatModalClose?.addEventListener("click", () => {
     chatModal?.classList.remove("open");
+    quickDealsBtn?.classList.remove("dimmed");
   });
 
   p2pModalClose?.addEventListener("click", () => {

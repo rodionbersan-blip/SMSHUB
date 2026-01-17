@@ -1483,6 +1483,12 @@ body.modal-open #app {
   transform: scale(0.96);
 }
 
+.quick-deals-btn.dimmed {
+  opacity: 0.45;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  filter: saturate(0.7);
+}
+
 .quick-deals-icon {
   font-size: 18px;
 }

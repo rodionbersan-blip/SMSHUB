@@ -1237,7 +1237,7 @@ body.modal-open #app {
   height: 54px;
   border-radius: 50%;
   border: none;
-  background: #fff;
+  background: transparent;
   color: var(--accent);
   display: flex;
   align-items: center;
@@ -1245,7 +1245,7 @@ body.modal-open #app {
   padding: 0;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-  border: 1px solid #fff;
+  border: 0;
   z-index: 50;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;

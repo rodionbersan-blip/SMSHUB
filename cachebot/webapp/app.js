@@ -588,6 +588,7 @@
     state.p2pAds = payload.ads || [];
     p2pList.innerHTML = "";
     if (p2pCreateBtn) p2pCreateBtn.style.display = "none";
+    if (p2pTradingToggle) p2pTradingToggle.style.display = "none";
     if (!state.p2pAds.length) {
       p2pList.innerHTML = "<div class=\"deal-empty\">Нет объявлений.</div>";
       return;
@@ -601,6 +602,7 @@
     state.myAds = payload.ads || [];
     p2pList.innerHTML = "";
     if (p2pCreateBtn) p2pCreateBtn.style.display = "";
+    if (p2pTradingToggle) p2pTradingToggle.style.display = "";
     if (!state.myAds.length) {
       p2pList.innerHTML = "<div class=\"deal-empty\">Объявлений пока нет.</div>";
       return;

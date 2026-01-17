@@ -681,9 +681,9 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
     if not field or field.name != "file":
         raise web.HTTPBadRequest(text="Файл не найден")
     filename = Path(field.filename or "qr.png").name
-    qr_dir = _qr_dir(deps) / deal_id
-    qr_dir.mkdir(parents=True, exist_ok=True)
-    file_path = qr_dir / filename
+    chat_dir = _chat_dir(deps) / deal_id
+    chat_dir.mkdir(parents=True, exist_ok=True)
+    file_path = chat_dir / filename
     with file_path.open("wb") as handle:
         while True:
             chunk = await field.read_chunk()
@@ -1773,6 +1773,7 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
     can_cancel = bool(
         (is_buyer or is_seller)
         and deal.status.value in {"open", "reserved", "paid"}
+        and deal.qr_stage.value != "ready"
     )
     can_accept_offer = bool(deal.status.value == "pending" and is_recipient)
     can_decline_offer = bool(deal.status.value == "pending" and (is_recipient or is_initiator))

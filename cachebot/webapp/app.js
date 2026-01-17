@@ -1458,15 +1458,13 @@
     if (actions.buyer_ready) {
       addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
     }
-    if (actions.confirm_seller) {
-      if (deal.buyer_cash_confirmed) {
-        addAction(topRow, "Получил нал", () => dealAction("confirm-seller", deal.id), true);
-      }
+    if (actions.confirm_seller && deal.qr_stage === "ready") {
+      addAction(topRow, "Получил нал", () => dealAction("confirm-seller", deal.id), true);
     }
     if (deal.role === "seller" && ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)) {
       addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
-    if (actions.confirm_buyer) {
+    if (actions.confirm_buyer && deal.qr_stage === "ready") {
       addAction(topRow, "Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
     }
     if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute"].includes(deal.status)) {

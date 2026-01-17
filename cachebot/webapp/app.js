@@ -573,11 +573,11 @@
     p2pTradingBadge.textContent = `${payload.active}/${payload.total}`;
     p2pTradingToggle.textContent = payload.trading ? "Торги: включены" : "Торги: остановлены";
     if (p2pMyAdsBtn) {
-      p2pMyAdsBtn.classList.toggle("status-ok", payload.trading);
-      p2pMyAdsBtn.classList.toggle("status-bad", !payload.trading);
-      p2pMyAdsBtn.textContent = payload.trading
-        ? "Объявления · Торги включены"
-        : "Объявления · Торги выключены";
+      p2pMyAdsBtn.textContent = "Объявления";
+    }
+    if (p2pTradingToggle) {
+      p2pTradingToggle.classList.toggle("status-ok", payload.trading);
+      p2pTradingToggle.classList.toggle("status-bad", !payload.trading);
     }
   };
 

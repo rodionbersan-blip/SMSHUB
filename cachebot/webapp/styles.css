@@ -621,6 +621,10 @@ body.modal-open #app {
   justify-content: space-between;
 }
 
+.p2p-toolbar {
+  flex-wrap: nowrap;
+}
+
 .p2p-toolbar .btn,
 .p2p-actions .btn {
   height: 38px;

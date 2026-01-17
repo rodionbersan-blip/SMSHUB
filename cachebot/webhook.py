@@ -930,10 +930,12 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     except Exception as exc:
         raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
     offer_text = (
-        f"📝 Новое предложение по объявлению {ad.public_id}\n"
+        f"🆕 Новая сделка\n"
+        f"Объявление: {ad.public_id}\n"
         f"Сумма: ₽{rub_amount}\n"
         f"USDT: {deal.usdt_amount.quantize(Decimal('0.001'))}\n"
-        f"Сделка: {deal.hashtag}"
+        f"Сделка: {deal.hashtag}\n\n"
+        "Перейдите в приложение для обработки сделки."
     )
     if buyer_id != user_id:
         markup = InlineKeyboardMarkup(

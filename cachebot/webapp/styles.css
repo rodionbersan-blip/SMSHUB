@@ -319,6 +319,16 @@ body.modal-open #app {
   color: var(--accent);
 }
 
+.btn.status-ok {
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  color: #2ecc71;
+}
+
+.btn.status-bad {
+  border: 1px solid rgba(229, 83, 61, 0.35);
+  color: #e5533d;
+}
+
 .tabs {
   display: flex;
   align-items: center;

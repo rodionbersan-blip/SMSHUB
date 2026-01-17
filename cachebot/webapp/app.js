@@ -572,6 +572,13 @@
     if (!payload?.ok) return;
     p2pTradingBadge.textContent = `${payload.active}/${payload.total}`;
     p2pTradingToggle.textContent = payload.trading ? "Торги: включены" : "Торги: остановлены";
+    if (p2pMyAdsBtn) {
+      p2pMyAdsBtn.classList.toggle("status-ok", payload.trading);
+      p2pMyAdsBtn.classList.toggle("status-bad", !payload.trading);
+      p2pMyAdsBtn.textContent = payload.trading
+        ? "Объявления · Торги включены"
+        : "Объявления · Торги выключены";
+    }
   };
 
   const loadPublicAds = async (side) => {

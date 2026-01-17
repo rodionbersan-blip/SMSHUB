@@ -794,15 +794,41 @@
         p2pModalActions.appendChild(btn);
       });
       confirmBtn.addEventListener("click", async () => {
-        const offer = await fetchJson(`/api/p2p/ads/${ad.id}/offer`, {
-          method: "POST",
-          body: JSON.stringify({ rub_amount: rub }),
-        });
-        if (offer?.ok) {
-          p2pModal.classList.remove("open");
-          await loadDeals();
-          await loadPublicAds(ad.side === "sell" ? "sell" : "buy");
-          showNotice("Предложение отправлено");
+        if (!state.initData) {
+          showNotice("initData не найден. Откройте WebApp из Telegram.");
+          return;
+        }
+        try {
+          const res = await fetch(`/api/p2p/ads/${ad.id}/offer`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Telegram-Init-Data": state.initData,
+            },
+            body: JSON.stringify({ rub_amount: rub }),
+          });
+          if (!res.ok) {
+            let message = "Не удалось создать сделку.";
+            try {
+              const text = await res.text();
+              if (text) {
+                message = text;
+              }
+            } catch {}
+            showNotice(message);
+            return;
+          }
+          const offer = await res.json();
+          if (offer?.ok) {
+            p2pModal.classList.remove("open");
+            await loadDeals();
+            await loadPublicAds(ad.side === "sell" ? "sell" : "buy");
+            showNotice("Предложение отправлено");
+          } else {
+            showNotice("Не удалось создать сделку.");
+          }
+        } catch (err) {
+          showNotice(`Ошибка: ${err.message}`);
         }
       });
       p2pModalActions.appendChild(confirm);

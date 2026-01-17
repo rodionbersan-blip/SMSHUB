@@ -625,6 +625,10 @@ body.modal-open #app {
   flex-wrap: nowrap;
 }
 
+.p2p-actions {
+  flex-wrap: nowrap;
+}
+
 .p2p-toolbar .btn,
 .p2p-actions .btn {
   height: 38px;
@@ -642,6 +646,16 @@ body.modal-open #app {
   background: var(--accent);
   color: #ffffff;
   border-color: transparent;
+}
+
+.p2p-actions .btn.status-ok {
+  border-color: rgba(46, 204, 113, 0.65);
+  color: #2ecc71;
+}
+
+.p2p-actions .btn.status-bad {
+  border-color: rgba(229, 83, 61, 0.65);
+  color: #e5533d;
 }
 
 .p2p-toolbar .btn.ghost,

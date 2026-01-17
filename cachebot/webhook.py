@@ -1507,6 +1507,8 @@ async def _deal_payload(
         "public_id": deal.public_id,
         "status": deal.status.value,
         "qr_stage": deal.qr_stage.value,
+        "seller_id": deal.seller_id,
+        "buyer_id": deal.buyer_id,
         "role": role,
         "cash_rub": str(deal.usd_amount),
         "usdt_amount": str(deal.usdt_amount),

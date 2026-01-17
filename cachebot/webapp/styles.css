@@ -6,7 +6,7 @@
   --card: #ffffff;
   --card-contrast: rgba(15, 17, 21, 0.04);
   --card-contrast-border: rgba(15, 17, 21, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-bg: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(15, 17, 21, 0.08);
   --text: #0f1115;
   --muted: #6b7280;

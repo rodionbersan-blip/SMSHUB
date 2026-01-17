@@ -72,6 +72,9 @@
   const chatInput = document.getElementById("chatInput");
   const chatFile = document.getElementById("chatFile");
   const chatFileHint = document.getElementById("chatFileHint");
+  const imageModal = document.getElementById("imageModal");
+  const imageModalImg = document.getElementById("imageModalImg");
+  const imageModalClose = document.getElementById("imageModalClose");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
@@ -1424,6 +1427,7 @@
           img.src = msg.file_url;
           img.alt = msg.file_name || "Фото";
           img.className = "chat-image";
+          img.addEventListener("click", () => openImageModal(msg.file_url, img.alt));
           item.appendChild(img);
         } else {
           const link = document.createElement("a");
@@ -1753,6 +1757,17 @@
     } catch (err) {
       showNotice(`Ошибка: ${err.message}`);
     }
+  });
+
+  const openImageModal = (src, alt = "Фото") => {
+    if (!imageModal || !imageModalImg) return;
+    imageModalImg.src = src;
+    imageModalImg.alt = alt;
+    imageModal.classList.add("open");
+  };
+
+  imageModalClose?.addEventListener("click", () => {
+    imageModal?.classList.remove("open");
   });
 
   chatFile?.addEventListener("change", updateChatFileHint);

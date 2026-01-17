@@ -1246,10 +1246,17 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
-    if (deal.qr_stage === "awaiting_buyer_ready") {
+    if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
-      alert.textContent = "Ожидайте готовность покупателя!\nНе выходите из сети!\nКак покупатель будет готов вам придет уведомление.";
+      alert.textContent =
+        "⚠️ Ожидайте готовность покупателя!\nНе выходите из сети!\nКак покупатель будет готов вам придет уведомление.";
+      dealModalBody.appendChild(alert);
+    }
+    if (deal.qr_stage === "awaiting_seller_photo" && deal.role === "seller") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "📎 Прикрепите QR по кнопке ниже.";
       dealModalBody.appendChild(alert);
     }
     const ownerLink = dealModalBody.querySelector(".owner-link");
@@ -1300,7 +1307,7 @@
       }
     }
     if (deal.role === "seller" && ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)) {
-      addAction(topRow, "Отправить QR", () => uploadQrForDeal(deal.id), true);
+      addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
     if (actions.confirm_buyer) {
       addAction(topRow, "Успешно снял", () => dealAction("confirm-buyer", deal.id), true);

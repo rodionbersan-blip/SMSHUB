@@ -646,6 +646,19 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
         file_path=str(file_path),
         file_name=filename,
     )
+    if deal.buyer_id:
+        with suppress(Exception):
+            webapp_url = str(request.url.with_path("/app").with_query(""))
+            keyboard = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="Смотреть", url=webapp_url)],
+                ]
+            )
+            await request.app["bot"].send_message(
+                deal.buyer_id,
+                "Пришел QR по сделке.\nСмотреть в приложении либо по кнопке ниже.",
+                reply_markup=keyboard,
+            )
     payload = {
         **msg.to_dict(),
         "file_url": _chat_file_url(request, msg),

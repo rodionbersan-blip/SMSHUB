@@ -1048,27 +1048,19 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
 async def _api_disputes_summary(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
-    if await _has_dispute_access(user_id, deps):
-        disputes = await deps.dispute_service.list_open_disputes_for(user_id)
-        return web.json_response(
-            {"ok": True, "can_access": True, "can_manage": True, "count": len(disputes)}
-        )
-    disputes = await _disputes_for_user(deps, user_id)
-    count = len(disputes)
-    return web.json_response(
-        {"ok": True, "can_access": count > 0, "can_manage": False, "count": count}
-    )
+    can_access = await _has_dispute_access(user_id, deps)
+    if not can_access:
+        return web.json_response({"ok": True, "can_access": False, "count": 0})
+    disputes = await deps.dispute_service.list_open_disputes_for(user_id)
+    return web.json_response({"ok": True, "can_access": True, "count": len(disputes)})
 
 
 async def _api_disputes_list(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
-    can_manage = await _has_dispute_access(user_id, deps)
-    disputes = (
-        await deps.dispute_service.list_open_disputes_for(user_id)
-        if can_manage
-        else await _disputes_for_user(deps, user_id)
-    )
+    if not await _has_dispute_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    disputes = await deps.dispute_service.list_open_disputes_for(user_id)
     payload = []
     for item in disputes:
         deal = await deps.deal_service.get_deal(item.deal_id)
@@ -1084,7 +1076,6 @@ async def _api_disputes_list(request: web.Request) -> web.Response:
                 "assigned_to": item.assigned_to,
                 "reason": item.reason,
                 "resolved": item.resolved,
-                "can_manage": can_manage,
             }
         )
     return web.json_response({"ok": True, "disputes": payload})
@@ -1093,7 +1084,8 @@ async def _api_disputes_list(request: web.Request) -> web.Response:
 async def _api_dispute_detail(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     user, user_id = await _require_user(request)
-    can_manage = await _has_dispute_access(user_id, deps)
+    if not await _has_dispute_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
     dispute_id = request.match_info["dispute_id"]
     dispute = await deps.dispute_service.dispute_by_id(dispute_id)
     if not dispute:
@@ -1101,8 +1093,6 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
     deal = await deps.deal_service.get_deal(dispute.deal_id)
     if not deal:
         raise web.HTTPNotFound(text="Сделка не найдена")
-    if not can_manage and user_id not in {deal.seller_id, deal.buyer_id}:
-        raise web.HTTPForbidden(text="Нет доступа")
     seller = await deps.user_service.profile_of(deal.seller_id)
     buyer = await deps.user_service.profile_of(deal.buyer_id) if deal.buyer_id else None
     include_private = _is_admin(user_id, deps)
@@ -1125,7 +1115,6 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         "reason": dispute.reason,
         "comment": dispute.comment,
         "assigned_to": dispute.assigned_to,
-        "can_manage": can_manage,
         "messages": [
             {
                 "author_id": msg.author_id,
@@ -1451,18 +1440,6 @@ async def _has_dispute_access(user_id: int, deps: AppDeps) -> bool:
     if user_id in deps.config.admin_ids:
         return True
     return await deps.user_service.is_moderator(user_id)
-
-
-async def _disputes_for_user(deps: AppDeps, user_id: int):
-    disputes = await deps.dispute_service.list_open_disputes()
-    result = []
-    for item in disputes:
-        deal = await deps.deal_service.get_deal(item.deal_id)
-        if not deal:
-            continue
-        if user_id in {deal.seller_id, deal.buyer_id}:
-            result.append(item)
-    return result
 
 
 def _avatar_dir(deps: AppDeps) -> Path:

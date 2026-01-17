@@ -1270,6 +1270,12 @@
         "⚠️ Ожидайте готовность покупателя!\nНе выходите из сети!\nКак покупатель будет готов вам придет уведомление.";
       dealModalBody.appendChild(alert);
     }
+    if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "buyer") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "⚠️ Продавец готов отправить QR.\nНажмите «Готов сканировать».";
+      dealModalBody.appendChild(alert);
+    }
     if (deal.qr_stage === "awaiting_seller_photo" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";

@@ -36,6 +36,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/profile", _api_profile)
     app.router.add_post("/api/profile", _api_profile_update)
     app.router.add_post("/api/profile/avatar", _api_profile_avatar)
+    app.router.add_get("/api/users/{user_id}", _api_public_profile)
     app.router.add_get("/api/avatar/{user_id}", _api_avatar)
     app.router.add_get("/api/balance", _api_balance)
     app.router.add_post("/api/balance/topup", _api_balance_topup)
@@ -197,6 +198,39 @@ async def _api_profile(request: web.Request) -> web.Response:
     payload = {
         "user": user,
         "profile": _profile_payload(profile, request=request, include_private=include_private),
+        "role": role.value if role else None,
+        "merchant_since": merchant_since.isoformat() if merchant_since else None,
+        "stats": {
+            "total_deals": total_deals,
+            "success_percent": success_percent,
+            "fail_percent": fail_percent,
+            "reviews_count": len(reviews),
+        },
+    }
+    return web.json_response({"ok": True, "data": payload})
+
+
+async def _api_public_profile(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    await _require_user(request)
+    try:
+        target_id = int(request.match_info.get("user_id", "0"))
+    except ValueError:
+        raise web.HTTPBadRequest(text="Некорректный пользователь")
+    profile = await deps.user_service.profile_of(target_id)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    role = await deps.user_service.role_of(target_id)
+    merchant_since = await deps.user_service.merchant_since_of(target_id)
+    deals = await deps.deal_service.list_user_deals(target_id)
+    total_deals = len(deals)
+    success_deals = sum(1 for deal in deals if deal.status == DealStatus.COMPLETED)
+    failed_deals = sum(1 for deal in deals if deal.status in {DealStatus.CANCELED, DealStatus.EXPIRED})
+    success_percent = round((success_deals / total_deals) * 100) if total_deals else 0
+    fail_percent = round((failed_deals / total_deals) * 100) if total_deals else 0
+    reviews = await deps.review_service.list_for_user(target_id)
+    payload = {
+        "profile": _profile_payload(profile, request=request, include_private=False),
         "role": role.value if role else None,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": {

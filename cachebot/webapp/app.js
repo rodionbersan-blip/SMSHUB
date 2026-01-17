@@ -74,6 +74,10 @@
   const p2pModalBody = document.getElementById("p2pModalBody");
   const p2pModalActions = document.getElementById("p2pModalActions");
   const p2pModalClose = document.getElementById("p2pModalClose");
+  const userModal = document.getElementById("userModal");
+  const userModalTitle = document.getElementById("userModalTitle");
+  const userModalBody = document.getElementById("userModalBody");
+  const userModalClose = document.getElementById("userModalClose");
   const p2pCreateModal = document.getElementById("p2pCreateModal");
   const p2pCreateClose = document.getElementById("p2pCreateClose");
   const p2pCreateForm = document.getElementById("p2pCreateForm");
@@ -567,6 +571,36 @@
     return item;
   };
 
+  const openUserProfile = async (userId) => {
+    if (!userModal || !userModalBody) return;
+    const payload = await fetchJson(`/api/users/${userId}`);
+    if (!payload?.ok) return;
+    const data = payload.data || {};
+    const profile = data.profile || {};
+    const stats = data.stats || {};
+    const display = profile.display_name || "Без имени";
+    const registered = profile.registered_at ? formatDate(profile.registered_at) : "—";
+    userModalTitle.textContent = "Профиль";
+    userModalBody.innerHTML = `
+      <div class="profile-hero">
+        <div class="profile-avatar-large" id="userModalAvatar">BC</div>
+        <div>
+          <div class="profile-value">${display}</div>
+          <div class="profile-muted">Регистрация: ${registered}</div>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-title">Статистика</div>
+        <div class="profile-value">Сделок: ${stats.total_deals ?? 0}</div>
+        <div class="profile-muted">Успешные: ${stats.success_percent ?? 0}%</div>
+        <div class="profile-muted">Отзывы: ${stats.reviews_count ?? 0}</div>
+      </div>
+    `;
+    const avatarNode = userModalBody.querySelector("#userModalAvatar");
+    setAvatarNode(avatarNode, display, profile.avatar_url);
+    userModal.classList.add("open");
+  };
+
   const loadP2PSummary = async () => {
     const payload = await fetchJson("/api/p2p/summary");
     if (!payload?.ok) return;
@@ -613,14 +647,21 @@
   const openP2PAd = async (adId) => {
     const ad = state.p2pAds.find((item) => item.id === adId);
     if (!ad) return;
+    const owner = ad.owner || {};
+    const ownerName = owner.display_name || owner.full_name || "—";
+    const ownerId = owner.user_id || "";
     p2pModalTitle.textContent = `Объявление #${ad.public_id}`;
     p2pModalBody.innerHTML = `
-      <div class="deal-detail-row"><span>Сторона:</span>${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
-      <div class="deal-detail-row"><span>Цена:</span>₽${formatAmount(ad.price_rub, 2)}/USDT</div>
-      <div class="deal-detail-row"><span>Объём:</span>${formatAmount(ad.remaining_usdt)} USDT</div>
-      <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 2)}-₽${formatAmount(ad.max_rub, 2)}</div>
-      <div class="deal-detail-row"><span>Банки:</span>${(ad.banks || []).join(", ") || "—"}</div>
-      <div class="deal-detail-row"><span>Условия:</span>${ad.terms || "—"}</div>
+      <div class="deal-detail-row">
+        <span>Продавец:</span>
+        <button class="link owner-link" data-owner="${ownerId}">${ownerName}</button>
+      </div>
+      <div class="deal-detail-row"><span>Цена:</span>1 USDT = ${formatAmount(ad.price_rub, 0)} RUB</div>
+      <div class="deal-detail-row"><span>Доступный объем:</span>${formatAmount(ad.remaining_usdt, 0)} USDT</div>
+      <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}</div>
+      <div class="deal-detail-row"><span>Способ оплаты:</span>${(ad.banks || []).join(", ") || "—"}</div>
+      <div class="deal-detail-row"><span>Срок оплаты:</span>15 мин</div>
+      <div class="deal-detail-row"><span>Условия сделки:</span>${ad.terms || "—"}</div>
     `;
     p2pModalActions.innerHTML = "";
     const input = document.createElement("input");
@@ -652,6 +693,10 @@
     p2pModalActions.appendChild(input);
     p2pModalActions.appendChild(btn);
     p2pModal.classList.add("open");
+    const ownerLink = p2pModalBody.querySelector(".owner-link");
+    if (ownerLink && ownerId) {
+      ownerLink.addEventListener("click", () => openUserProfile(ownerId));
+    }
   };
 
   const openMyAd = async (adId) => {
@@ -1173,6 +1218,10 @@
 
   p2pModalClose?.addEventListener("click", () => {
     p2pModal.classList.remove("open");
+  });
+
+  userModalClose?.addEventListener("click", () => {
+    userModal?.classList.remove("open");
   });
 
   p2pCreateClose?.addEventListener("click", () => {

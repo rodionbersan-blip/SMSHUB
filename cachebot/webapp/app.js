@@ -1608,9 +1608,6 @@
         renderQuickDeals();
       }
     }
-    if (payload.deal?.chat_last_at) {
-      markChatRead(dealId, payload.deal.chat_last_at);
-    }
     renderDealModal(payload.deal);
     state.activeDealId = dealId;
     startDealAutoRefresh();

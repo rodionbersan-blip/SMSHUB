@@ -71,6 +71,7 @@
   const chatForm = document.getElementById("chatForm");
   const chatInput = document.getElementById("chatInput");
   const chatFile = document.getElementById("chatFile");
+  const chatFileHint = document.getElementById("chatFileHint");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
@@ -1396,14 +1397,20 @@
     (messages || []).forEach((msg) => {
       const item = document.createElement("div");
       item.className = `chat-message ${msg.sender_id === state.userId ? "self" : ""}`.trim();
+      const fileName = (msg.file_name || "").toLowerCase();
+      const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
+      if (msg.file_url) {
+        const label = document.createElement("div");
+        label.className = "chat-file-label";
+        label.textContent = isImage ? "📎 Фото" : "📎 Файл";
+        item.appendChild(label);
+      }
       if (msg.text) {
         const text = document.createElement("div");
         text.textContent = msg.text;
         item.appendChild(text);
       }
       if (msg.file_url) {
-        const fileName = (msg.file_name || "").toLowerCase();
-        const isImage = /\.(png|jpe?g|gif|webp)$/i.test(fileName);
         if (isImage) {
           const img = document.createElement("img");
           img.src = msg.file_url;
@@ -1459,6 +1466,18 @@
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
     chatModal.classList.add("open");
+  };
+
+  const updateChatFileHint = () => {
+    if (!chatFileHint) return;
+    const file = chatFile?.files?.[0];
+    if (file) {
+      chatFileHint.textContent = `📎 ${file.name}`;
+      chatFileHint.classList.add("show");
+    } else {
+      chatFileHint.textContent = "";
+      chatFileHint.classList.remove("show");
+    }
   };
 
   const openDealModal = async (dealId) => {
@@ -1712,6 +1731,7 @@
       }
       if (chatInput) chatInput.value = "";
       if (chatFile) chatFile.value = "";
+      updateChatFileHint();
       await loadChatMessages(dealId);
       if (sentMessage?.created_at) {
         markChatRead(dealId, sentMessage.created_at);
@@ -1726,6 +1746,8 @@
       showNotice(`Ошибка: ${err.message}`);
     }
   });
+
+  chatFile?.addEventListener("change", updateChatFileHint);
 
   p2pVolumeMax?.addEventListener("click", async () => {
     if (state.balance !== null) {

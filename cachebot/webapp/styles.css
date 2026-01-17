@@ -1166,6 +1166,7 @@ body.modal-open #app {
   grid-template-columns: 1fr auto auto;
   gap: 8px;
   margin-top: 12px;
+  align-items: center;
 }
 
 .chat-form input[type="text"] {
@@ -1174,7 +1175,7 @@ body.modal-open #app {
   color: var(--text);
   border-radius: 999px;
   padding: 0 14px;
-  height: 40px;
+  height: 44px;
 }
 
 .chat-attach input {
@@ -1182,13 +1183,38 @@ body.modal-open #app {
 }
 
 .chat-attach {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.chat-form .btn.primary {
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-file-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  display: none;
+  padding-left: 6px;
+}
+
+.chat-file-hint.show {
+  display: block;
+}
+
+.chat-file-label {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 #chatModal .modal-card {

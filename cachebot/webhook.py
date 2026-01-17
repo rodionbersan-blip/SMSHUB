@@ -1428,8 +1428,12 @@ def _qr_dir(deps: AppDeps) -> Path:
 def _chat_file_url(request: web.Request, msg) -> str | None:
     if not msg.file_path or not msg.file_name:
         return None
+    query = {}
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if init_data:
+        query["initData"] = init_data
     return str(
-        request.url.with_path(f"/api/chat-files/{msg.deal_id}/{msg.file_name}").with_query({})
+        request.url.with_path(f"/api/chat-files/{msg.deal_id}/{msg.file_name}").with_query(query)
     )
 
 

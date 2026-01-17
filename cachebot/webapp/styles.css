@@ -1637,7 +1637,7 @@ body.modal-open #app {
 .quick-deals-panel {
   position: fixed;
   left: 16px;
-  bottom: calc(140px + env(safe-area-inset-bottom));
+  bottom: calc(100px + env(safe-area-inset-bottom));
   width: min(92vw, 360px);
   max-height: 60vh;
   opacity: 0;

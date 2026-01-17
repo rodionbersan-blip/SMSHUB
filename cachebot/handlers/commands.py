@@ -1612,10 +1612,11 @@ async def dispute_open(callback: CallbackQuery, state: FSMContext) -> None:
     if not deal or user.id not in {deal.seller_id, deal.buyer_id}:
         await callback.answer("Сделка недоступна", show_alert=True)
         return
-    if deal.status != DealStatus.PAID:
+    if deal.status not in {DealStatus.PAID, DealStatus.DISPUTE}:
         await callback.answer("Спор можно открыть только после оплаты", show_alert=True)
         return
-    if deal.dispute_opened_by or deal.status == DealStatus.DISPUTE:
+    existing = await deps.dispute_service.dispute_for_deal(deal.id)
+    if existing:
         await callback.answer("Спор уже открыт", show_alert=True)
         return
     now = datetime.now(timezone.utc)
@@ -1808,14 +1809,19 @@ async def dispute_evidence(message: Message, state: FSMContext) -> None:
         await message.answer("Сделка недоступна.")
         return
     try:
-        await deps.dispute_service.open_dispute(
-            deal_id=deal.id,
-            opened_by=user.id,
-            reason=reason,
-            comment=comment,
-            evidence=[evidence],
-        )
-        await deps.deal_service.open_dispute(deal.id, user.id)
+        dispute = await deps.dispute_service.dispute_for_deal(deal.id)
+        if dispute:
+            await deps.dispute_service.append_evidence(dispute.id, evidence)
+        else:
+            await deps.dispute_service.open_dispute(
+                deal_id=deal.id,
+                opened_by=user.id,
+                reason=reason,
+                comment=comment,
+                evidence=[evidence],
+            )
+        if deal.status != DealStatus.DISPUTE:
+            await deps.deal_service.open_dispute(deal.id, user.id)
     except Exception as exc:
         await state.clear()
         await message.answer(f"Не удалось открыть спор: {exc}")

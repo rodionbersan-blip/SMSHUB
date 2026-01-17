@@ -272,7 +272,7 @@ body.modal-open #app {
   color: var(--accent);
   padding: 0 16px;
   height: 46px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -1065,7 +1065,7 @@ body.modal-open #app {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--card);
-  border-radius: 16px;
+  border-radius: 26px;
   padding: 20px;
   box-shadow: var(--shadow);
 }

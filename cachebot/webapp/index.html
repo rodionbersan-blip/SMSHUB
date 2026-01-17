@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BC Cash</title>
-    <link rel="stylesheet" href="/app/styles.css?v=pay46" />
+    <link rel="stylesheet" href="/app/styles.css?v=pay48" />
   </head>
   <body>
     <div id="app">
@@ -205,6 +205,9 @@
             <button id="userModalClose" class="btn ghost">Закрыть</button>
           </div>
           <div id="userModalBody" class="modal-body"></div>
+          <div class="modal-actions">
+            <button id="userModalReviews" class="btn pill">Отзывы</button>
+          </div>
         </div>
       </div>
 
@@ -355,11 +358,31 @@
         </div>
       </div>
 
+    <button id="quickDealsBtn" class="quick-deals-btn" aria-label="Быстрые сделки">
+      <span class="quick-deals-icon">💬</span>
+      <span id="quickDealsBadge" class="quick-deals-badge"></span>
+    </button>
+
+    <div id="quickDealsPanel" class="quick-deals-panel" aria-hidden="true">
+      <div class="quick-deals-card">
+        <div class="quick-deals-header">
+          <div class="quick-deals-title">Активные сделки</div>
+          <button id="quickDealsClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div id="quickDealsList" class="quick-deals-list"></div>
+      </div>
+    </div>
+
+    <button id="dealFab" class="deal-fab" aria-label="К сделкам">
+      <span class="deal-fab-icon">◎</span>
+      <span id="dealFabBadge" class="deal-fab-badge">1</span>
+    </button>
+
     <div id="successAnim" class="success-anim" aria-hidden="true"></div>
     <div id="centerNotice" class="center-notice" aria-live="polite"></div>
 
     <script src="/app/assets/lottie.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/app/app.js?v=pay39"></script>
+    <script src="/app/app.js?v=pay42"></script>
   </body>
 </html>

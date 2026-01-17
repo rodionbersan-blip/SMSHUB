@@ -64,6 +64,11 @@
   const dealModalClose = document.getElementById("dealModalClose");
   const dealFab = document.getElementById("dealFab");
   const dealFabBadge = document.getElementById("dealFabBadge");
+  const quickDealsBtn = document.getElementById("quickDealsBtn");
+  const quickDealsBadge = document.getElementById("quickDealsBadge");
+  const quickDealsPanel = document.getElementById("quickDealsPanel");
+  const quickDealsList = document.getElementById("quickDealsList");
+  const quickDealsClose = document.getElementById("quickDealsClose");
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
@@ -546,6 +551,7 @@
     if (!active.length) {
       dealFab.classList.remove("show");
       dealFab.classList.remove("alert");
+      updateQuickDealsButton(active);
       return;
     }
     dealFab.classList.add("show");
@@ -560,6 +566,54 @@
     if (dealFabBadge) {
       dealFabBadge.textContent = `${active.length}`;
     }
+    updateQuickDealsButton(active);
+  };
+
+  const updateQuickDealsButton = (activeDeals) => {
+    if (!quickDealsBtn) return;
+    const deals = activeDeals || [];
+    if (quickDealsBadge) {
+      const hasIncoming = deals.some(
+        (deal) =>
+          deal.status === "pending" &&
+          deal.offer_initiator_id &&
+          state.userId &&
+          deal.offer_initiator_id !== state.userId
+      );
+      quickDealsBadge.classList.toggle("show", hasIncoming);
+    }
+  };
+
+  const renderQuickDeals = () => {
+    if (!quickDealsList) return;
+    const deals = (state.deals || []).filter(
+      (deal) => !["completed", "canceled", "expired"].includes(deal.status)
+    );
+    quickDealsList.innerHTML = "";
+    if (!deals.length) {
+      quickDealsList.innerHTML = '<div class="deal-empty">Активных сделок нет.</div>';
+      return;
+    }
+    deals.forEach((deal) => {
+      const row = document.createElement("div");
+      row.className = "quick-deal-item";
+      const amountText = `₽${formatAmount(deal.cash_rub, 0)} · ${formatAmount(
+        deal.usdt_amount,
+        3
+      )} USDT`;
+      row.innerHTML = `
+        <div class="quick-deal-info">
+          <div class="quick-deal-id">Сделка #${deal.public_id}</div>
+          <div class="quick-deal-meta">${amountText}</div>
+        </div>
+        <div class="quick-deal-status">${statusLabel(deal)}</div>
+      `;
+      row.addEventListener("click", () => {
+        quickDealsPanel?.classList.remove("open");
+        openDealModal(deal.id);
+      });
+      quickDealsList.appendChild(row);
+    });
   };
 
   const loadSummary = async () => {
@@ -1278,6 +1332,17 @@
 
   dealFab?.addEventListener("click", () => {
     setView("deals");
+  });
+
+  quickDealsBtn?.addEventListener("click", () => {
+    renderQuickDeals();
+    quickDealsPanel?.classList.add("open");
+    quickDealsPanel?.setAttribute("aria-hidden", "false");
+  });
+
+  quickDealsClose?.addEventListener("click", () => {
+    quickDealsPanel?.classList.remove("open");
+    quickDealsPanel?.setAttribute("aria-hidden", "true");
   });
 
   dealModalClose?.addEventListener("click", () => {

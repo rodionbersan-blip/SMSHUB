@@ -1718,6 +1718,7 @@
       state.livePollInFlight = true;
       try {
         await loadDeals();
+        await loadBalance();
         if (state.activeDealId && dealModal?.classList.contains("open")) {
           const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
           if (payload?.ok) {

@@ -1864,11 +1864,11 @@
     }
   };
 
-  const loadChatMessages = async (dealId) => {
+  const loadChatMessages = async (dealId, options = {}) => {
     const payload = await fetchJson(`/api/deals/${dealId}/chat`);
     if (!payload?.ok) return;
     const messages = payload.messages || [];
-    renderChatMessages(messages, { keepPosition: true });
+    renderChatMessages(messages, { keepPosition: options.keepPosition !== false });
     return messages;
   };
 
@@ -1878,7 +1878,7 @@
     if (chatModalTitle) {
       chatModalTitle.textContent = `Чат сделки #${deal.public_id}`;
     }
-    const messages = await loadChatMessages(deal.id);
+    const messages = await loadChatMessages(deal.id, { keepPosition: false });
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
     if (lastMessage?.created_at) {
       markChatRead(deal.id, lastMessage.created_at);

@@ -1828,16 +1828,24 @@ body.pin-lock .app {
 }
 
 .pin-key-bio {
-  font-size: 18px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff;
+  width: 78px;
+  height: 78px;
+  padding: 0;
+  font-size: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pin-key-bio::after {
-  content: "Face ID";
+.pin-face-icon {
+  width: 32px;
+  height: 32px;
   display: block;
-  font-size: 9px;
-  margin-top: 4px;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.6px;
 }
 
 .pin-key-num {

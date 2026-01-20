@@ -2634,7 +2634,15 @@
         }),
       });
       if (!res.ok) {
-        const text = await res.text();
+        let text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          if (data && data.error) {
+            text = data.error;
+          }
+        } catch {
+          // ignore
+        }
         showNotice(text || "Не удалось отправить отзыв");
         if (text && text.includes("Отзыв уже оставлен")) {
           removeSystemNotice(active.key);

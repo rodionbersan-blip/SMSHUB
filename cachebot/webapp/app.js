@@ -1,5 +1,5 @@
 (() => {
-  const tg = window.Telegram?.WebApp;
+  let tg = window.Telegram?.WebApp || null;
   const logEl = document.getElementById("log");
   const successAnim = document.getElementById("successAnim");
   const centerNotice = document.getElementById("centerNotice");
@@ -178,6 +178,7 @@
     completedNotified: {},
     bootstrapDone: false,
     initRetryTimer: null,
+    tgRetryTimer: null,
     systemNoticeShownOnce: false,
     systemNoticeTimer: null,
     systemNoticeActive: null,
@@ -2245,6 +2246,9 @@
   };
 
   const initTelegram = async () => {
+    if (!tg && window.Telegram?.WebApp) {
+      tg = window.Telegram.WebApp;
+    }
     if (tg) {
       tg.ready();
       tg.expand();
@@ -2319,6 +2323,16 @@
     }
     if (!state.initData) {
       showNotice("Нет initData. Откройте WebApp из Telegram.");
+    }
+    if (!tg && !state.tgRetryTimer) {
+      state.tgRetryTimer = window.setInterval(() => {
+        if (window.Telegram?.WebApp) {
+          tg = window.Telegram.WebApp;
+          window.clearInterval(state.tgRetryTimer);
+          state.tgRetryTimer = null;
+          initTelegram();
+        }
+      }, 500);
     }
   };
 

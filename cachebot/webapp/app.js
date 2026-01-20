@@ -2516,19 +2516,38 @@
     if (!el) return;
     const tag = el.tagName;
     if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") return;
+    const scrollP2PModal = () => {
+      if (!p2pModal?.classList.contains("open")) return;
+      if (!p2pModal.contains(el)) return;
+      const modalCard = p2pModal.querySelector(".modal-card");
+      if (modalCard) {
+        modalCard.scrollTop = modalCard.scrollHeight;
+      }
+      p2pModalActions?.scrollIntoView({ block: "end", behavior: "smooth" });
+    };
     window.setTimeout(() => {
       if (typeof el.scrollIntoView === "function") {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
       }
-      if (p2pModal?.classList.contains("open") && p2pModal.contains(el)) {
-        p2pModalActions?.scrollIntoView({ block: "end", behavior: "smooth" });
-        const modalCard = p2pModal.querySelector(".modal-card");
-        if (modalCard) {
-          modalCard.scrollTop = modalCard.scrollHeight;
-        }
-      }
+      scrollP2PModal();
     }, 120);
+    window.setTimeout(scrollP2PModal, 300);
+    window.setTimeout(scrollP2PModal, 600);
   });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      const el = document.activeElement;
+      if (!el) return;
+      if (!p2pModal?.classList.contains("open")) return;
+      if (!p2pModal.contains(el)) return;
+      const modalCard = p2pModal.querySelector(".modal-card");
+      if (modalCard) {
+        modalCard.scrollTop = modalCard.scrollHeight;
+      }
+      p2pModalActions?.scrollIntoView({ block: "end", behavior: "smooth" });
+    });
+  }
 
   profileQuick?.addEventListener("click", () => {
     const display = userBadge.textContent || "—";

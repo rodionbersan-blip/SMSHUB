@@ -604,6 +604,51 @@
       renderPinDots(0);
     };
 
+    const triggerBiometric = () => {
+      const biometric = tg?.BiometricManager;
+      if (!biometric || typeof biometric.authenticate !== "function") {
+        setHint("Face ID недоступен");
+        return;
+      }
+      const runAuth = () => {
+        biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
+          if (result) {
+            if (mode === "biometric") {
+              saveBioFlag(true);
+            }
+            unlock();
+          } else {
+            setHint("Face ID не сработал");
+          }
+        });
+      };
+      const runFlow = () => {
+        if (!biometric.isAccessGranted) {
+          biometric.requestAccess({ reason: "Вход в BC Cash" }, (granted) => {
+            if (!granted) {
+              setHint("Face ID не разрешен");
+              return;
+            }
+            runAuth();
+          });
+          return;
+        }
+        runAuth();
+      };
+      if (!biometric.isInited && typeof biometric.init === "function") {
+        let initDone = false;
+        biometric.init(() => {
+          initDone = true;
+          runFlow();
+        });
+        window.setTimeout(() => {
+          if (!initDone) runFlow();
+        }, 300);
+        return;
+      }
+      runFlow();
+    };
+
     const setMode = (next) => {
       mode = next;
       resetBuffer();
@@ -625,9 +670,8 @@
       if (mode === "unlock" && biometricEnabled && !autoBioTried) {
         autoBioTried = true;
         setTimeout(() => {
-          pinBiometric?.click();
-          setTimeout(() => pinBiometric?.click(), 700);
-        }, 300);
+          triggerBiometric();
+        }, 400);
       }
     };
 
@@ -690,7 +734,7 @@
         return;
       }
       if (action === "bio") {
-        pinBiometric?.click();
+        triggerBiometric();
         return;
       }
       if (!digit) return;
@@ -702,38 +746,8 @@
       }
     });
 
-    pinBiometric?.addEventListener("click", async () => {
-      const biometric = tg?.BiometricManager;
-      if (!biometric || typeof biometric.authenticate !== "function") {
-        setHint("Face ID недоступен");
-        return;
-      }
-      if (!biometric.isInited && typeof biometric.init === "function") {
-        biometric.init();
-      }
-      const runAuth = () => {
-        biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
-          if (result) {
-            if (mode === "biometric") {
-              saveBioFlag(true);
-            }
-            unlock();
-          } else {
-            setHint("Face ID не сработал");
-          }
-        });
-      };
-      if (!biometric.isAccessGranted) {
-        biometric.requestAccess({ reason: "Вход в BC Cash" }, (granted) => {
-          if (!granted) {
-            setHint("Face ID не разрешен");
-            return;
-          }
-          runAuth();
-        });
-        return;
-      }
-      runAuth();
+    pinBiometric?.addEventListener("click", () => {
+      triggerBiometric();
     });
 
     pinSkipBiometric?.addEventListener("click", () => {
@@ -2531,7 +2545,11 @@
     }
     if (tg) {
       tg.ready();
-      tg.expand();
+      if (typeof tg.requestFullscreen === "function") {
+        tg.requestFullscreen();
+      } else {
+        tg.expand();
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";

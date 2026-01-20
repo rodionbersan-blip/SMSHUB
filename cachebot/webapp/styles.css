@@ -42,6 +42,11 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -61,6 +66,10 @@ select {
 body.modal-open {
   overflow: hidden;
   touch-action: none;
+}
+
+body.pin-lock #app {
+  visibility: hidden;
 }
 
 h1,

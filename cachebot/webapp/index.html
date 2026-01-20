@@ -6,7 +6,7 @@
     <title>BC Cash</title>
     <link rel="stylesheet" href="/app/styles.css?v=pay48" />
   </head>
-  <body>
+  <body class="pin-lock">
     <div id="app">
       <header class="topbar">
         <div class="brand">
@@ -445,7 +445,7 @@
       </div>
     </div>
 
-    <div id="pinOverlay" class="pin-overlay" aria-live="polite">
+    <div id="pinOverlay" class="pin-overlay show" aria-live="polite">
       <div class="pin-card glass">
         <div id="pinTitle" class="pin-title">Введите PIN</div>
         <div id="pinDots" class="pin-dots"></div>
@@ -519,6 +519,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay76"></script>
+    <script src="/app/app.js?v=pay79"></script>
   </body>
 </html>

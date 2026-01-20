@@ -900,6 +900,13 @@
       if (deal.chat_last_at !== lastSeen) {
         chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
         chatSeen[deal.id] = deal.chat_last_at;
+        if (deal.chat_last_sender_id === 0) {
+          try {
+            tg?.HapticFeedback?.notificationOccurred("success");
+          } catch {
+            // ignore haptics errors
+          }
+        }
       }
     });
     state.chatUnreadCounts = chatUnreadCounts;

@@ -20,7 +20,7 @@ from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
-from PIL import Image
+from PIL import Image, ImageDraw
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -1598,7 +1598,7 @@ def _chat_dir(deps: AppDeps) -> Path:
 
 
 def _qr_logo_path() -> Path:
-    return Path(__file__).resolve().parent / "webapp" / "assets" / "minilogo.png"
+    return Path(__file__).resolve().parents[1] / "bc-logo.png"
 
 
 def _apply_qr_logo(image: Image.Image) -> Image.Image:
@@ -1609,11 +1609,27 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         logo = Image.open(logo_path).convert("RGBA")
         qr = image.convert("RGBA")
         qr_w, qr_h = qr.size
-        max_logo = int(min(qr_w, qr_h) * 0.22)
-        logo.thumbnail((max_logo, max_logo), Image.Resampling.LANCZOS)
+        logo_box = int(min(qr_w, qr_h) * 0.24)
+        logo.thumbnail((logo_box, logo_box), Image.Resampling.LANCZOS)
         logo_w, logo_h = logo.size
-        pos = ((qr_w - logo_w) // 2, (qr_h - logo_h) // 2)
-        qr.alpha_composite(logo, dest=pos)
+
+        pad = max(6, int(logo_box * 0.18))
+        box_w = logo_w + pad * 2
+        box_h = logo_h + pad * 2
+        box = Image.new("RGBA", (box_w, box_h), (255, 255, 255, 255))
+        try:
+            mask = Image.new("L", (box_w, box_h), 0)
+            radius = int(min(box_w, box_h) * 0.2)
+            mask_draw = ImageDraw.Draw(mask)
+            mask_draw.rounded_rectangle((0, 0, box_w, box_h), radius=radius, fill=255)
+            box.putalpha(mask)
+        except Exception:
+            pass
+        box_pos = ((box_w - logo_w) // 2, (box_h - logo_h) // 2)
+        box.alpha_composite(logo, dest=box_pos)
+
+        pos = ((qr_w - box_w) // 2, (qr_h - box_h) // 2)
+        qr.alpha_composite(box, dest=pos)
         return qr
     except Exception:
         return image

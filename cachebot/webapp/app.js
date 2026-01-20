@@ -175,6 +175,7 @@
     buyerProofDraft: {},
     buyerProofSent: {},
     buyerProofDealId: null,
+    completedNotified: {},
     systemNoticeShownOnce: false,
     systemNoticeTimer: null,
     systemNoticeActive: null,
@@ -193,6 +194,7 @@
   const systemNoticeStorageKey = "systemNotifications";
   const dealStatusStorageKey = "dealStatusMap";
   const buyerProofStorageKey = "buyerProofSent";
+  const completedNoticeStorageKey = "dealCompletedNotified";
   const themeStorageKey = "preferredTheme";
   const loadUnreadDeals = () => {
     try {
@@ -348,6 +350,25 @@
   state.systemNotifications = loadSystemNotifications();
   state.dealStatusMap = loadDealStatusMap();
   state.buyerProofSent = loadBuyerProofSent();
+  const loadCompletedNotified = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(completedNoticeStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistCompletedNotified = () => {
+    try {
+      window.localStorage.setItem(
+        completedNoticeStorageKey,
+        JSON.stringify(state.completedNotified || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.completedNotified = loadCompletedNotified();
 
   const clearSystemNoticeTimer = () => {
     if (state.systemNoticeTimer) {
@@ -847,17 +868,29 @@
     deals.forEach((deal) => {
       nextStatusMap[deal.id] = deal.status;
       const prev = previousStatusMap[deal.id];
-      if ((prev && prev !== deal.status) || (!prev && deal.status === "completed")) {
-        const dealLabel = `#${deal.public_id || deal.id}`;
+      const dealLabel = `#${deal.public_id || deal.id}`;
+      const completedKey = `${deal.id}:completed`;
+      if (deal.status === "completed" && !deal.reviewed && !state.completedNotified?.[completedKey]) {
+        pushSystemNotification({
+          key: completedKey,
+          message: `Сделка ${dealLabel} завершена.`,
+          type: "deal_completed",
+          deal_id: deal.id,
+          public_id: deal.public_id,
+          counterparty_id: deal.counterparty?.user_id || null,
+        });
+        state.completedNotified[completedKey] = true;
+      } else if ((prev && prev !== deal.status) || (!prev && deal.status === "completed")) {
         if (deal.status === "completed" && !deal.reviewed) {
           pushSystemNotification({
-            key: `${deal.id}:completed`,
+            key: completedKey,
             message: `Сделка ${dealLabel} завершена.`,
             type: "deal_completed",
             deal_id: deal.id,
             public_id: deal.public_id,
             counterparty_id: deal.counterparty?.user_id || null,
           });
+          state.completedNotified[completedKey] = true;
         }
       }
       if (["completed", "canceled", "expired"].includes(deal.status)) {
@@ -866,6 +899,7 @@
     });
     state.dealStatusMap = nextStatusMap;
     persistDealStatusMap();
+    persistCompletedNotified();
     if (!state.chatInitDone) {
       deals.forEach((deal) => {
         if (deal.chat_last_at) {

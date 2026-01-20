@@ -2245,6 +2245,18 @@
     }, 500);
   };
 
+  const parseInitDataUser = (initData) => {
+    if (!initData) return null;
+    try {
+      const params = new URLSearchParams(initData);
+      const rawUser = params.get("user");
+      if (!rawUser) return null;
+      return JSON.parse(rawUser);
+    } catch {
+      return null;
+    }
+  };
+
   const initTelegram = async () => {
     if (!tg && window.Telegram?.WebApp) {
       tg = window.Telegram.WebApp;
@@ -2265,14 +2277,18 @@
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
     }
     const unsafeUser = tg?.initDataUnsafe?.user;
-    if (unsafeUser) {
-      const fullName = [unsafeUser.first_name, unsafeUser.last_name].filter(Boolean).join(" ");
+    const parsedUser = !unsafeUser ? parseInitDataUser(state.initData) : null;
+    const fallbackUser = unsafeUser || parsedUser;
+    if (fallbackUser) {
+      const fullName = [fallbackUser.first_name, fallbackUser.last_name]
+        .filter(Boolean)
+        .join(" ");
       setAuthState({
         display_name: null,
         full_name: fullName || null,
-        first_name: unsafeUser.first_name,
-        username: unsafeUser.username,
-        avatar_url: unsafeUser.photo_url,
+        first_name: fallbackUser.first_name,
+        username: fallbackUser.username,
+        avatar_url: fallbackUser.photo_url,
       });
     }
     const bootstrapApp = async () => {

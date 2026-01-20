@@ -285,7 +285,7 @@ async def start(message: Message, state: FSMContext) -> None:
     if role == UserRole.BUYER:
         await message.answer(
             "Ты уже мерчант. Нажми «Меню», чтобы открыть действия.",
-            reply_markup=base_keyboard(is_admin, is_moderator),
+            reply_markup=base_keyboard(is_admin, is_moderator, deps.config.webapp_url),
         )
     else:
         await message.answer(
@@ -313,7 +313,7 @@ async def role_seller(callback: CallbackQuery) -> None:
         await callback.message.delete()
     await callback.message.answer(
         "Отлично! переходи в меню",
-        reply_markup=base_keyboard(is_admin, is_moderator),
+        reply_markup=base_keyboard(is_admin, is_moderator, deps.config.webapp_url),
     )
     await callback.answer("Роль продавца установлена")
 
@@ -828,7 +828,7 @@ async def settings_switch_to_seller(callback: CallbackQuery) -> None:
     sent = await callback.bot.send_message(
         chat_id,
         "Отлично! переходи в меню",
-        reply_markup=base_keyboard(is_admin, is_moderator),
+        reply_markup=base_keyboard(is_admin, is_moderator, deps.config.webapp_url),
     )
     # reply menu is not tracked for back deletion
     await callback.answer("Переключено в режим продавца")

@@ -23,6 +23,7 @@ class Config:
     default_usd_rate: Decimal = Decimal("100")
     fee_percent: Decimal = Decimal("1.0")
     withdraw_fee_percent: Decimal = Decimal("2.5")
+    webapp_url: str = "https://cashnowshop.ru/app/"
     webhook_host: str = "0.0.0.0"
     webhook_port: int = 8080
     webhook_path: str = "/crypto-pay/webhook"
@@ -49,6 +50,7 @@ class Config:
         default_rate = Decimal(os.getenv("DEFAULT_USD_RATE", "100"))
         fee_percent = Decimal(os.getenv("FEE_PERCENT", "1.0"))
         withdraw_fee_percent = Decimal(os.getenv("WITHDRAW_FEE_PERCENT", "2.5"))
+        webapp_url = os.getenv("WEBAPP_URL", "https://cashnowshop.ru/app/")
         webhook_host = os.getenv("CRYPTO_PAY_WEBHOOK_HOST", "0.0.0.0")
         webhook_port = int(os.getenv("CRYPTO_PAY_WEBHOOK_PORT", "8080"))
         webhook_path = os.getenv("CRYPTO_PAY_WEBHOOK_PATH", "/crypto-pay/webhook")
@@ -67,6 +69,7 @@ class Config:
             default_usd_rate=default_rate,
             fee_percent=fee_percent,
             withdraw_fee_percent=withdraw_fee_percent,
+            webapp_url=webapp_url,
             webhook_host=webhook_host,
             webhook_port=webhook_port,
             webhook_path=webhook_path,

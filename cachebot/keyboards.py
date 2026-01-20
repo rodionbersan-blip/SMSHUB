@@ -7,6 +7,7 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
+    WebAppInfo,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -32,8 +33,14 @@ class MenuAction(str, Enum):
     BACK = "menu:back"
 
 
-def base_keyboard(is_admin: bool, is_moderator: bool = False) -> ReplyKeyboardMarkup:
+def base_keyboard(
+    is_admin: bool,
+    is_moderator: bool = False,
+    webapp_url: str | None = None,
+) -> ReplyKeyboardMarkup:
     rows = [[KeyboardButton(text=MenuButtons.SHOW_MENU.value)]]
+    if webapp_url:
+        rows.append([KeyboardButton(text="🚀 Приложение", web_app=WebAppInfo(url=webapp_url))])
     if is_admin:
         rows.append(
             [

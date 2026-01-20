@@ -1682,22 +1682,21 @@ def _apply_rounded_eyes(img: Image.Image, qr) -> Image.Image:
         def draw_eye(x, y):
             x0 = (border + x) * box
             y0 = (border + y) * box
-            # outer black
-            draw.rounded_rectangle(
+            # clear to white to remove square frame
+            draw.rectangle((x0, y0, x0 + outer, y0 + outer), fill=(255, 255, 255))
+            # outer black circle
+            draw.ellipse(
                 (x0, y0, x0 + outer, y0 + outer),
-                radius=radius_outer,
                 fill=(0, 0, 0),
             )
-            # inner white
-            draw.rounded_rectangle(
+            # inner white circle
+            draw.ellipse(
                 (x0 + box, y0 + box, x0 + box + inner, y0 + box + inner),
-                radius=radius_inner,
                 fill=(255, 255, 255),
             )
-            # center black
-            draw.rounded_rectangle(
+            # center black circle
+            draw.ellipse(
                 (x0 + 2 * box, y0 + 2 * box, x0 + 2 * box + center, y0 + 2 * box + center),
-                radius=radius_center,
                 fill=(0, 0, 0),
             )
 

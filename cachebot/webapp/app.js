@@ -1,4 +1,35 @@
 (() => {
+  window.addEventListener("error", (event) => {
+    try {
+      fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tag: "js-error",
+          message: event.message,
+          source: event.filename,
+          line: event.lineno,
+          col: event.colno,
+        }),
+      });
+    } catch {
+      // ignore
+    }
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    try {
+      fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tag: "js-rejection",
+          reason: String(event.reason || ""),
+        }),
+      });
+    } catch {
+      // ignore
+    }
+  });
   let tg = window.Telegram?.WebApp || null;
   const logEl = document.getElementById("log");
   const successAnim = document.getElementById("successAnim");

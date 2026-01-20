@@ -593,6 +593,7 @@
     let firstPin = "";
     const savedHash = loadPinHash();
     const biometricEnabled = loadBioFlag();
+    let autoBioTried = false;
 
     const setHint = (text = "") => {
       if (pinHint) pinHint.textContent = text;
@@ -620,6 +621,12 @@
       }
       if (pinSkipBiometric) {
         pinSkipBiometric.style.display = mode === "biometric" ? "block" : "none";
+      }
+      if (mode === "unlock" && biometricEnabled && !autoBioTried) {
+        autoBioTried = true;
+        setTimeout(() => {
+          pinBiometric?.click();
+        }, 300);
       }
     };
 

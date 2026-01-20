@@ -1626,6 +1626,25 @@ async def _api_reviews_add(request: web.Request) -> web.Response:
         )
     except ValueError as exc:
         return web.json_response({"ok": False, "error": str(exc)}, status=409)
+    try:
+        author_profile = await deps.user_service.profile_of(user_id)
+        author_name = (
+            author_profile.display_name if author_profile else str(user_id)
+        )
+    except Exception:
+        author_name = str(user_id)
+    deal_label = deal.public_id or deal.id
+    mark = "👍" if int(rating) > 0 else "👎"
+    lines = [
+        f"⭐ Новый отзыв {mark}",
+        f"Сделка: #{deal_label}",
+        f"От: {author_name}",
+    ]
+    if comment:
+        lines.append(f"Комментарий: {comment}")
+    text = "\n".join(lines)
+    with suppress(Exception):
+        await request.app["bot"].send_message(target_id, text)
     return web.json_response({"ok": True, "review": review.to_dict()})
 
 

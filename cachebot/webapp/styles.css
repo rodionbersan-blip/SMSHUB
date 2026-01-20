@@ -799,6 +799,18 @@ body.modal-open #app {
   font-size: 16px;
 }
 
+.p2p-offer-input:focus {
+  outline: none;
+  background: var(--bg);
+  border-color: rgba(77, 163, 255, 0.6);
+  box-shadow: 0 0 0 2px rgba(77, 163, 255, 0.12);
+}
+
+.p2p-offer-input::selection {
+  background: rgba(77, 163, 255, 0.2);
+  color: var(--text);
+}
+
 .p2p-bank-choices {
   display: flex;
   flex-wrap: nowrap;

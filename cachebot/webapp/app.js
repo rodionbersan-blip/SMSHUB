@@ -1216,9 +1216,6 @@
       cancelBtn.addEventListener("click", () => {
         p2pModalActions.innerHTML = "";
         p2pModalActions.appendChild(input);
-        if (ad.banks && ad.banks.length > 1) {
-          p2pModalActions.appendChild(bankChoices);
-        }
         p2pModalActions.appendChild(btn);
       });
       if (ad.banks && ad.banks.length > 1) {
@@ -1269,9 +1266,6 @@
       p2pModalActions.appendChild(cancelBtn);
     });
     p2pModalActions.appendChild(input);
-    if (ad.banks && ad.banks.length > 1) {
-      p2pModalActions.appendChild(bankChoices);
-    }
     p2pModalActions.appendChild(btn);
     p2pModal.classList.add("open");
     const ownerLink = p2pModalBody.querySelector(".owner-link");

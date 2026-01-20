@@ -19,7 +19,7 @@ from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -710,16 +710,10 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
     )
     if deal.buyer_id:
         with suppress(Exception):
-            webapp_url = str(request.url.with_path("/app").with_query(""))
-            keyboard = InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="Смотреть", url=webapp_url)],
-                ]
-            )
-            await request.app["bot"].send_message(
+            await request.app["bot"].send_photo(
                 deal.buyer_id,
-                "Пришел QR по сделке.\nСмотреть в приложении либо по кнопке ниже.",
-                reply_markup=keyboard,
+                FSInputFile(str(file_path)),
+                caption="QR по сделке.",
             )
     payload = {
         **msg.to_dict(),
@@ -768,16 +762,10 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
     )
     if deal.buyer_id:
         with suppress(Exception):
-            webapp_url = str(request.url.with_path("/app").with_query(""))
-            keyboard = InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="Смотреть", url=webapp_url)],
-                ]
-            )
-            await request.app["bot"].send_message(
+            await request.app["bot"].send_photo(
                 deal.buyer_id,
-                "Пришел QR по сделке.\nСмотреть в приложении либо по кнопке ниже.",
-                reply_markup=keyboard,
+                FSInputFile(str(file_path)),
+                caption="QR по сделке.",
             )
     payload = {
         **msg.to_dict(),

@@ -176,6 +176,8 @@
     buyerProofSent: {},
     buyerProofDealId: null,
     completedNotified: {},
+    bootstrapDone: false,
+    initRetryTimer: null,
     systemNoticeShownOnce: false,
     systemNoticeTimer: null,
     systemNoticeActive: null,
@@ -2249,12 +2251,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";
-      if (!state.initData && tg.initDataUnsafe) {
-        for (let i = 0; i < 8 && !state.initData; i += 1) {
-          await new Promise((resolve) => setTimeout(resolve, 150));
-          state.initData = tg.initData || initFromUrl || "";
-        }
-      }
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
@@ -2275,14 +2271,16 @@
         avatar_url: unsafeUser.photo_url,
       });
     }
-    const user = await fetchMe();
-    if (user) {
-      setAuthState(user);
-      log(`Готово. Пользователь: ${user.display_name || user.full_name || user.first_name || user.id}`);
-    } else if (!state.initData) {
-      showNotice("Нет initData. Откройте WebApp из Telegram.");
-    }
-    if (state.initData) {
+    const bootstrapApp = async () => {
+      if (state.bootstrapDone || !state.initData) return;
+      state.bootstrapDone = true;
+      const user = await fetchMe();
+      if (user) {
+        setAuthState(user);
+        log(
+          `Готово. Пользователь: ${user.display_name || user.full_name || user.first_name || user.id}`
+        );
+      }
       await loadSummary();
       await loadProfile();
       await loadBalance();
@@ -2297,6 +2295,30 @@
       await loadBanks();
       await loadDisputes();
       await loadAdmin();
+    };
+
+    await bootstrapApp();
+    if (!state.bootstrapDone && tg) {
+      state.initRetryTimer = window.setInterval(async () => {
+        if (state.bootstrapDone) {
+          window.clearInterval(state.initRetryTimer);
+          state.initRetryTimer = null;
+          return;
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const initFromUrl = urlParams.get("initData");
+        state.initData = tg.initData || initFromUrl || "";
+        if (state.initData) {
+          await bootstrapApp();
+          if (state.bootstrapDone) {
+            window.clearInterval(state.initRetryTimer);
+            state.initRetryTimer = null;
+          }
+        }
+      }, 500);
+    }
+    if (!state.initData) {
+      showNotice("Нет initData. Откройте WebApp из Telegram.");
     }
   };
 

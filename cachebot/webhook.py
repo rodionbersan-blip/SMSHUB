@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from contextlib import suppress
 from pathlib import Path
@@ -54,6 +55,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/confirm-seller", _api_deal_confirm_seller)
     app.router.add_post("/api/deals/{deal_id}/open-dispute", _api_deal_open_dispute)
     app.router.add_post("/api/deals/{deal_id}/qr", _api_deal_upload_qr)
+    app.router.add_post("/api/deals/{deal_id}/qr-text", _api_deal_upload_qr_text)
     app.router.add_get("/api/deals/{deal_id}/chat", _api_deal_chat_list)
     app.router.add_post("/api/deals/{deal_id}/chat", _api_deal_chat_send)
     app.router.add_post("/api/deals/{deal_id}/chat/file", _api_deal_chat_send_file)
@@ -697,6 +699,64 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
             if not chunk:
                 break
             handle.write(chunk)
+    await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
+    msg = await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="QR код",
+        file_path=str(file_path),
+        file_name=filename,
+        system=False,
+    )
+    if deal.buyer_id:
+        with suppress(Exception):
+            webapp_url = str(request.url.with_path("/app").with_query(""))
+            keyboard = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="Смотреть", url=webapp_url)],
+                ]
+            )
+            await request.app["bot"].send_message(
+                deal.buyer_id,
+                "Пришел QR по сделке.\nСмотреть в приложении либо по кнопке ниже.",
+                reply_markup=keyboard,
+            )
+    payload = {
+        **msg.to_dict(),
+        "file_url": _chat_file_url(request, msg),
+    }
+    return web.json_response({"ok": True, "message": payload})
+
+
+async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id != deal.seller_id and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise web.HTTPBadRequest(text="Пустой QR")
+    try:
+        import qrcode
+    except Exception:
+        raise web.HTTPInternalServerError(text="QR генератор недоступен")
+    chat_dir = _chat_dir(deps) / deal_id
+    chat_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"qr-{int(time.time())}.png"
+    file_path = chat_dir / filename
+    qr = qrcode.QRCode(box_size=12, border=2)
+    qr.add_data(text)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save(file_path)
     await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
     msg = await deps.chat_service.add_message(
         deal_id=deal_id,

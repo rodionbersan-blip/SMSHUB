@@ -1668,7 +1668,7 @@
     }
   };
 
-  const uploadQrForDeal = async (dealId) => {
+  const uploadQrFromGallery = async (dealId) => {
     if (!state.initData) {
       showNotice("initData не найден. Откройте WebApp из Telegram.");
       return;
@@ -1703,6 +1703,67 @@
       }
     };
     input.click();
+  };
+
+  const uploadQrFromScan = async (dealId) => {
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    if (!tg?.showScanQrPopup) {
+      showNotice("Сканер QR недоступен");
+      return;
+    }
+    const handleScan = async (data) => {
+      try {
+        const payload = await fetchJson(`/api/deals/${dealId}/qr-text`, {
+          method: "POST",
+          body: JSON.stringify({ text: data }),
+        });
+        if (!payload?.ok) {
+          showNotice("Не удалось отправить QR");
+          return;
+        }
+        showNotice("QR отправлен");
+        await loadChatMessages(dealId);
+        const dealPayload = await fetchJson(`/api/deals/${dealId}`);
+        if (dealPayload?.ok) {
+          renderDealModal(dealPayload.deal);
+        }
+      } catch {
+        showNotice("Не удалось отправить QR");
+      }
+    };
+    tg.showScanQrPopup({ text: "Наведите камеру на QR" }, (data) => {
+      if (!data) return;
+      tg.closeScanQrPopup?.();
+      handleScan(data);
+      return true;
+    });
+  };
+
+  const uploadQrForDeal = async (dealId) => {
+    if (!tg?.showPopup) {
+      return uploadQrFromGallery(dealId);
+    }
+    tg.showPopup(
+      {
+        title: "QR код",
+        message: "Выберите способ",
+        buttons: [
+          { id: "scan", type: "default", text: "Сканировать" },
+          { id: "gallery", type: "default", text: "Из галереи" },
+          { id: "cancel", type: "cancel", text: "Отмена" },
+        ],
+      },
+      (buttonId) => {
+        if (buttonId === "scan") {
+          uploadQrFromScan(dealId);
+        } else if (buttonId === "gallery") {
+          uploadQrFromGallery(dealId);
+        }
+      }
+    );
   };
 
   const uploadDisputeEvidence = async (disputeId) => {

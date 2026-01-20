@@ -155,6 +155,7 @@
     lastQuickBadgeCount: 0,
     activeChatDealId: null,
     activeDealId: null,
+    activeDealSnapshot: null,
     dealRefreshTimer: null,
     livePollTimer: null,
     livePollInFlight: false,
@@ -1667,6 +1668,21 @@
     }
   };
 
+  const maybeRenderDealModal = (deal) => {
+    if (!deal) return;
+    let snapshot = "";
+    try {
+      snapshot = JSON.stringify(deal);
+    } catch {
+      snapshot = `${deal.id || ""}:${deal.status || ""}:${deal.qr_stage || ""}`;
+    }
+    if (state.activeDealSnapshot === snapshot) {
+      return;
+    }
+    state.activeDealSnapshot = snapshot;
+    renderDealModal(deal);
+  };
+
   const uploadQrFromGallery = async (dealId) => {
     if (!state.initData) {
       showNotice("initData не найден. Откройте WebApp из Telegram.");
@@ -1927,7 +1943,8 @@
     state.pendingRead = state.pendingRead || {};
     state.pendingRead[dealId] = true;
     persistPendingRead();
-    renderDealModal(payload.deal);
+    state.activeDealSnapshot = null;
+    maybeRenderDealModal(payload.deal);
     state.activeDealId = dealId;
     startDealAutoRefresh();
     dealModal.classList.add("open");
@@ -1937,7 +1954,7 @@
     const path = `/api/deals/${dealId}/${action}`;
     const payload = await fetchJson(path, { method: "POST", body: "{}" });
     if (!payload?.ok) return;
-    renderDealModal(payload.deal);
+    maybeRenderDealModal(payload.deal);
     await loadDeals();
   };
 
@@ -1952,12 +1969,12 @@
     stopDealAutoRefresh();
     state.dealRefreshTimer = window.setInterval(async () => {
       if (!state.activeDealId || !dealModal?.classList.contains("open")) return;
-      const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
-      if (!payload?.ok) return;
-      renderDealModal(payload.deal);
-      if (["completed", "canceled", "expired"].includes(payload.deal.status)) {
-        stopDealAutoRefresh();
-      }
+    const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
+    if (!payload?.ok) return;
+    maybeRenderDealModal(payload.deal);
+    if (["completed", "canceled", "expired"].includes(payload.deal.status)) {
+      stopDealAutoRefresh();
+    }
     }, 5000);
   };
 
@@ -1972,7 +1989,7 @@
         if (state.activeDealId && dealModal?.classList.contains("open")) {
           const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
           if (payload?.ok) {
-            renderDealModal(payload.deal);
+            maybeRenderDealModal(payload.deal);
           }
         }
         if (state.activeChatDealId && chatModal?.classList.contains("open")) {

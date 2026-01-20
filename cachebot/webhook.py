@@ -769,6 +769,7 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
     if RoundedEyeDrawer:
         image_kwargs["eye_drawer"] = RoundedEyeDrawer()
     img = qr.make_image(**image_kwargs).convert("RGBA")
+    img = _apply_rounded_eyes(img, qr)
     img = _apply_qr_logo(img)
     img.save(file_path)
     await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
@@ -1661,6 +1662,51 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         return qr
     except Exception:
         return image
+
+
+def _apply_rounded_eyes(img: Image.Image, qr) -> Image.Image:
+    try:
+        box = int(getattr(qr, "box_size", 12))
+        border = int(getattr(qr, "border", 2))
+        count = int(getattr(qr, "modules_count", 0))
+        if not count:
+            return img
+        draw = ImageDraw.Draw(img)
+        outer = 7 * box
+        inner = 5 * box
+        center = 3 * box
+        radius_outer = int(outer * 0.32)
+        radius_inner = int(inner * 0.32)
+        radius_center = int(center * 0.32)
+
+        def draw_eye(x, y):
+            x0 = (border + x) * box
+            y0 = (border + y) * box
+            # outer black
+            draw.rounded_rectangle(
+                (x0, y0, x0 + outer, y0 + outer),
+                radius=radius_outer,
+                fill=(0, 0, 0),
+            )
+            # inner white
+            draw.rounded_rectangle(
+                (x0 + box, y0 + box, x0 + box + inner, y0 + box + inner),
+                radius=radius_inner,
+                fill=(255, 255, 255),
+            )
+            # center black
+            draw.rounded_rectangle(
+                (x0 + 2 * box, y0 + 2 * box, x0 + 2 * box + center, y0 + 2 * box + center),
+                radius=radius_center,
+                fill=(0, 0, 0),
+            )
+
+        draw_eye(0, 0)
+        draw_eye(count - 7, 0)
+        draw_eye(0, count - 7)
+        return img
+    except Exception:
+        return img
 
 def _qr_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "qr"

@@ -81,8 +81,16 @@
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
   const systemNotice = document.getElementById("systemNotice");
+  const systemNoticeTitle = document.getElementById("systemNoticeTitle");
   const systemNoticeList = document.getElementById("systemNoticeList");
-  const systemNoticeReadAll = document.getElementById("systemNoticeReadAll");
+  const systemNoticeActions = document.getElementById("systemNoticeActions");
+  const systemNoticeRate = document.getElementById("systemNoticeRate");
+  const systemNoticeSkip = document.getElementById("systemNoticeSkip");
+  const systemNoticeRateForm = document.getElementById("systemNoticeRateForm");
+  const systemNoticeLike = document.getElementById("systemNoticeLike");
+  const systemNoticeDislike = document.getElementById("systemNoticeDislike");
+  const systemNoticeComment = document.getElementById("systemNoticeComment");
+  const systemNoticeSubmit = document.getElementById("systemNoticeSubmit");
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
@@ -156,6 +164,9 @@
     activeChatDealId: null,
     activeDealId: null,
     activeDealSnapshot: null,
+    systemNoticeShownOnce: false,
+    systemNoticeTimer: null,
+    systemNoticeActive: null,
     dealRefreshTimer: null,
     livePollTimer: null,
     livePollInFlight: false,
@@ -263,7 +274,15 @@
   const loadSystemNotifications = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(systemNoticeStorageKey) || "[]");
-      return Array.isArray(raw) ? raw : [];
+      if (!Array.isArray(raw)) return [];
+      return raw
+        .map((item) => {
+          if (typeof item === "string") {
+            return { key: item, message: item };
+          }
+          return item;
+        })
+        .filter(Boolean);
     } catch {
       return [];
     }
@@ -299,34 +318,66 @@
   state.systemNotifications = loadSystemNotifications();
   state.dealStatusMap = loadDealStatusMap();
 
-  const renderSystemNotifications = () => {
-    if (!systemNotice || !systemNoticeList) return;
-    const items = state.systemNotifications || [];
-    systemNoticeList.innerHTML = "";
-    items.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "system-notice-item";
-      row.textContent = item.message || "";
-      systemNoticeList.appendChild(row);
-    });
-    systemNotice.classList.toggle("show", items.length > 0);
+  const clearSystemNoticeTimer = () => {
+    if (state.systemNoticeTimer) {
+      window.clearTimeout(state.systemNoticeTimer);
+      state.systemNoticeTimer = null;
+    }
   };
 
-  const pushSystemNotification = (message, key) => {
-    if (!message) return;
-    const noticeKey = key || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const hideSystemNotice = () => {
+    if (!systemNotice) return;
+    systemNotice.classList.remove("show");
+    clearSystemNoticeTimer();
+  };
+
+  const showSystemNotice = (item, { autoClose = true } = {}) => {
+    if (!systemNotice || !systemNoticeList) return;
+    state.systemNoticeActive = item;
+    systemNoticeTitle.textContent = "Уведомление";
+    systemNoticeList.innerHTML = "";
+    const row = document.createElement("div");
+    row.className = "system-notice-item";
+    row.textContent = item?.message || "";
+    systemNoticeList.appendChild(row);
+    systemNoticeActions?.classList.remove("hidden");
+    systemNoticeRateForm?.classList.remove("show");
+    systemNotice.classList.add("show");
+    clearSystemNoticeTimer();
+    if (autoClose) {
+      state.systemNoticeTimer = window.setTimeout(() => {
+        hideSystemNotice();
+      }, 3000);
+    }
+  };
+
+  const renderSystemNotifications = () => {
+    const items = state.systemNotifications || [];
+    if (!items.length) {
+      hideSystemNotice();
+      return;
+    }
+    if (!state.systemNoticeShownOnce) {
+      state.systemNoticeShownOnce = true;
+      showSystemNotice(items[0], { autoClose: true });
+    }
+  };
+
+  const pushSystemNotification = (entry) => {
+    if (!entry?.message) return;
+    const noticeKey = entry.key || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     if ((state.systemNotifications || []).some((item) => item.key === noticeKey)) {
       return;
     }
-    const entry = {
+    const payload = {
+      ...entry,
       key: noticeKey,
-      message,
       created_at: new Date().toISOString(),
     };
-    const next = [...(state.systemNotifications || []), entry];
+    const next = [...(state.systemNotifications || []), payload];
     state.systemNotifications = next.slice(-6);
     persistSystemNotifications();
-    renderSystemNotifications();
+    showSystemNotice(payload, { autoClose: true });
   };
 
   const clearDealAlerts = (dealId) => {
@@ -758,21 +809,17 @@
     deals.forEach((deal) => {
       nextStatusMap[deal.id] = deal.status;
       const prev = previousStatusMap[deal.id];
-      if (prev && prev !== deal.status) {
+      if ((prev && prev !== deal.status) || (!prev && deal.status === "completed")) {
         const dealLabel = `#${deal.public_id || deal.id}`;
-        if (deal.status === "dispute") {
-          pushSystemNotification(`Открыт спор по сделке ${dealLabel}.`, `${deal.id}:dispute`);
-        } else if (prev === "dispute" && deal.status !== "dispute") {
-          pushSystemNotification(
-            `Спор по сделке ${dealLabel} решен.`,
-            `${deal.id}:dispute-resolved`
-          );
-        } else if (deal.status === "canceled") {
-          pushSystemNotification(`Сделка ${dealLabel} отменена.`, `${deal.id}:canceled`);
-        } else if (deal.status === "expired") {
-          pushSystemNotification(`Сделка ${dealLabel} истекла.`, `${deal.id}:expired`);
-        } else if (deal.status === "completed") {
-          pushSystemNotification(`Сделка ${dealLabel} завершена.`, `${deal.id}:completed`);
+        if (deal.status === "completed" && !deal.reviewed) {
+          pushSystemNotification({
+            key: `${deal.id}:completed`,
+            message: `Сделка ${dealLabel} завершена.`,
+            type: "deal_completed",
+            deal_id: deal.id,
+            public_id: deal.public_id,
+            counterparty_id: deal.counterparty?.user_id || null,
+          });
         }
       }
       if (["completed", "canceled", "expired"].includes(deal.status)) {
@@ -2177,10 +2224,58 @@
     setQuickDealsOpen(false);
   });
 
-  systemNoticeReadAll?.addEventListener("click", () => {
-    state.systemNotifications = [];
+  const removeSystemNotice = (key) => {
+    state.systemNotifications = (state.systemNotifications || []).filter((item) => item.key !== key);
     persistSystemNotifications();
+    state.systemNoticeActive = null;
+    hideSystemNotice();
     renderSystemNotifications();
+  };
+
+  systemNoticeRate?.addEventListener("click", () => {
+    clearSystemNoticeTimer();
+    systemNoticeRateForm?.classList.add("show");
+  });
+
+  systemNoticeSkip?.addEventListener("click", () => {
+    const active = state.systemNoticeActive;
+    if (active?.key) {
+      removeSystemNotice(active.key);
+    } else {
+      hideSystemNotice();
+    }
+  });
+
+  let pendingReviewRating = null;
+  const setReviewRating = (value) => {
+    pendingReviewRating = value;
+    systemNoticeLike?.classList.toggle("active", value === 1);
+    systemNoticeDislike?.classList.toggle("active", value === -1);
+  };
+
+  systemNoticeLike?.addEventListener("click", () => setReviewRating(1));
+  systemNoticeDislike?.addEventListener("click", () => setReviewRating(-1));
+
+  systemNoticeSubmit?.addEventListener("click", async () => {
+    const active = state.systemNoticeActive;
+    if (!active?.deal_id || !pendingReviewRating) {
+      showNotice("Выберите оценку");
+      return;
+    }
+    const comment = systemNoticeComment?.value || "";
+    const payload = await fetchJson("/api/reviews", {
+      method: "POST",
+      body: JSON.stringify({
+        deal_id: active.deal_id,
+        rating: pendingReviewRating,
+        comment,
+      }),
+    });
+    if (!payload?.ok) return;
+    pendingReviewRating = null;
+    if (systemNoticeComment) systemNoticeComment.value = "";
+    removeSystemNotice(active.key);
+    await loadDeals();
   });
 
   dealModalClose?.addEventListener("click", () => {

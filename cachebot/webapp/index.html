@@ -406,11 +406,20 @@
     <div id="centerNotice" class="center-notice" aria-live="polite"></div>
     <div id="systemNotice" class="system-notice" aria-live="polite">
       <div class="system-notice-card">
-        <div class="system-notice-title">Уведомления</div>
+        <div id="systemNoticeTitle" class="system-notice-title">Уведомление</div>
         <div id="systemNoticeList" class="system-notice-list"></div>
-        <div class="system-notice-footer">
-          <span>SMS от BC Cash</span>
-          <button id="systemNoticeReadAll" class="btn pill">Прочитать все</button>
+        <div id="systemNoticeActions" class="system-notice-actions">
+          <button id="systemNoticeRate" class="btn primary">Оценить</button>
+          <button id="systemNoticeSkip" class="btn pill">Пропустить</button>
+        </div>
+        <div id="systemNoticeRateForm" class="system-notice-rate">
+          <div class="system-notice-rate-title">Оцените сделку</div>
+          <div class="system-notice-rate-actions">
+            <button id="systemNoticeLike" class="btn status-ok">👍</button>
+            <button id="systemNoticeDislike" class="btn status-bad">👎</button>
+          </div>
+          <textarea id="systemNoticeComment" rows="2" placeholder="Комментарий (необязательно)"></textarea>
+          <button id="systemNoticeSubmit" class="btn primary">Отправить</button>
         </div>
       </div>
     </div>

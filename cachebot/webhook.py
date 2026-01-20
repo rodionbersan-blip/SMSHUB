@@ -87,6 +87,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
     app.router.add_get("/api/reviews", _api_reviews_list)
+    app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
     app.router.add_get("/api/ping", _api_ping)
     return app
@@ -1501,6 +1502,40 @@ async def _api_reviews_list(request: web.Request) -> web.Response:
     )
 
 
+async def _api_reviews_add(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    deal_id = str(body.get("deal_id") or "").strip()
+    rating = body.get("rating")
+    comment = (body.get("comment") or "").strip()
+    if not deal_id:
+        raise web.HTTPBadRequest(text="deal_id required")
+    if rating not in (-1, 1):
+        raise web.HTTPBadRequest(text="rating must be -1 or 1")
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if deal.status != DealStatus.COMPLETED:
+        raise web.HTTPBadRequest(text="Сделка не завершена")
+    if user_id not in {deal.seller_id, deal.buyer_id}:
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = deal.buyer_id if user_id == deal.seller_id else deal.seller_id
+    if not target_id:
+        raise web.HTTPBadRequest(text="Контрагент не найден")
+    review = await deps.review_service.add_review(
+        deal_id=deal_id,
+        from_user_id=user_id,
+        to_user_id=target_id,
+        rating=int(rating),
+        comment=comment or None,
+    )
+    return web.json_response({"ok": True, "review": review.to_dict()})
+
+
 def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None:
     try:
         pairs = parse_qsl(init_data, keep_blank_values=True)
@@ -1931,6 +1966,12 @@ async def _deal_payload(
         if deal.dispute_available_at
         else None,
     }
+    reviewed = False
+    try:
+        reviewed = await deps.review_service.review_for_deal(deal.id, prefer_from=user_id) is not None
+    except Exception:
+        reviewed = False
+    payload["reviewed"] = reviewed
     if deal.status == DealStatus.DISPUTE:
         dispute = await deps.dispute_service.dispute_for_deal(deal.id)
         payload["dispute_id"] = dispute.id if dispute else None

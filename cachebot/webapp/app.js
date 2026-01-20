@@ -1197,7 +1197,7 @@
       if (ad.banks && ad.banks.length > 1) {
         const bankTitle = document.createElement("div");
         bankTitle.className = "deal-row";
-        bankTitle.textContent = "Выберите банкомат:";
+        bankTitle.textContent = "Выберите банкомат для начала сделки";
         p2pModalActions.appendChild(bankTitle);
         p2pModalActions.appendChild(bankChoices);
       }

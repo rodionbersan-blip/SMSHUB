@@ -800,12 +800,13 @@ body.modal-open #app {
 }
 
 .p2p-bank-choices {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
 }
 
 .p2p-bank-btn {
+  flex: 1 1 0;
   height: 36px;
   border: 1px solid rgba(77, 163, 255, 0.35);
   background: rgba(77, 163, 255, 0.12);
@@ -816,6 +817,8 @@ body.modal-open #app {
   background: var(--accent);
   color: #ffffff;
   border-color: var(--accent);
+  box-shadow: 0 10px 22px rgba(77, 163, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .p2p-evidence {

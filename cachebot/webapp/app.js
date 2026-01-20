@@ -2545,11 +2545,6 @@
     }
     if (tg) {
       tg.ready();
-      if (typeof tg.requestFullscreen === "function") {
-        tg.requestFullscreen();
-      } else {
-        tg.expand();
-      }
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";

@@ -1949,6 +1949,7 @@
       persistBuyerProofSent();
       state.buyerProofDraft[dealId] = null;
       resetBuyerProofModal(dealId);
+      closeBuyerProofModal();
       const dealPayload = await fetchJson(`/api/deals/${dealId}`);
       if (dealPayload?.ok) {
         maybeRenderDealModal(dealPayload.deal);

@@ -2246,7 +2246,9 @@
     if (tg) {
       tg.ready();
       tg.expand();
-      state.initData = tg.initData || "";
+      const urlParams = new URLSearchParams(window.location.search);
+      const initFromUrl = urlParams.get("initData");
+      state.initData = tg.initData || initFromUrl || "";
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
@@ -2256,10 +2258,25 @@
       updateThemeToggle(theme);
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
     }
+    const unsafeUser = tg?.initDataUnsafe?.user;
+    if (unsafeUser && !state.user) {
+      const fullName = [unsafeUser.first_name, unsafeUser.last_name].filter(Boolean).join(" ");
+      setAuthState({
+        display_name: null,
+        full_name: fullName || null,
+        first_name: unsafeUser.first_name,
+        username: unsafeUser.username,
+        avatar_url: unsafeUser.photo_url,
+      });
+    }
     const user = await fetchMe();
     if (user) {
       setAuthState(user);
       log(`Готово. Пользователь: ${user.display_name || user.full_name || user.first_name || user.id}`);
+    } else if (!state.initData) {
+      showNotice("Нет initData. Откройте WebApp из Telegram.");
+    }
+    if (state.initData) {
       await loadSummary();
       await loadProfile();
       await loadBalance();

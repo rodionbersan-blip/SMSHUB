@@ -1635,7 +1635,8 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         box_h = logo_h + pad * 2
         mask = Image.new("L", (box_w, box_h), 0)
         draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0, box_w, box_h), fill=255)
+        radius = int(min(box_w, box_h) * 0.48)
+        draw.rounded_rectangle((0, 0, box_w, box_h), radius=radius, fill=255)
         box = Image.new("RGBA", (box_w, box_h), (255, 255, 255, 255))
         box.putalpha(mask)
         box_pos = ((box_w - logo_w) // 2, (box_h - logo_h) // 2)

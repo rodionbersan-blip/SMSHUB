@@ -684,7 +684,6 @@ class DealService:
     def _reset_qr_locked(self, deal: Deal) -> None:
         deal.qr_stage = QrStage.IDLE
         deal.qr_bank_options = []
-        deal.atm_bank = None
         deal.qr_photo_id = None
         deal.buyer_cash_confirmed = False
         deal.seller_cash_confirmed = False

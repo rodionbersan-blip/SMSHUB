@@ -1131,7 +1131,6 @@ body.modal-open #app {
   max-height: 60vh;
   overflow-y: auto;
   padding: 4px 2px 8px;
-  touch-action: pan-y;
 }
 
 .chat-message {

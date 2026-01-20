@@ -2619,15 +2619,35 @@
       return;
     }
     const comment = systemNoticeComment?.value || "";
-    const payload = await fetchJson("/api/reviews", {
-      method: "POST",
-      body: JSON.stringify({
-        deal_id: active.deal_id,
-        rating: pendingReviewRating,
-        comment,
-      }),
-    });
-    if (!payload?.ok) {
+    let payload = null;
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Telegram-Init-Data": state.initData,
+        },
+        body: JSON.stringify({
+          deal_id: active.deal_id,
+          rating: pendingReviewRating,
+          comment,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        showNotice(text || "Не удалось отправить отзыв");
+        if (text && text.includes("Отзыв уже оставлен")) {
+          removeSystemNotice(active.key);
+          await loadDeals();
+          return;
+        }
+        systemNoticeSubmit.disabled = false;
+        systemNoticeSubmit.classList.remove("loading");
+        return;
+      }
+      payload = await res.json();
+    } catch (err) {
+      showNotice(`Ошибка: ${err.message}`);
       systemNoticeSubmit.disabled = false;
       systemNoticeSubmit.classList.remove("loading");
       return;

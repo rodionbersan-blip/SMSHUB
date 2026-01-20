@@ -1616,13 +1616,16 @@ async def _api_reviews_add(request: web.Request) -> web.Response:
     target_id = deal.buyer_id if user_id == deal.seller_id else deal.seller_id
     if not target_id:
         raise web.HTTPBadRequest(text="Контрагент не найден")
-    review = await deps.review_service.add_review(
-        deal_id=deal_id,
-        from_user_id=user_id,
-        to_user_id=target_id,
-        rating=int(rating),
-        comment=comment or None,
-    )
+    try:
+        review = await deps.review_service.add_review(
+            deal_id=deal_id,
+            from_user_id=user_id,
+            to_user_id=target_id,
+            rating=int(rating),
+            comment=comment or None,
+        )
+    except ValueError as exc:
+        return web.json_response({"ok": False, "error": str(exc)}, status=409)
     return web.json_response({"ok": True, "review": review.to_dict()})
 
 

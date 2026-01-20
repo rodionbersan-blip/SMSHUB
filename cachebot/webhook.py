@@ -20,7 +20,7 @@ from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
-from PIL import Image
+from PIL import Image, ImageChops, ImageDraw
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -1600,6 +1600,36 @@ def _chat_dir(deps: AppDeps) -> Path:
 def _qr_logo_path() -> Path:
     return Path(__file__).resolve().parents[1] / "bc-logo.png"
 
+def _trim_logo(logo: Image.Image) -> Image.Image:
+    try:
+        rgba = logo.convert("RGBA")
+        if "A" in rgba.getbands():
+            bbox = rgba.split()[-1].getbbox()
+            if bbox:
+                return rgba.crop(bbox)
+        bg = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+        diff = ImageChops.difference(rgba, bg)
+        diff = ImageChops.add(diff, diff, 2.0, -10)
+        bbox = diff.getbbox()
+        if bbox:
+            return rgba.crop(bbox)
+        return rgba
+    except Exception:
+        return logo
+
+def _circle_crop(logo: Image.Image) -> Image.Image:
+    logo = logo.convert("RGBA")
+    size = min(logo.size)
+    if logo.size[0] != logo.size[1]:
+        left = (logo.size[0] - size) // 2
+        top = (logo.size[1] - size) // 2
+        logo = logo.crop((left, top, left + size, top + size))
+    mask = Image.new("L", (size, size), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, size, size), fill=255)
+    result = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    result.paste(logo, (0, 0), mask)
+    return result
 
 def _apply_qr_logo(image: Image.Image) -> Image.Image:
     try:
@@ -1607,16 +1637,22 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         if not logo_path.exists():
             return image
         logo = Image.open(logo_path).convert("RGBA")
+        logo = _trim_logo(logo)
         qr = image.convert("RGBA")
         qr_w, qr_h = qr.size
         logo_box = int(min(qr_w, qr_h) * 0.24)
         logo.thumbnail((logo_box, logo_box), Image.Resampling.LANCZOS)
+        logo = _circle_crop(logo)
         logo_w, logo_h = logo.size
 
-        pad = max(3, int(logo_box * 0.1))
+        pad = max(4, int(logo_box * 0.12))
         box_w = logo_w + pad * 2
         box_h = logo_h + pad * 2
+        mask = Image.new("L", (box_w, box_h), 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((0, 0, box_w, box_h), fill=255)
         box = Image.new("RGBA", (box_w, box_h), (255, 255, 255, 255))
+        box.putalpha(mask)
         box_pos = ((box_w - logo_w) // 2, (box_h - logo_h) // 2)
         box.alpha_composite(logo, dest=box_pos)
 

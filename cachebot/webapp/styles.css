@@ -1692,19 +1692,16 @@ body.modal-open #app {
   position: fixed;
   inset: 0;
   display: none;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
   pointer-events: all;
-  padding: calc(24px + env(safe-area-inset-top, 0px))
-    calc(20px + env(safe-area-inset-right, 0px))
-    calc(24px + env(safe-area-inset-bottom, 0px))
-    calc(20px + env(safe-area-inset-left, 0px));
+  padding: 0;
   background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(73, 170, 255, 0.35), transparent 60%),
-    radial-gradient(900px 700px at 80% 20%, rgba(116, 255, 201, 0.18), transparent 65%),
-    radial-gradient(1200px 900px at 50% 80%, rgba(36, 54, 90, 0.65), rgba(12, 14, 18, 0.9));
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+    radial-gradient(900px 700px at 15% 15%, rgba(153, 102, 255, 0.45), transparent 60%),
+    radial-gradient(800px 600px at 85% 20%, rgba(255, 116, 210, 0.28), transparent 60%),
+    radial-gradient(1200px 900px at 50% 85%, rgba(48, 24, 86, 0.85), rgba(14, 8, 24, 0.95));
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   z-index: 80;
 }
 
@@ -1733,11 +1730,17 @@ body.pin-lock .app {
   background: transparent;
   border-radius: 0;
   border: none;
-  padding: 0;
+  padding: calc(28px + env(safe-area-inset-top, 0px))
+    calc(22px + env(safe-area-inset-right, 0px))
+    calc(32px + env(safe-area-inset-bottom, 0px))
+    calc(22px + env(safe-area-inset-left, 0px));
   display: grid;
   gap: 18px;
   color: var(--text);
   box-shadow: none;
+  margin: 0 auto;
+  min-height: 100dvh;
+  align-content: center;
 }
 
 :root[data-theme="light"] .pin-card {

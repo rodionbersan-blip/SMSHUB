@@ -743,6 +743,7 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
         import qrcode
         from qrcode.image.styledpil import StyledPilImage
         from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+        from qrcode.image.styles.eyedrawers import RoundedEyeDrawer
         from qrcode.image.styles.colormasks import SolidFillColorMask
     except Exception:
         raise web.HTTPInternalServerError(text="QR генератор недоступен")
@@ -760,6 +761,7 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
     img = qr.make_image(
         image_factory=StyledPilImage,
         module_drawer=RoundedModuleDrawer(),
+        eye_drawer=RoundedEyeDrawer(),
         color_mask=SolidFillColorMask(back_color=(255, 255, 255), front_color=(0, 0, 0)),
     ).convert("RGBA")
     img = _apply_qr_logo(img)

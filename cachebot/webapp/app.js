@@ -1521,7 +1521,7 @@
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent =
-        "Как будете у банкомата\nНажмите Готов отправить!\nВажно отправить сразу!";
+        "Как будете готовы отправить QR\nНажмите Готов отправить!";
       dealModalBody.appendChild(alert);
     }
     if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_attach" && deal.role === "buyer") {

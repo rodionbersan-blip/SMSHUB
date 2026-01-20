@@ -1617,20 +1617,6 @@ def _trim_logo(logo: Image.Image) -> Image.Image:
     except Exception:
         return logo
 
-def _circle_crop(logo: Image.Image) -> Image.Image:
-    logo = logo.convert("RGBA")
-    size = min(logo.size)
-    if logo.size[0] != logo.size[1]:
-        left = (logo.size[0] - size) // 2
-        top = (logo.size[1] - size) // 2
-        logo = logo.crop((left, top, left + size, top + size))
-    mask = Image.new("L", (size, size), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, size, size), fill=255)
-    result = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    result.paste(logo, (0, 0), mask)
-    return result
-
 def _apply_qr_logo(image: Image.Image) -> Image.Image:
     try:
         logo_path = _qr_logo_path()
@@ -1640,12 +1626,11 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         logo = _trim_logo(logo)
         qr = image.convert("RGBA")
         qr_w, qr_h = qr.size
-        logo_box = int(min(qr_w, qr_h) * 0.24)
+        logo_box = int(min(qr_w, qr_h) * 0.26)
         logo.thumbnail((logo_box, logo_box), Image.Resampling.LANCZOS)
-        logo = _circle_crop(logo)
         logo_w, logo_h = logo.size
 
-        pad = max(4, int(logo_box * 0.12))
+        pad = max(6, int(logo_box * 0.16))
         box_w = logo_w + pad * 2
         box_h = logo_h + pad * 2
         mask = Image.new("L", (box_w, box_h), 0)

@@ -696,6 +696,9 @@
         setHint("Face ID недоступен");
         return;
       }
+      if (!biometric.isInited && typeof biometric.init === "function") {
+        biometric.init();
+      }
       const runAuth = () => {
         biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
           if (result) {

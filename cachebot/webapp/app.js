@@ -385,6 +385,7 @@
   state.systemNotifications = loadSystemNotifications();
   state.dealStatusMap = loadDealStatusMap();
   state.buyerProofSent = loadBuyerProofSent();
+  let pendingReviewRating = null;
   const loadCompletedNotified = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(completedNoticeStorageKey) || "{}");
@@ -504,7 +505,6 @@
     logEl.prepend(line);
   };
 
-  let pendingReviewRating = null;
   let successAnimInstance = null;
   let successAnimHideTimer = null;
   let noticeTimer = null;

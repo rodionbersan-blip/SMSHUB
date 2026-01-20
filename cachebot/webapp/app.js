@@ -1728,6 +1728,16 @@
     input.click();
   };
 
+  const scrollChatToBottom = (smooth = false) => {
+    if (!chatList) return;
+    const top = chatList.scrollHeight;
+    if (typeof chatList.scrollTo === "function") {
+      chatList.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
+    } else {
+      chatList.scrollTop = top;
+    }
+  };
+
   const renderChatMessages = (messages) => {
     if (!chatList) return;
     chatList.innerHTML = "";
@@ -1760,6 +1770,7 @@
           img.alt = msg.file_name || "Фото";
           img.className = "chat-image";
           img.addEventListener("click", () => openImageModal(msg.file_url, img.alt));
+          img.addEventListener("load", () => scrollChatToBottom(false));
           item.appendChild(img);
         } else {
           const link = document.createElement("a");
@@ -1777,7 +1788,7 @@
       item.appendChild(meta);
       chatList.appendChild(item);
     });
-    chatList.scrollTop = chatList.scrollHeight;
+    window.requestAnimationFrame(() => scrollChatToBottom(false));
   };
 
   const loadChatMessages = async (dealId) => {
@@ -1795,6 +1806,7 @@
       chatModalTitle.textContent = `Чат сделки #${deal.public_id}`;
     }
     const messages = await loadChatMessages(deal.id);
+    scrollChatToBottom(false);
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
     if (lastMessage?.created_at) {
       markChatRead(deal.id, lastMessage.created_at);

@@ -191,6 +191,11 @@ async def _api_me(request: web.Request) -> web.Response:
     payload = {
         "id": user_id,
         "display_name": profile.display_name if profile else None,
+        "username": getattr(user, "username", None),
+        "first_name": getattr(user, "first_name", None),
+        "last_name": getattr(user, "last_name", None),
+        "full_name": f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip()
+        or None,
         "avatar_url": _avatar_url(request, profile),
     }
     return web.json_response({"ok": True, "user": payload})

@@ -20,7 +20,7 @@ from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
-from PIL import Image, ImageDraw
+from PIL import Image
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -1613,18 +1613,10 @@ def _apply_qr_logo(image: Image.Image) -> Image.Image:
         logo.thumbnail((logo_box, logo_box), Image.Resampling.LANCZOS)
         logo_w, logo_h = logo.size
 
-        pad = max(6, int(logo_box * 0.18))
+        pad = max(3, int(logo_box * 0.1))
         box_w = logo_w + pad * 2
         box_h = logo_h + pad * 2
         box = Image.new("RGBA", (box_w, box_h), (255, 255, 255, 255))
-        try:
-            mask = Image.new("L", (box_w, box_h), 0)
-            radius = int(min(box_w, box_h) * 0.2)
-            mask_draw = ImageDraw.Draw(mask)
-            mask_draw.rounded_rectangle((0, 0, box_w, box_h), radius=radius, fill=255)
-            box.putalpha(mask)
-        except Exception:
-            pass
         box_pos = ((box_w - logo_w) // 2, (box_h - logo_h) // 2)
         box.alpha_composite(logo, dest=box_pos)
 

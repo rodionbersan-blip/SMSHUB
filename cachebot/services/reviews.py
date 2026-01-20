@@ -30,9 +30,6 @@ class ReviewService:
             for review in self._reviews:
                 if review.deal_id == deal_id and review.from_user_id == from_user_id:
                     raise ValueError("Отзыв уже оставлен")
-            for review in self._reviews:
-                if review.from_user_id == from_user_id and review.to_user_id == to_user_id:
-                    raise ValueError("Отзыв уже оставлен")
             new_review = Review(
                 deal_id=deal_id,
                 from_user_id=from_user_id,

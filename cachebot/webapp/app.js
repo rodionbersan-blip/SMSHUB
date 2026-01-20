@@ -694,16 +694,29 @@
         setHint("Face ID недоступен");
         return;
       }
-      biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
-        if (result) {
-          if (mode === "biometric") {
-            saveBioFlag(true);
+      const runAuth = () => {
+        biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
+          if (result) {
+            if (mode === "biometric") {
+              saveBioFlag(true);
+            }
+            unlock();
+          } else {
+            setHint("Face ID не сработал");
           }
-          unlock();
-        } else {
-          setHint("Face ID не сработал");
-        }
-      });
+        });
+      };
+      if (!biometric.isAccessGranted) {
+        biometric.requestAccess({ reason: "Вход в BC Cash" }, (granted) => {
+          if (!granted) {
+            setHint("Face ID не разрешен");
+            return;
+          }
+          runAuth();
+        });
+        return;
+      }
+      runAuth();
     });
 
     pinSkipBiometric?.addEventListener("click", () => {

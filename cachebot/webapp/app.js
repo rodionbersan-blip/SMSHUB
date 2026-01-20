@@ -2522,8 +2522,12 @@
       }
       if (p2pModal?.classList.contains("open") && p2pModal.contains(el)) {
         p2pModalActions?.scrollIntoView({ block: "end", behavior: "smooth" });
+        const modalCard = p2pModal.querySelector(".modal-card");
+        if (modalCard) {
+          modalCard.scrollTop = modalCard.scrollHeight;
+        }
       }
-    }, 60);
+    }, 120);
   });
 
   profileQuick?.addEventListener("click", () => {

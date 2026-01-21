@@ -2756,7 +2756,7 @@
           </div>
           <div class="deal-status ${item.rating > 0 ? "positive" : "negative"}">${statusLabel}</div>
         </div>
-        <div class="deal-row">${item.comment || "Без комментария"}</div>
+        ${item.comment ? `<div class="deal-row">${item.comment}</div>` : ""}
       `;
       reviewsList.appendChild(row);
     });

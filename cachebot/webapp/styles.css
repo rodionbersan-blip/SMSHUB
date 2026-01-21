@@ -896,10 +896,15 @@ body.modal-open #app {
 
 .p2p-bank-btn {
   flex: 1 1 0;
-  height: 36px;
+  height: 38px;
   border: 1px solid rgba(77, 163, 255, 0.35);
   background: rgba(77, 163, 255, 0.12);
   color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
 }
 
 .p2p-bank-btn.active {
@@ -908,6 +913,13 @@ body.modal-open #app {
   border-color: var(--accent);
   box-shadow: 0 10px 22px rgba(77, 163, 255, 0.35);
   transform: translateY(-1px);
+}
+
+.p2p-bank-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
 }
 
 .p2p-evidence {

@@ -958,6 +958,41 @@
     return num.toFixed(digits).replace(/\\.?0+$/, "");
   };
 
+  const bankMeta = {
+    ozon: { label: "Озон", icon: "/app/assets/bank-ozon.png" },
+    ozonbank: { label: "Озон", icon: "/app/assets/bank-ozon.png" },
+    sber: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
+    sberbank: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
+    sberbankonline: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
+    alfa: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    alfabank: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    alfabankru: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    альфа: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    сбер: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
+    озон: { label: "Озон", icon: "/app/assets/bank-ozon.png" },
+  };
+
+  const normalizeBankKey = (name) =>
+    String(name || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_-]+/g, "");
+
+  const getBankMeta = (name) => {
+    const key = normalizeBankKey(name);
+    return bankMeta[key] || null;
+  };
+
+  const bankLabel = (name) => {
+    const meta = getBankMeta(name);
+    return meta?.label || name || "—";
+  };
+
+  const bankIcon = (name) => {
+    const meta = getBankMeta(name);
+    return meta?.icon || "";
+  };
+
   const formatDate = (iso) => {
     if (!iso) return "—";
     const dt = new Date(iso);
@@ -1564,7 +1599,9 @@
       <div class="deal-detail-row"><span>Цена:</span>1 USDT = ${formatAmount(ad.price_rub, 0)} RUB</div>
       <div class="deal-detail-row"><span>Доступный объем:</span>${formatAmount(ad.remaining_usdt, 0)} USDT</div>
       <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}</div>
-      <div class="deal-detail-row"><span>Способ оплаты:</span>${(ad.banks || []).join(", ") || "—"}</div>
+      <div class="deal-detail-row"><span>Способ оплаты:</span>${(ad.banks || [])
+        .map((bank) => bankLabel(bank))
+        .join(", ") || "—"}</div>
       <div class="deal-detail-row"><span>Срок оплаты:</span>15 мин</div>
       <div class="deal-detail-row"><span>Условия сделки:</span>${ad.terms || "—"}</div>
     `;
@@ -1584,11 +1621,16 @@
         const bankBtn = document.createElement("button");
         bankBtn.type = "button";
         bankBtn.className = "btn pill p2p-bank-btn";
-        bankBtn.textContent = bank;
+        bankBtn.dataset.bank = bank;
+        const icon = bankIcon(bank);
+        const label = bankLabel(bank);
+        bankBtn.innerHTML = icon
+          ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
+          : label;
         bankBtn.addEventListener("click", () => {
           selectedBank = bank;
           bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-            el.classList.toggle("active", el.textContent === bank);
+            el.classList.toggle("active", el.dataset.bank === bank);
           });
         });
         bankChoices.appendChild(bankBtn);
@@ -1694,7 +1736,9 @@
       <div class="deal-detail-row"><span>Цена:</span>₽${formatAmount(ad.price_rub, 2)}/USDT</div>
       <div class="deal-detail-row"><span>Объём:</span>${formatAmount(ad.remaining_usdt)} / ${formatAmount(ad.total_usdt)} USDT</div>
       <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 2)}-₽${formatAmount(ad.max_rub, 2)}</div>
-      <div class="deal-detail-row"><span>Банки:</span>${(ad.banks || []).join(", ") || "—"}</div>
+      <div class="deal-detail-row"><span>Банки:</span>${(ad.banks || [])
+        .map((bank) => bankLabel(bank))
+        .join(", ") || "—"}</div>
       <div class="deal-detail-row"><span>Условия:</span>${ad.terms || "—"}</div>
       <div class="p2p-edit-grid">
         <label>Цена (RUB)
@@ -1789,7 +1833,7 @@
         input.checked = true;
       }
       label.appendChild(input);
-      label.appendChild(document.createTextNode(bankInput.parentElement.textContent.trim()));
+      label.appendChild(document.createTextNode(bankLabel(bankInput.value)));
       banksContainer.appendChild(label);
     });
   };
@@ -1805,7 +1849,7 @@
       input.type = "checkbox";
       input.value = bank.key;
       label.appendChild(input);
-      label.appendChild(document.createTextNode(bank.label));
+      label.appendChild(document.createTextNode(bankLabel(bank.label || bank.key)));
       p2pBanks.appendChild(label);
     });
   };
@@ -2012,7 +2056,7 @@
       <div class="deal-detail-row"><span>USDT:</span>${formatAmount(deal.usdt_amount)} USDT</div>
       <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
       <div class="deal-detail-row"><span>Создано:</span>${formatDate(deal.created_at)}</div>
-      <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank || "—"}</div>
+      <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank ? bankLabel(deal.atm_bank) : "—"}</div>
       <div class="deal-detail-row"><span>Контрагент:</span>
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>

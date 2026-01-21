@@ -671,12 +671,13 @@ body.modal-open #app {
 }
 
 .deal-pagination .btn {
-  height: 36px;
-  padding: 0 14px;
+  height: 44px;
+  min-width: 120px;
+  padding: 0 20px;
   border-radius: 999px;
   background: rgba(77, 163, 255, 0.12);
   color: var(--accent);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -1066,12 +1067,13 @@ body.modal-open #app {
 }
 
 .reviews-pagination .btn {
-  height: 36px;
-  padding: 0 14px;
+  height: 44px;
+  min-width: 120px;
+  padding: 0 20px;
   border-radius: 999px;
   background: rgba(77, 163, 255, 0.12);
   color: var(--accent);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 

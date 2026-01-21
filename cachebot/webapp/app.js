@@ -965,8 +965,10 @@
     sberbank: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
     sberbankonline: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
     alfa: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    alpha: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
     alfabank: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
     alfabankru: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
+    alfabankrussia: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
     альфа: { label: "Альфа", icon: "/app/assets/bank-alfa.png" },
     сбер: { label: "Сбер", icon: "/app/assets/bank-sber.png" },
     озон: { label: "Озон", icon: "/app/assets/bank-ozon.png" },
@@ -976,7 +978,7 @@
     String(name || "")
       .trim()
       .toLowerCase()
-      .replace(/[\s_-]+/g, "");
+      .replace(/[^a-zа-я0-9]+/gi, "");
 
   const getBankMeta = (name) => {
     const key = normalizeBankKey(name);

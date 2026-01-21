@@ -2026,6 +2026,12 @@
       alert.textContent = "✅ QR прикреплен и отправлен в чат.";
       dealModalBody.appendChild(alert);
     }
+    if (deal.status === "completed" && !deal.reviewed) {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "Оцените сделку — кнопка внизу.";
+      dealModalBody.appendChild(alert);
+    }
     const ownerLink = dealModalBody.querySelector(".owner-link");
     if (ownerLink && deal.counterparty?.user_id) {
       ownerLink.addEventListener("click", () => openUserProfile(deal.counterparty.user_id));

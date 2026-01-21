@@ -1736,9 +1736,9 @@ body.pin-lock .app {
 
 .pin-card {
   width: min(92vw, 420px);
-  background: rgba(10, 8, 20, 0.28);
-  border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  border-radius: 0;
+  border: none;
   padding: calc(28px + env(safe-area-inset-top, 0px))
     calc(22px + env(safe-area-inset-right, 0px))
     calc(32px + env(safe-area-inset-bottom, 0px))
@@ -1746,7 +1746,7 @@ body.pin-lock .app {
   display: grid;
   gap: 18px;
   color: var(--text);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  box-shadow: none;
   margin: 0 auto;
   min-height: 100dvh;
   align-content: center;
@@ -1762,6 +1762,10 @@ body.pin-lock .app {
   font-size: 22px;
   font-weight: 700;
   text-align: center;
+  color: #ffffff;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.7),
+    0 0 6px rgba(255, 255, 255, 0.25);
 }
 
 .pin-dots {

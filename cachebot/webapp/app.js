@@ -462,6 +462,24 @@
     }
   };
 
+  const openReviewForDeal = (deal) => {
+    if (!deal?.id) return;
+    const dealLabel = deal.public_id ? `#${deal.public_id}` : `#${deal.id}`;
+    const item = {
+      key: `manual-review-${deal.id}`,
+      message: `Сделка ${dealLabel} завершена.`,
+      type: "deal_completed",
+      deal_id: deal.id,
+      public_id: deal.public_id,
+      counterparty_id: deal.counterparty?.user_id || null,
+    };
+    showSystemNotice(item, { autoClose: false });
+    systemNoticeRateForm?.classList.add("show");
+    if (systemNoticeSubmit) {
+      systemNoticeSubmit.disabled = !pendingReviewRating;
+    }
+  };
+
   const renderSystemNotifications = () => {
     const items = state.systemNotifications || [];
     if (!items.length) {
@@ -2108,6 +2126,14 @@
         () => dealAction("cancel", deal.id),
         false,
         "status-bad"
+      );
+    }
+    if (deal.status === "completed" && !deal.reviewed) {
+      addAction(
+        bottomRow,
+        "Оценить сделку",
+        () => openReviewForDeal(deal),
+        true
       );
     }
     if (!bottomRow.childElementCount) {

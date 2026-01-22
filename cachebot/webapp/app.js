@@ -2262,7 +2262,9 @@
       p2pModalActions.appendChild(take);
     }
     if (canManage && dispute.assigned_to) {
-      const total = Number(dispute.deal.usdt_amount || 0);
+      const baseTotal = dispute.deal?.rate
+        ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
+        : Number(dispute.deal.usdt_amount || 0);
       const sellerRow = document.createElement("div");
       sellerRow.className = "dispute-resolve-row";
       const sellerInput = document.createElement("input");
@@ -2273,7 +2275,7 @@
       sellerMax.textContent = "Макс";
       sellerMax.addEventListener("click", () => {
         const other = Number((buyerInput.value || "").replace(",", ".")) || 0;
-        const value = Math.max(0, total - other);
+        const value = Math.max(0, baseTotal - other);
         sellerInput.value = formatAmount(value, 3);
       });
       sellerRow.appendChild(sellerInput);
@@ -2289,7 +2291,7 @@
       buyerMax.textContent = "Макс";
       buyerMax.addEventListener("click", () => {
         const other = Number((sellerInput.value || "").replace(",", ".")) || 0;
-        const value = Math.max(0, total - other);
+        const value = Math.max(0, baseTotal - other);
         buyerInput.value = formatAmount(value, 3);
       });
       buyerRow.appendChild(buyerInput);

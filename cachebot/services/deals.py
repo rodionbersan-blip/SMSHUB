@@ -468,10 +468,11 @@ class DealService:
                 if deal.payout_completed:
                     raise ValueError("Сделка уже завершена")
                 deal.status = DealStatus.DISPUTE
+            base_usdt = deal.usd_amount / deal.rate
             total = seller_amount + buyer_amount
             if seller_amount < 0 or buyer_amount < 0:
                 raise ValueError("Сумма не может быть отрицательной")
-            if total > deal.usdt_amount:
+            if total > base_usdt:
                 raise ValueError("Сумма превышает объем сделки")
             if seller_amount > 0:
                 self._credit_balance_locked(deal.seller_id, seller_amount)

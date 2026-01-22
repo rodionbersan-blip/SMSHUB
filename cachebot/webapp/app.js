@@ -3431,6 +3431,7 @@
     input.accept = "video/*";
     input.onchange = () => {
       const file = input.files?.[0];
+      input.remove();
       if (!file) return;
       const name = (file.name || "").toLowerCase();
       const isVideo =
@@ -3455,6 +3456,8 @@
       }
       showNotice("Видео выбрано");
     };
+    input.style.display = "none";
+    document.body.appendChild(input);
     input.click();
   });
 

@@ -3339,6 +3339,8 @@ def _format_deal_detail(deal: Deal, user_id: int, buyer_profile: UserProfile | N
 async def _handle_deal_completed(deal: Deal, deps, bot) -> None:
     await deps.dispute_service.resolve_for_deal(deal.id, resolved_by=0)
     await deps.chat_service.purge_chat(deal.id)
+    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal.id)
+    dispute_resolved = bool(dispute_any and dispute_any.resolved)
     if deal.buyer_id:
         kb_configured = bool(deps.config.kb_api_url and deps.config.kb_api_token)
         credited = True
@@ -3349,35 +3351,41 @@ async def _handle_deal_completed(deal: Deal, deps, bot) -> None:
             if credited or not kb_configured
             else "Не удалось обновить баланс автоматически, обратитесь к админу."
         )
-        buyer_review = await deps.review_service.review_for_deal(
-            deal.id, prefer_from=deal.buyer_id
-        )
         buyer_builder = InlineKeyboardBuilder()
-        if buyer_review is None:
-            buyer_builder.button(
-                text="Оценить сделку",
-                callback_data=f"{REVIEW_START_PREFIX}{deal.id}",
+        buyer_review = None
+        if not dispute_resolved:
+            buyer_review = await deps.review_service.review_for_deal(
+                deal.id, prefer_from=deal.buyer_id
             )
+            if buyer_review is None:
+                buyer_builder.button(
+                    text="Оценить сделку",
+                    callback_data=f"{REVIEW_START_PREFIX}{deal.id}",
+                )
         await bot.send_message(
             deal.buyer_id,
             f"✅ Сделка {deal.hashtag} завершена.\n{buyer_note}\n"
             "Используй кнопку «Баланс», чтобы оформить вывод USDT.",
-            reply_markup=buyer_builder.as_markup() if buyer_review is None else None,
+            reply_markup=buyer_builder.as_markup()
+            if (not dispute_resolved and buyer_review is None)
+            else None,
         )
     if deal.seller_id:
-        review = await deps.review_service.review_for_deal(
-            deal.id, prefer_from=deal.seller_id
-        )
         builder = InlineKeyboardBuilder()
-        if review is None:
-            builder.button(
-                text="Оценить сделку",
-                callback_data=f"{REVIEW_START_PREFIX}{deal.id}",
+        review = None
+        if not dispute_resolved:
+            review = await deps.review_service.review_for_deal(
+                deal.id, prefer_from=deal.seller_id
             )
+            if review is None:
+                builder.button(
+                    text="Оценить сделку",
+                    callback_data=f"{REVIEW_START_PREFIX}{deal.id}",
+                )
         await bot.send_message(
             deal.seller_id,
             f"✅ Сделка {deal.hashtag} выполнена. Спасибо за использование сервиса.",
-            reply_markup=builder.as_markup() if review is None else None,
+            reply_markup=builder.as_markup() if (not dispute_resolved and review is None) else None,
         )
 
 

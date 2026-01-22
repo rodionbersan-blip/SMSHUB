@@ -1473,6 +1473,57 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
         dispute_id, resolved_by=user_id, seller_amount=str(seller_amount), buyer_amount=str(buyer_amount)
     )
     with suppress(Exception):
+        seller_profile = await deps.user_service.profile_of(deal.seller_id)
+        buyer_profile = await deps.user_service.profile_of(deal.buyer_id) if deal.buyer_id else None
+        seller_name = (
+            seller_profile.display_name
+            if seller_profile and seller_profile.display_name
+            else seller_profile.full_name
+            if seller_profile and seller_profile.full_name
+            else seller_profile.username
+            if seller_profile and seller_profile.username
+            else str(deal.seller_id)
+        )
+        buyer_name = (
+            buyer_profile.display_name
+            if buyer_profile and buyer_profile.display_name
+            else buyer_profile.full_name
+            if buyer_profile and buyer_profile.full_name
+            else buyer_profile.username
+            if buyer_profile and buyer_profile.username
+            else str(deal.buyer_id or "")
+        )
+        seller_amount_text = f"{seller_amount.quantize(Decimal('0.001')):f}"
+        buyer_amount_text = f"{buyer_amount.quantize(Decimal('0.001')):f}"
+        winner_is_seller = seller_amount >= buyer_amount
+        winner_name = seller_name if winner_is_seller else buyer_name
+        if deal.seller_id:
+            if seller_amount > 0:
+                await request.app["bot"].send_message(
+                    deal.seller_id,
+                    f"✅ Сделка #{deal.public_id} была закрыта в вашу пользу.\n"
+                    f"На баланс было зачислено {seller_amount_text} USDT.",
+                )
+            else:
+                await request.app["bot"].send_message(
+                    deal.seller_id,
+                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_name}.\n"
+                    f"Средства отправлены {winner_name}.",
+                )
+        if deal.buyer_id:
+            if buyer_amount > 0:
+                await request.app["bot"].send_message(
+                    deal.buyer_id,
+                    f"✅ Сделка #{deal.public_id} была закрыта в вашу пользу.\n"
+                    f"На баланс было зачислено {buyer_amount_text} USDT.",
+                )
+            else:
+                await request.app["bot"].send_message(
+                    deal.buyer_id,
+                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_name}.\n"
+                    f"Средства отправлены {winner_name}.",
+                )
+    with suppress(Exception):
         await deps.chat_service.purge_chat(deal.id)
     with suppress(Exception):
         chat_dir = _chat_dir(deps) / deal.id
@@ -2220,6 +2271,14 @@ async def _deal_payload(
     if deal.status == DealStatus.DISPUTE:
         dispute = await deps.dispute_service.dispute_for_deal(deal.id)
         payload["dispute_id"] = dispute.id if dispute else None
+    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal.id)
+    if dispute_any and dispute_any.resolved:
+        payload["dispute_resolution"] = {
+            "seller_amount": dispute_any.seller_amount,
+            "buyer_amount": dispute_any.buyer_amount,
+            "resolved_by": dispute_any.resolved_by,
+            "resolved_at": dispute_any.resolved_at.isoformat() if dispute_any.resolved_at else None,
+        }
     include_all = user_id in deps.config.admin_ids
     last_chat = await deps.chat_service.latest_message_for_user(
         deal.id, user_id, include_all=include_all

@@ -250,6 +250,7 @@
     disputeSnapshot: null,
     disputeRefreshTimer: null,
     completedNotified: {},
+    disputeResolvedNotified: {},
     bootstrapDone: false,
     initRetryTimer: null,
     tgRetryTimer: null,
@@ -272,6 +273,7 @@
   const dealStatusStorageKey = "dealStatusMap";
   const buyerProofStorageKey = "buyerProofSent";
   const completedNoticeStorageKey = "dealCompletedNotified";
+  const disputeResolvedStorageKey = "dealDisputeResolvedNotified";
   const themeStorageKey = "preferredTheme";
   const pinHashStorageKey = "appPinHash";
   const pinBioStorageKey = "appPinBio";
@@ -450,6 +452,27 @@
   };
   state.completedNotified = loadCompletedNotified();
 
+  const loadDisputeResolvedNotified = () => {
+    try {
+      return JSON.parse(window.localStorage.getItem(disputeResolvedStorageKey) || "{}");
+    } catch {
+      return {};
+    }
+  };
+
+  const persistDisputeResolvedNotified = () => {
+    try {
+      window.localStorage.setItem(
+        disputeResolvedStorageKey,
+        JSON.stringify(state.disputeResolvedNotified || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  state.disputeResolvedNotified = loadDisputeResolvedNotified();
+
   const clearSystemNoticeTimer = () => {
     if (state.systemNoticeTimer) {
       window.clearTimeout(state.systemNoticeTimer);
@@ -472,8 +495,13 @@
     row.className = "system-notice-item";
     row.textContent = item?.message || "";
     systemNoticeList.appendChild(row);
-    systemNoticeActions?.classList.remove("hidden");
-    systemNoticeRateForm?.classList.remove("show");
+    if (item?.type === "dispute_resolved") {
+      systemNoticeActions?.classList.add("hidden");
+      systemNoticeRateForm?.classList.remove("show");
+    } else {
+      systemNoticeActions?.classList.remove("hidden");
+      systemNoticeRateForm?.classList.remove("show");
+    }
     if (typeof pendingReviewRating !== "undefined") {
       pendingReviewRating = null;
     }
@@ -483,6 +511,7 @@
     systemNotice.classList.add("show");
     clearSystemNoticeTimer();
     if (autoClose) {
+      const timeoutMs = item?.type === "dispute_resolved" ? 3000 : 4000;
       state.systemNoticeTimer = window.setTimeout(() => {
         if (item?.key) {
           state.systemNotifications = (state.systemNotifications || []).filter(
@@ -492,7 +521,7 @@
         }
         hideSystemNotice();
         renderSystemNotifications();
-      }, 4000);
+      }, timeoutMs);
     }
   };
 
@@ -1330,6 +1359,37 @@
           state.completedNotified[completedKey] = true;
         }
       }
+      if (deal.dispute_resolution && !state.disputeResolvedNotified?.[`${deal.id}:dispute`]) {
+        const sellerAmount = Number(deal.dispute_resolution.seller_amount || 0);
+        const buyerAmount = Number(deal.dispute_resolution.buyer_amount || 0);
+        const myAmount = deal.role === "seller" ? sellerAmount : buyerAmount;
+        const counterpartyName =
+          deal.counterparty?.display_name ||
+          deal.counterparty?.full_name ||
+          deal.counterparty?.username ||
+          "другой стороны";
+        const winnerIsSeller = sellerAmount >= buyerAmount;
+        const winnerName = winnerIsSeller
+          ? deal.role === "seller"
+            ? "вас"
+            : counterpartyName
+          : deal.role === "buyer"
+          ? "вас"
+          : counterpartyName;
+        const amountText = formatAmount(myAmount, 3);
+        const message =
+          myAmount > 0
+            ? `Сделка ${dealLabel} была закрыта в вашу пользу.\nНа баланс было зачислено ${amountText} USDT.`
+            : `Сделка ${dealLabel} была закрыта в пользу ${winnerName}.\nСредства отправлены ${winnerName}.`;
+        pushSystemNotification({
+          key: `${deal.id}:dispute`,
+          message,
+          type: "dispute_resolved",
+          deal_id: deal.id,
+          public_id: deal.public_id,
+        });
+        state.disputeResolvedNotified[`${deal.id}:dispute`] = true;
+      }
       if (["completed", "canceled", "expired"].includes(deal.status)) {
         clearDealAlerts(deal.id);
       }
@@ -1337,6 +1397,7 @@
     state.dealStatusMap = nextStatusMap;
     persistDealStatusMap();
     persistCompletedNotified();
+    persistDisputeResolvedNotified();
     if (!state.chatInitDone) {
       deals.forEach((deal) => {
         if (!deal.chat_last_at) return;

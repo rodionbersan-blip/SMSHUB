@@ -1787,6 +1787,32 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.dispute-party {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dispute-party .link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dispute-party .link-btn:hover {
+  text-decoration: underline;
+}
+
+.dispute-party .tg-profile-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 .modal-actions {
   display: flex;
   flex-direction: column;

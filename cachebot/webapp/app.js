@@ -2055,11 +2055,23 @@
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
     const buyer =
       dispute.buyer?.display_name || dispute.buyer?.full_name || dispute.buyer?.username || "—";
+    const sellerUsername = dispute.seller?.username ? `@${dispute.seller.username}` : "—";
+    const buyerUsername = dispute.buyer?.username ? `@${dispute.buyer.username}` : "—";
     const openerName = dispute.opened_by_name || "—";
     const commentText = dispute.comment ? ` ${dispute.comment} (от ${openerName})` : " —";
     p2pModalBody.innerHTML = `
-      <div class="deal-detail-row"><span>Продавец:</span>${seller}</div>
-      <div class="deal-detail-row"><span>Мерчант:</span>${buyer}</div>
+      <div class="deal-detail-row"><span>Продавец:</span>
+        <span class="dispute-party">
+          <button class="link-btn" data-user="${dispute.seller?.user_id || ""}">${seller}</button>
+          <button class="btn pill tg-profile-btn" data-username="${dispute.seller?.username || ""}">Профиль TG</button>
+        </span>
+      </div>
+      <div class="deal-detail-row"><span>Мерчант:</span>
+        <span class="dispute-party">
+          <button class="link-btn" data-user="${dispute.buyer?.user_id || ""}">${buyer}</button>
+          <button class="btn pill tg-profile-btn" data-username="${dispute.buyer?.username || ""}">Профиль TG</button>
+        </span>
+      </div>
       <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
       <div class="deal-detail-row"><span>Комментарий:</span>${commentText}</div>
@@ -2096,6 +2108,28 @@
       });
       p2pModalBody.appendChild(evidenceList);
     }
+    p2pModalBody.querySelectorAll(".link-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-user");
+        if (!targetId) return;
+        openUserProfile(targetId);
+      });
+    });
+    p2pModalBody.querySelectorAll(".tg-profile-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const username = btn.getAttribute("data-username");
+        if (!username) return;
+        const handle = username.replace(/^@/, "");
+        const url = `https://t.me/${handle}`;
+        if (tg?.openTelegramLink) {
+          tg.openTelegramLink(url);
+        } else if (tg?.openLink) {
+          tg.openLink(url);
+        } else {
+          window.open(url, "_blank", "noopener");
+        }
+      });
+    });
     p2pModalActions.innerHTML = "";
     if (dispute.deal) {
       const chatBtn = document.createElement("button");

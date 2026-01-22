@@ -1663,6 +1663,22 @@ body.modal-open #app {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
+.video-modal-card {
+  width: min(520px, 92vw);
+  height: auto;
+  padding: 16px;
+  background: rgba(10, 12, 16, 0.92);
+  border-radius: 22px;
+}
+
+.video-modal-card video {
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 16px;
+  background: #0b0f14;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
 .image-modal-close {
   position: absolute;
   top: 12px;

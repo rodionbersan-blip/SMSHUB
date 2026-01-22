@@ -121,6 +121,9 @@
   const imageModal = document.getElementById("imageModal");
   const imageModalImg = document.getElementById("imageModalImg");
   const imageModalClose = document.getElementById("imageModalClose");
+  const videoModal = document.getElementById("videoModal");
+  const videoModalPlayer = document.getElementById("videoModalPlayer");
+  const videoModalClose = document.getElementById("videoModalClose");
   const buyerProofModal = document.getElementById("buyerProofModal");
   const buyerProofClose = document.getElementById("buyerProofClose");
   const buyerProofPick = document.getElementById("buyerProofPick");
@@ -2062,6 +2065,14 @@
         btn.textContent = `${label} от ${author}`;
         btn.addEventListener("click", () => {
           if (!item.url) return;
+          if (item.kind === "video") {
+            openVideoModal(item.url);
+            return;
+          }
+          if (item.kind === "photo") {
+            openImageModal(item.url, `${label} от ${author}`);
+            return;
+          }
           if (tg?.openLink) {
             tg.openLink(item.url);
           } else {
@@ -3413,8 +3424,24 @@
     imageModal.classList.add("open");
   };
 
+  const openVideoModal = (src) => {
+    if (!videoModal || !videoModalPlayer) return;
+    videoModalPlayer.src = src;
+    videoModalPlayer.currentTime = 0;
+    videoModal.classList.add("open");
+  };
+
   imageModalClose?.addEventListener("click", () => {
     imageModal?.classList.remove("open");
+  });
+
+  videoModalClose?.addEventListener("click", () => {
+    if (videoModalPlayer) {
+      videoModalPlayer.pause?.();
+      videoModalPlayer.removeAttribute("src");
+      videoModalPlayer.load?.();
+    }
+    videoModal?.classList.remove("open");
   });
 
   buyerProofClose?.addEventListener("click", () => {

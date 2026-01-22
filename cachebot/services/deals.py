@@ -526,7 +526,10 @@ class DealService:
                     DealStatus.PAID,
                     DealStatus.DISPUTE,
                 }:
-                    reserved += deal.usd_amount / deal.rate
+                    base_usdt = deal.usdt_amount - deal.fee_amount
+                    if base_usdt <= 0 and deal.rate:
+                        base_usdt = deal.usd_amount / deal.rate
+                    reserved += max(Decimal("0"), base_usdt)
             return reserved
 
     def _credit_balance_locked(self, user_id: int, amount: Decimal) -> None:

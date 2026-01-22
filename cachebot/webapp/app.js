@@ -2797,7 +2797,7 @@
         item.appendChild(label);
       } else if (msg.sender_label) {
         const label = document.createElement("div");
-        label.className = "chat-system-label";
+        label.className = "chat-system-label chat-mod-label";
         label.textContent = msg.sender_label;
         item.appendChild(label);
       }

@@ -1647,6 +1647,10 @@ body.modal-open #app {
   letter-spacing: 0.04em;
 }
 
+.chat-mod-label {
+  color: #ff4d4f;
+}
+
 .image-modal {
   background: rgba(10, 12, 18, 0.8);
   backdrop-filter: blur(16px);

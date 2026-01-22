@@ -700,12 +700,27 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
     comment = None
+    reason = "Открыт через WebApp"
     with suppress(Exception):
         payload = await request.json()
         if isinstance(payload, dict):
             raw_comment = payload.get("comment")
             if isinstance(raw_comment, str):
                 comment = raw_comment.strip() or None
+            reason_key = payload.get("reason")
+            reason_text = payload.get("reason_text")
+            if isinstance(reason_key, str):
+                reason_key = reason_key.strip()
+                if reason_key == "no_cash":
+                    reason = "Не получил деньги"
+                elif reason_key == "partial":
+                    reason = "Получил, но не все"
+                elif reason_key == "other":
+                    reason = "Другая причина"
+                    if isinstance(reason_text, str):
+                        extra = reason_text.strip()
+                        if extra:
+                            reason = f"Другая причина: {extra}"
     deal = await deps.deal_service.get_deal(deal_id)
     if not deal:
         raise web.HTTPNotFound(text="Сделка не найдена")
@@ -722,7 +737,7 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         await deps.dispute_service.open_dispute(
             deal_id=deal_id,
             opened_by=user_id,
-            reason="Открыт через WebApp",
+            reason=reason,
             comment=comment,
             evidence=[],
         )

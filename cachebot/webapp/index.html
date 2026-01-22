@@ -265,6 +265,23 @@
             <div class="deal-proof-title">
               ⚠️ Для открытия спора нужно прикрепить видео с Банка. Скрины не рассматриваются.
             </div>
+            <label class="deal-proof-field">
+              Причина спора
+              <select id="disputeReason" class="input">
+                <option value="no_cash">Не получил деньги</option>
+                <option value="partial">Получил, но не все</option>
+                <option value="other">Другая причина</option>
+              </select>
+            </label>
+            <label id="disputeReasonCustomField" class="deal-proof-field is-hidden">
+              Причина (опишите)
+              <input
+                id="disputeReasonCustom"
+                class="input"
+                type="text"
+                placeholder="Опишите причину"
+              />
+            </label>
             <div id="disputeVideoName" class="dispute-video-name">Видео не выбрано.</div>
             <label class="deal-proof-field">
               Комментарий

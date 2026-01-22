@@ -135,6 +135,9 @@
   const disputeOpenSend = document.getElementById("disputeOpenSend");
   const disputeVideoName = document.getElementById("disputeVideoName");
   const disputeComment = document.getElementById("disputeComment");
+  const disputeReason = document.getElementById("disputeReason");
+  const disputeReasonCustomField = document.getElementById("disputeReasonCustomField");
+  const disputeReasonCustom = document.getElementById("disputeReasonCustom");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
@@ -2482,6 +2485,13 @@
     if (disputeVideoName) {
       disputeVideoName.textContent = "Видео не выбрано.";
     }
+    if (disputeReason) {
+      disputeReason.value = "no_cash";
+    }
+    if (disputeReasonCustom) {
+      disputeReasonCustom.value = "";
+    }
+    disputeReasonCustomField?.classList.add("is-hidden");
     if (disputeComment) {
       disputeComment.value = "";
     }
@@ -2516,10 +2526,12 @@
     if (disputeVideoName) {
       disputeVideoName.textContent = "Загружается...";
     }
+    const reasonKey = disputeReason?.value || "no_cash";
+    const reasonText = (disputeReasonCustom?.value || "").trim();
     const comment = (disputeComment?.value || "").trim() || null;
     const payload = await fetchJson(`/api/deals/${dealId}/open-dispute`, {
       method: "POST",
-      body: JSON.stringify({ comment }),
+      body: JSON.stringify({ comment, reason: reasonKey, reason_text: reasonText }),
     });
     if (!payload?.ok) {
       if (disputeVideoName) {
@@ -3423,6 +3435,15 @@
 
   disputeOpenClose?.addEventListener("click", () => {
     closeDisputeOpenModal();
+  });
+
+  disputeReason?.addEventListener("change", () => {
+    if (!disputeReasonCustomField) return;
+    if (disputeReason?.value === "other") {
+      disputeReasonCustomField.classList.remove("is-hidden");
+    } else {
+      disputeReasonCustomField.classList.add("is-hidden");
+    }
   });
 
   disputeVideoPick?.addEventListener("click", () => {

@@ -953,6 +953,14 @@ async def _api_deal_chat_send(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
     )
+    is_moderator = user_id in set(deps.config.admin_ids or []) or await deps.user_service.is_moderator(user_id)
+    if is_moderator:
+        with suppress(Exception):
+            notice = f"⚠️ Модератор написал в чате сделки #{deal.public_id}.\nОткройте приложение."
+            if deal.seller_id and deal.seller_id != user_id:
+                await request.app["bot"].send_message(deal.seller_id, notice)
+            if deal.buyer_id and deal.buyer_id != user_id:
+                await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
         profile = await deps.user_service.profile_of(user_id)
@@ -998,6 +1006,14 @@ async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
         file_path=str(file_path),
         file_name=filename,
     )
+    is_moderator = user_id in set(deps.config.admin_ids or []) or await deps.user_service.is_moderator(user_id)
+    if is_moderator:
+        with suppress(Exception):
+            notice = f"⚠️ Модератор отправил файл в чате сделки #{deal.public_id}.\nОткройте приложение."
+            if deal.seller_id and deal.seller_id != user_id:
+                await request.app["bot"].send_message(deal.seller_id, notice)
+            if deal.buyer_id and deal.buyer_id != user_id:
+                await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
         profile = await deps.user_service.profile_of(user_id)

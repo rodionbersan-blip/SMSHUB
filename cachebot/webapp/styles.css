@@ -1763,6 +1763,33 @@ body.modal-open #app {
   z-index: 96;
 }
 
+#disputeResolveModal {
+  z-index: 110;
+}
+
+:root[data-theme="light"] #disputeResolveModal .modal-card.glass {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 17, 21, 0.18);
+  box-shadow: 0 20px 46px rgba(15, 17, 21, 0.22);
+}
+
+:root[data-theme="light"] #disputeResolveModal .modal-title,
+:root[data-theme="light"] #disputeResolveModal .deal-proof-title {
+  color: #0f1115;
+}
+
+:root[data-theme="light"] #disputeResolveModal .btn.ghost {
+  background: rgba(77, 163, 255, 0.2);
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #disputeResolveModal .btn.ghost:hover {
+  background: rgba(77, 163, 255, 0.3);
+  border-color: rgba(77, 163, 255, 0.6);
+  color: #0f1115;
+}
+
 #balanceHistoryModal.modal {
   padding: 0;
 }

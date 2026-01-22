@@ -131,6 +131,11 @@
   const commentModal = document.getElementById("commentModal");
   const commentModalClose = document.getElementById("commentModalClose");
   const commentModalText = document.getElementById("commentModalText");
+  const disputeResolveModal = document.getElementById("disputeResolveModal");
+  const disputeResolveClose = document.getElementById("disputeResolveClose");
+  const disputeResolveCancel = document.getElementById("disputeResolveCancel");
+  const disputeResolveConfirm = document.getElementById("disputeResolveConfirm");
+  const disputeResolveInfo = document.getElementById("disputeResolveInfo");
   const buyerProofModal = document.getElementById("buyerProofModal");
   const buyerProofClose = document.getElementById("buyerProofClose");
   const buyerProofPick = document.getElementById("buyerProofPick");
@@ -253,6 +258,7 @@
     activeDisputeId: null,
     disputeSnapshot: null,
     disputeRefreshTimer: null,
+    pendingResolve: null,
     completedNotified: {},
     disputeResolvedNotified: {},
     bootstrapDone: false,
@@ -2295,14 +2301,15 @@
       resolve.addEventListener("click", async () => {
         const sellerAmount = Number((sellerInput.value || "").replace(",", ".")) || 0;
         const buyerAmount = Number((buyerInput.value || "").replace(",", ".")) || 0;
-        const res = await fetchJson(`/api/disputes/${dispute.id}/resolve`, {
-          method: "POST",
-          body: JSON.stringify({ seller_amount: sellerAmount, buyer_amount: buyerAmount }),
-        });
-        if (res?.ok) {
-          p2pModal.classList.remove("open");
-          await loadDisputes();
-        }
+        if (!disputeResolveModal || !disputeResolveInfo) return;
+        const sellerName = seller || "Продавцу";
+        const buyerName = buyer || "Мерчанту";
+        disputeResolveInfo.innerHTML = `
+          <div>Продавцу (${sellerName}): <strong>${formatAmount(sellerAmount, 3)} USDT</strong></div>
+          <div>Мерчанту (${buyerName}): <strong>${formatAmount(buyerAmount, 3)} USDT</strong></div>
+        `;
+        disputeResolveModal.classList.add("open");
+        state.pendingResolve = { id: dispute.id, sellerAmount, buyerAmount };
       });
       p2pModalActions.appendChild(sellerRow);
       p2pModalActions.appendChild(buyerRow);
@@ -3677,6 +3684,28 @@
 
   commentModalClose?.addEventListener("click", () => {
     commentModal?.classList.remove("open");
+  });
+
+  const closeDisputeResolve = () => {
+    disputeResolveModal?.classList.remove("open");
+    state.pendingResolve = null;
+  };
+
+  disputeResolveClose?.addEventListener("click", closeDisputeResolve);
+  disputeResolveCancel?.addEventListener("click", closeDisputeResolve);
+
+  disputeResolveConfirm?.addEventListener("click", async () => {
+    if (!state.pendingResolve) return;
+    const { id, sellerAmount, buyerAmount } = state.pendingResolve;
+    const res = await fetchJson(`/api/disputes/${id}/resolve`, {
+      method: "POST",
+      body: JSON.stringify({ seller_amount: sellerAmount, buyer_amount: buyerAmount }),
+    });
+    if (res?.ok) {
+      closeDisputeResolve();
+      p2pModal?.classList.remove("open");
+      await loadDisputes();
+    }
   });
 
   const stopDisputeAutoRefresh = () => {

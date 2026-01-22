@@ -1651,6 +1651,34 @@ body.modal-open #app {
   color: #ff4d4f;
 }
 
+.chat-message.system {
+  align-self: center;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.chat-message.system .chat-system-label {
+  display: none;
+}
+
+.chat-message.system > div {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(77, 163, 255, 0.18);
+  border: 1px solid rgba(77, 163, 255, 0.35);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.chat-message.system .chat-message-meta {
+  display: none;
+}
+
 .image-modal {
   background: rgba(10, 12, 18, 0.8);
   backdrop-filter: blur(16px);

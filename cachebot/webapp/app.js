@@ -2823,7 +2823,9 @@
     chatList.innerHTML = "";
     (messages || []).forEach((msg) => {
       const item = document.createElement("div");
-      item.className = `chat-message ${isSelfSender(msg.sender_id) ? "self" : ""}`.trim();
+      item.className = `chat-message ${isSelfSender(msg.sender_id) ? "self" : ""} ${
+        msg.system ? "system" : ""
+      }`.trim();
       if (msg.system) {
         const label = document.createElement("div");
         label.className = "chat-system-label";

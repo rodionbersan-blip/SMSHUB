@@ -1418,6 +1418,26 @@ async def _api_dispute_assign(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text=str(exc))
     except LookupError:
         raise web.HTTPNotFound(text="Спор не найден")
+    deal = await deps.deal_service.get_deal(dispute.deal_id)
+    if deal:
+        profile = await deps.user_service.profile_of(user_id)
+        name = (
+            profile.display_name
+            if profile and profile.display_name
+            else profile.full_name
+            if profile and profile.full_name
+            else profile.username
+            if profile and profile.username
+            else str(user_id)
+        )
+        await deps.chat_service.add_message(
+            deal_id=deal.id,
+            sender_id=0,
+            text=f"Модератор {name} подключен к чату",
+            file_path=None,
+            file_name=None,
+            system=True,
+        )
     return web.json_response({"ok": True, "dispute_id": dispute.id, "assigned_to": dispute.assigned_to})
 
 

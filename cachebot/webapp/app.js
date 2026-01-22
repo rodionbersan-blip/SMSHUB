@@ -1339,7 +1339,8 @@
     persistCompletedNotified();
     if (!state.chatInitDone) {
       deals.forEach((deal) => {
-        if (deal.chat_last_at) {
+        if (!deal.chat_last_at) return;
+        if (deal.chat_last_sender_id && isSelfSender(deal.chat_last_sender_id)) {
           state.chatLastSeenAt[deal.id] = deal.chat_last_at;
         }
       });

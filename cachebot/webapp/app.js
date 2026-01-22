@@ -2486,12 +2486,18 @@
       showNotice("Прикрепите видео с банкомата");
       return;
     }
+    if (disputeVideoName) {
+      disputeVideoName.textContent = "Загружается...";
+    }
     const comment = (disputeComment?.value || "").trim() || null;
     const payload = await fetchJson(`/api/deals/${dealId}/open-dispute`, {
       method: "POST",
       body: JSON.stringify({ comment }),
     });
     if (!payload?.ok) {
+      if (disputeVideoName) {
+        disputeVideoName.textContent = "Ошибка загрузки.";
+      }
       showNotice("Не удалось открыть спор");
       return;
     }
@@ -2515,8 +2521,14 @@
       });
       if (!res.ok) {
         const text = await res.text();
+        if (disputeVideoName) {
+          disputeVideoName.textContent = "Ошибка загрузки.";
+        }
         showNotice(text || "Не удалось отправить видео");
         return;
+      }
+      if (disputeVideoName) {
+        disputeVideoName.textContent = "Загружено.";
       }
       showNotice("Спор открыт");
       closeDisputeOpenModal();
@@ -2525,6 +2537,9 @@
         maybeRenderDealModal(dealPayload.deal);
       }
     } catch (err) {
+      if (disputeVideoName) {
+        disputeVideoName.textContent = "Ошибка загрузки.";
+      }
       showNotice(`Ошибка: ${err.message}`);
     }
   };
@@ -3406,7 +3421,7 @@
       }
       state.disputeOpenDraft = { file, name: file.name || "Видео" };
       if (disputeVideoName) {
-        disputeVideoName.textContent = state.disputeOpenDraft.name;
+        disputeVideoName.textContent = `Выбрано: ${state.disputeOpenDraft.name}`;
       }
       if (disputeOpenSend) {
         disputeOpenSend.disabled = false;

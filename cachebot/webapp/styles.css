@@ -1422,6 +1422,41 @@ body.modal-open #app {
   min-height: 42px;
 }
 
+#disputeOpenModal .deal-proof-actions .btn {
+  min-height: 46px;
+}
+
+:root[data-theme="light"] #disputeOpenModal .deal-proof-title {
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #disputeOpenModal .dispute-video-name {
+  color: #1b2b4a;
+  background: rgba(77, 163, 255, 0.18);
+  border-color: rgba(77, 163, 255, 0.4);
+}
+
+:root[data-theme="light"] #disputeOpenModal .deal-proof-field {
+  color: #4b5563;
+}
+
+:root[data-theme="light"] #disputeOpenModal .deal-proof-field .input {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 17, 21, 0.12);
+  color: #111827;
+}
+
+:root[data-theme="light"] #disputeOpenModal .btn.pill {
+  background: rgba(77, 163, 255, 0.16);
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #disputeOpenModal .btn.pill:hover {
+  background: rgba(77, 163, 255, 0.3);
+  color: #1b2b4a;
+}
+
 .proof-modal .deal-proof-actions .btn:focus {
   outline: none;
   box-shadow: none;

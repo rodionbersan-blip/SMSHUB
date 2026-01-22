@@ -124,6 +124,9 @@
   const videoModal = document.getElementById("videoModal");
   const videoModalPlayer = document.getElementById("videoModalPlayer");
   const videoModalClose = document.getElementById("videoModalClose");
+  const commentModal = document.getElementById("commentModal");
+  const commentModalClose = document.getElementById("commentModalClose");
+  const commentModalText = document.getElementById("commentModalText");
   const buyerProofModal = document.getElementById("buyerProofModal");
   const buyerProofClose = document.getElementById("buyerProofClose");
   const buyerProofPick = document.getElementById("buyerProofPick");
@@ -2058,7 +2061,15 @@
     const sellerUsername = dispute.seller?.username ? `@${dispute.seller.username}` : "—";
     const buyerUsername = dispute.buyer?.username ? `@${dispute.buyer.username}` : "—";
     const openerName = dispute.opened_by_name || "—";
-    const commentText = dispute.comment ? ` ${dispute.comment} (от ${openerName})` : " —";
+    const comments = [];
+    if (dispute.comment) {
+      comments.push({ author: openerName, text: dispute.comment });
+    }
+    (dispute.messages || []).forEach((msg) => {
+      if (msg?.text) {
+        comments.push({ author: msg.author_name || msg.author_id || "—", text: msg.text });
+      }
+    });
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
@@ -2074,10 +2085,8 @@
       </div>
       <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
-      <div class="deal-detail-row"><span>Комментарий:</span>${commentText}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
       <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(dispute.deal.usdt_amount)} USDT</div>
-      <div class="deal-detail-row"><span>Доказательства:</span>${dispute.evidence.length}</div>
     `;
     if (dispute.evidence.length) {
       const evidenceList = document.createElement("div");
@@ -2108,6 +2117,30 @@
       });
       p2pModalBody.appendChild(evidenceList);
     }
+    const commentRow = document.createElement("div");
+    commentRow.className = "deal-detail-row comment-row";
+    const commentLabel = document.createElement("span");
+    commentLabel.textContent = "Комментарий:";
+    const commentButtons = document.createElement("div");
+    commentButtons.className = "comment-buttons";
+    if (!comments.length) {
+      const empty = document.createElement("div");
+      empty.textContent = "—";
+      commentButtons.appendChild(empty);
+    } else {
+      comments.slice(0, 2).forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "btn pill";
+        btn.textContent = item.author;
+        btn.addEventListener("click", () => {
+          openCommentModal(item.text);
+        });
+        commentButtons.appendChild(btn);
+      });
+    }
+    commentRow.appendChild(commentLabel);
+    commentRow.appendChild(commentButtons);
+    p2pModalBody.appendChild(commentRow);
     p2pModalBody.querySelectorAll(".link-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-user");
@@ -3550,6 +3583,12 @@
     videoModal.classList.add("open");
   };
 
+  const openCommentModal = (text) => {
+    if (!commentModal || !commentModalText) return;
+    commentModalText.textContent = text;
+    commentModal.classList.add("open");
+  };
+
   imageModalClose?.addEventListener("click", () => {
     imageModal?.classList.remove("open");
   });
@@ -3561,6 +3600,10 @@
       videoModalPlayer.load?.();
     }
     videoModal?.classList.remove("open");
+  });
+
+  commentModalClose?.addEventListener("click", () => {
+    commentModal?.classList.remove("open");
   });
 
   const stopDisputeAutoRefresh = () => {

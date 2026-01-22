@@ -1795,6 +1795,26 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.comment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.comment-buttons {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 8px;
+}
+
+.comment-buttons .btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 .dispute-party {
   display: inline-flex;
   align-items: center;

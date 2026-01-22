@@ -1390,6 +1390,9 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         "messages": [
             {
                 "author_id": msg.author_id,
+                "author_name": _display_name(
+                    await deps.user_service.profile_of(msg.author_id), msg.author_id
+                ),
                 "text": msg.text,
                 "created_at": msg.created_at.isoformat(),
             }

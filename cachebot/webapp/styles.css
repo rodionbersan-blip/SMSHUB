@@ -1656,6 +1656,10 @@ body.modal-open #app {
     calc(16px + env(safe-area-inset-left, 0px));
 }
 
+#videoModal {
+  z-index: 90;
+}
+
 .image-modal-card {
   position: relative;
   width: 100%;
@@ -1675,7 +1679,7 @@ body.modal-open #app {
 .video-modal-card {
   width: min(520px, 92vw);
   height: auto;
-  padding: 16px;
+  padding: 52px 16px 16px;
   background: rgba(10, 12, 16, 0.92);
   border-radius: 22px;
 }
@@ -1693,6 +1697,12 @@ body.modal-open #app {
   top: 12px;
   right: 12px;
   z-index: 1;
+}
+
+#videoModal .image-modal-close {
+  top: 10px;
+  right: 10px;
+  z-index: 2;
 }
 
 #chatModal .modal-card {

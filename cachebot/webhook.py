@@ -930,6 +930,7 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
     for msg in messages:
         label = None
         if msg.sender_id in admin_ids and not msg.system:
+            dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
             profile = admin_profiles.get(msg.sender_id) or {}
             name = (
                 profile.get("display_name")
@@ -937,7 +938,8 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
                 or profile.get("username")
                 or msg.sender_id
             )
-            label = f"Модератор {name}"
+            if dispute_any and dispute_any.assigned_to == msg.sender_id:
+                label = f"Модератор {name}"
         payload.append(
             {
                 **msg.to_dict(),
@@ -981,10 +983,12 @@ async def _api_deal_chat_send(request: web.Request) -> web.Response:
                 await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
+        dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
         profile = await deps.user_service.profile_of(user_id)
         data = _profile_payload(profile, request=request, include_private=True) or {}
         name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
-        sender_label = f"Модератор {name}"
+        if dispute_any and dispute_any.assigned_to == user_id:
+            sender_label = f"Модератор {name}"
     payload = {**msg.to_dict(), "file_url": None, "sender_label": sender_label}
     return web.json_response({"ok": True, "message": payload})
 
@@ -1034,10 +1038,12 @@ async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
                 await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
+        dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
         profile = await deps.user_service.profile_of(user_id)
         data = _profile_payload(profile, request=request, include_private=True) or {}
         name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
-        sender_label = f"Модератор {name}"
+        if dispute_any and dispute_any.assigned_to == user_id:
+            sender_label = f"Модератор {name}"
     payload = {
         **msg.to_dict(),
         "file_url": _chat_file_url(request, msg),

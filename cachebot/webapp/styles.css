@@ -1820,20 +1820,23 @@ body.modal-open #app {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 18px;
+  padding: 10px 14px;
+  border-radius: 26px;
   background: var(--card-contrast);
   border: 1px solid var(--card-contrast-border);
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .balance-item.pos {
   border-color: rgba(46, 204, 113, 0.35);
-  background: rgba(46, 204, 113, 0.1);
+  background: rgba(46, 204, 113, 0.08);
 }
 
 .balance-item.neg {
   border-color: rgba(231, 76, 60, 0.35);
-  background: rgba(231, 76, 60, 0.1);
+  background: rgba(231, 76, 60, 0.08);
 }
 
 .balance-info {

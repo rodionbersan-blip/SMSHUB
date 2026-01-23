@@ -2550,11 +2550,17 @@
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
     input.onchange = async () => {
       const file = input.files?.[0];
+      input.remove();
       if (!file) return;
       const form = new FormData();
-      form.append("file", file);
+      form.append("file", file, file.name || "qr.png");
+      showNotice("Загружаем QR...");
       try {
         const res = await fetch(`/api/deals/${dealId}/qr`, {
           method: "POST",

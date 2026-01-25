@@ -221,29 +221,27 @@ class UserService:
 
 def _random_display_name() -> str:
     adjectives = [
-        "Тихий",
-        "Северный",
-        "Быстрый",
-        "Смелый",
-        "Ровный",
-        "Золотой",
-        "Тёплый",
-        "Скрытный",
-        "Спокойный",
-        "Ясный",
+        "Swift",
+        "Calm",
+        "Bright",
+        "Bold",
+        "Quick",
+        "Silent",
+        "Nova",
+        "Sunny",
+        "Lucky",
+        "Cool",
     ]
     nouns = [
-        "Лис",
-        "Сокол",
-        "Ворон",
-        "Барс",
-        "Кедр",
-        "Огонёк",
-        "Орёл",
-        "Ёж",
-        "Ветер",
-        "Бриг",
+        "Fox",
+        "Wolf",
+        "Eagle",
+        "Lynx",
+        "Hawk",
+        "Bear",
+        "Otter",
+        "Kite",
+        "Raven",
+        "Star",
     ]
-    base = f"{random.choice(adjectives)} {random.choice(nouns)}"
-    suffix = random.randint(10, 999)
-    return f"{base} {suffix}"
+    return f"{random.choice(adjectives)} {random.choice(nouns)}"

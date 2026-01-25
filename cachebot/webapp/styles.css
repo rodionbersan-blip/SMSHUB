@@ -106,8 +106,8 @@ body.modal-open #app {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
+  gap: 12px;
+  padding: 12px 14px;
   background: rgba(18, 22, 30, 0.78);
   border: 1px solid rgba(120, 180, 255, 0.18);
   border-radius: 26px;
@@ -123,7 +123,9 @@ body.modal-open #app {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  max-width: 56%;
+  justify-content: flex-end;
 }
 
 .theme-switch {
@@ -208,14 +210,17 @@ body.modal-open #app {
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 10px 24px rgba(0, 0, 0, 0.35),
     0 0 18px rgba(77, 163, 255, 0.3);
-  max-width: 220px;
+  max-width: 190px;
 }
 
 .profile-chip .profile-name {
   max-width: 120px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  white-space: normal;
+  line-height: 1.05;
 }
 
 .profile-avatar {
@@ -248,7 +253,7 @@ body.modal-open #app {
 }
 
 .brand-mark {
-  height: 32px;
+  height: 28px;
   width: auto;
   max-width: 160px;
   object-fit: contain;
@@ -302,7 +307,7 @@ body.modal-open #app {
 
 @media (min-width: 900px) {
   .brand-mark {
-    height: 44px;
+    height: 36px;
     max-width: 220px;
   }
 }

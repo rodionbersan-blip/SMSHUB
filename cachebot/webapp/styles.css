@@ -539,6 +539,33 @@ body.modal-open #app {
   margin-left: auto;
 }
 
+.nav-btn.with-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+:root[data-theme="light"] .nav-icon img {
+  filter: none;
+}
+
 .tab {
   background: transparent;
   border: none;

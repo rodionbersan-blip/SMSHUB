@@ -607,13 +607,14 @@ body.modal-open #app {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-top: -4px;
 }
 
 .profile-balance-row.history-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 #balanceHistoryOpen {

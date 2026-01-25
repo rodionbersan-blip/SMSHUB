@@ -1147,6 +1147,10 @@ body.modal-open #app {
   margin-left: auto;
 }
 
+.tab[data-view="admin"] {
+  margin-left: auto;
+}
+
 .p2p-actions {
   flex-wrap: nowrap;
 }

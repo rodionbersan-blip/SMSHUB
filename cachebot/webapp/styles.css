@@ -655,7 +655,7 @@ body.modal-open #app {
   justify-content: space-between;
   gap: 10px;
   margin-top: -24px;
-  --action-btn-width: 126px;
+  --action-btn-width: 121px;
   --action-btn-gap: 10px;
 }
 

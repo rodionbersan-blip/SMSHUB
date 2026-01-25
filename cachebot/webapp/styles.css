@@ -463,6 +463,7 @@ body.modal-open #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 18px;
 }
 
 .btn.reviews-btn .btn-icon {
@@ -475,6 +476,17 @@ body.modal-open #app {
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.profile-balance-row .btn-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.profile-balance-row .btn-icon img {
+  min-width: 20px;
+  min-height: 20px;
 }
 
 .btn.reviews-btn .btn-icon img {

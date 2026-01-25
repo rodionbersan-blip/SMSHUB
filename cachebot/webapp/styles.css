@@ -607,20 +607,24 @@ body.modal-open #app {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: -14px;
+  margin-top: -22px;
 }
 
 .profile-balance-row.history-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  margin-top: -4px;
+  margin-top: -8px;
 }
 
 #balanceHistoryOpen {
   min-width: 220px;
   grid-column: 2 / span 2;
   justify-self: center;
+}
+
+#profileBalance {
+  margin-top: 10px;
 }
 
 .profile-title {

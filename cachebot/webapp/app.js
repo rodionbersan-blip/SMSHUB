@@ -1307,11 +1307,10 @@
           <div class="deal-id">Сделка #${deal.public_id}</div>
           <div class="deal-status">${statusLabel(deal)}</div>
         </div>
-        <div class="deal-row">Сумма: ₽${formatAmount(deal.cash_rub, 2)} | ${formatAmount(
-          deal.usdt_amount
-        )} USDT</div>
-        <div class="deal-row">Курс: 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
-        <div class="deal-row">Создано: ${formatDate(deal.created_at)}</div>
+        <div class="deal-row">${formatAmount(deal.cash_rub, 2)}₽-${formatAmount(
+        deal.usdt_amount
+      )} USDT | 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
+        <div class="deal-row">Дата: ${formatDate(deal.created_at)}</div>
       `;
       item.addEventListener("click", () => openDealModal(deal.id));
       dealsList.appendChild(item);

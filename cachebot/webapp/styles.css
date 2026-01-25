@@ -604,7 +604,7 @@ body.modal-open #app {
 
 .profile-balance-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   margin-top: -42px;
@@ -624,11 +624,15 @@ body.modal-open #app {
 }
 
 #profileBalance {
-  margin-top: 22px;
+  margin-top: 28px;
 }
 
 .profile-card .profile-title + .profile-value {
-  margin-top: 14px;
+  margin-top: 18px;
+}
+
+.profile-balance-row .btn {
+  margin-top: -10px;
 }
 
 .profile-title {

@@ -973,7 +973,7 @@ body.modal-open #app {
 
 .p2p-toolbar .btn.status-ok,
 .p2p-actions .btn.status-ok {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.8));
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.82), rgba(34, 197, 94, 0.76));
   border-color: transparent;
   color: #0f1b2e;
   box-shadow:
@@ -983,7 +983,7 @@ body.modal-open #app {
 
 .p2p-toolbar .btn.status-bad,
 .p2p-actions .btn.status-bad {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.88), rgba(220, 38, 38, 0.82));
+  background: linear-gradient(135deg, rgba(239, 88, 88, 0.82), rgba(229, 72, 72, 0.76));
   border-color: transparent;
   color: #ffffff;
   box-shadow:
@@ -993,7 +993,7 @@ body.modal-open #app {
 
 :root[data-theme="light"] .p2p-toolbar .btn.status-ok,
 :root[data-theme="light"] .p2p-actions .btn.status-ok {
-  background: linear-gradient(135deg, rgba(22, 163, 74, 0.86), rgba(16, 185, 129, 0.82));
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.86), rgba(16, 185, 129, 0.8));
   color: #ffffff;
   box-shadow:
     0 10px 16px rgba(16, 185, 129, 0.2),
@@ -1002,7 +1002,7 @@ body.modal-open #app {
 
 :root[data-theme="light"] .p2p-toolbar .btn.status-bad,
 :root[data-theme="light"] .p2p-actions .btn.status-bad {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.88), rgba(239, 68, 68, 0.84));
+  background: linear-gradient(135deg, rgba(239, 88, 88, 0.88), rgba(229, 72, 72, 0.82));
   color: #ffffff;
   box-shadow:
     0 10px 16px rgba(239, 68, 68, 0.2),

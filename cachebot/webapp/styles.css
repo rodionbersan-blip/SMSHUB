@@ -1047,19 +1047,19 @@ body.modal-open #app {
 }
 
 #p2pCreateBtn {
-  background: linear-gradient(135deg, rgba(120, 190, 255, 0.95), rgba(77, 163, 255, 0.9));
-  color: #0f1b2e;
+  background: linear-gradient(135deg, rgba(255, 167, 66, 0.95), rgba(244, 114, 46, 0.9));
+  color: #2b1406;
   border-color: transparent;
   box-shadow:
-    0 10px 18px rgba(77, 163, 255, 0.28),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    0 10px 18px rgba(244, 114, 46, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 #p2pCreateBtn:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 12px 22px rgba(77, 163, 255, 0.34),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    0 12px 22px rgba(244, 114, 46, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
 }
 
 :root[data-theme="light"] #p2pCreateBtn {

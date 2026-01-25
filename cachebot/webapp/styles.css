@@ -673,8 +673,9 @@ body.modal-open #app {
   min-width: 0;
   grid-column: 2 / span 2;
   justify-self: stretch;
-  margin-left: -48px;
-  width: calc(100% + 48px);
+  margin-left: -80px;
+  width: calc(100% + 80px);
+  transform: translateX(-80px);
 }
 
 #profileBalance {

@@ -585,6 +585,7 @@ body.modal-open #app {
   border-radius: 999px;
   padding: 6px 12px;
   transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
 }
 
 .tab.active {
@@ -1144,12 +1145,13 @@ body.modal-open #app {
 }
 
 .tab[data-view="disputes"] {
-  flex-basis: 100%;
+  flex: 0 0 100%;
+  width: 100%;
   margin-left: 0;
 }
 
 .tab[data-view="admin"] {
-  margin-left: 12px;
+  margin-left: 0;
 }
 
 .p2p-actions {

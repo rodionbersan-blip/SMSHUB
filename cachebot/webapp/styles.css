@@ -567,11 +567,11 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .tab.active .nav-icon img {
-  filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1) !important;
 }
 
 :root[data-theme="dark"] .tab.active .nav-icon img {
-  filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1) !important;
 }
 
 .tab {

@@ -416,11 +416,11 @@ body.modal-open #app {
   background: rgba(255, 167, 66, 0.16);
   border: 1px solid rgba(255, 167, 66, 0.32);
   color: #c46912;
-  box-shadow: 0 6px 12px rgba(255, 144, 38, 0.12);
+  box-shadow: 0 2px 6px rgba(255, 144, 38, 0.08);
 }
 
 .btn.reviews-btn:hover {
-  background: rgba(255, 167, 66, 0.26);
+  background: rgba(255, 167, 66, 0.22);
   color: #c46912;
 }
 
@@ -428,11 +428,11 @@ body.modal-open #app {
   background: rgba(255, 178, 76, 0.2);
   border: 1px solid rgba(255, 178, 76, 0.38);
   color: #ffb053;
-  box-shadow: 0 7px 14px rgba(255, 140, 40, 0.14);
+  box-shadow: 0 2px 8px rgba(255, 140, 40, 0.1);
 }
 
 :root[data-theme="dark"] .btn.reviews-btn:hover {
-  background: rgba(255, 178, 76, 0.3);
+  background: rgba(255, 178, 76, 0.24);
   color: #ffb053;
 }
 
@@ -457,7 +457,7 @@ body.modal-open #app {
 }
 
 .btn.reviews-btn .btn-icon img {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+  filter: none;
 }
 
 .btn.oval {

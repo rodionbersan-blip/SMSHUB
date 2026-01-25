@@ -542,6 +542,8 @@ body.modal-open #app {
 #disputesTab,
 #adminTab {
   margin-top: 6px;
+  width: calc(50% - 6px);
+  justify-content: center;
 }
 
 .tabs-break {

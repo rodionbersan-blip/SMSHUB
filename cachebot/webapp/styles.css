@@ -412,6 +412,30 @@ body.modal-open #app {
   gap: 8px;
 }
 
+.btn.reviews-btn {
+  background: rgba(255, 167, 66, 0.16);
+  border: 1px solid rgba(255, 167, 66, 0.32);
+  color: #c46912;
+  box-shadow: 0 10px 18px rgba(255, 144, 38, 0.18);
+}
+
+.btn.reviews-btn:hover {
+  background: rgba(255, 167, 66, 0.26);
+  color: #c46912;
+}
+
+:root[data-theme="dark"] .btn.reviews-btn {
+  background: rgba(255, 178, 76, 0.2);
+  border: 1px solid rgba(255, 178, 76, 0.38);
+  color: #ffb053;
+  box-shadow: 0 12px 20px rgba(255, 140, 40, 0.22);
+}
+
+:root[data-theme="dark"] .btn.reviews-btn:hover {
+  background: rgba(255, 178, 76, 0.3);
+  color: #ffb053;
+}
+
 .btn-icon {
   width: 18px;
   height: 18px;
@@ -420,11 +444,20 @@ body.modal-open #app {
   justify-content: center;
 }
 
+.btn.reviews-btn .btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .btn-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.btn.reviews-btn .btn-icon img {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .btn.oval {

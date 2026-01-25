@@ -698,7 +698,7 @@ async def view_user_profile(callback: CallbackQuery) -> None:
     role = await deps.user_service.role_of(target_id)
     show_private = bool(callback.from_user and callback.from_user.id in deps.config.admin_ids)
     builder = InlineKeyboardBuilder()
-    builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
+    builder.button(text="💬 Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
     await callback.message.answer(
         _format_profile(
             profile,
@@ -750,7 +750,7 @@ async def reviews_back(callback: CallbackQuery) -> None:
     role = await deps.user_service.role_of(target_id)
     show_private = bool(callback.from_user and callback.from_user.id in deps.config.admin_ids)
     builder = InlineKeyboardBuilder()
-    builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
+    builder.button(text="💬 Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
     with suppress(TelegramBadRequest):
         await callback.message.delete()
     await callback.message.answer(
@@ -2947,7 +2947,7 @@ async def _send_profile(
     deals = await deps.deal_service.list_user_deals(user.id)
     reviews = await deps.review_service.list_for_user(user.id)
     builder = InlineKeyboardBuilder()
-    builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{user.id}:pos")
+    builder.button(text="💬 Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{user.id}:pos")
     builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
     builder.adjust(1, 1)
     sent = await bot.send_message(

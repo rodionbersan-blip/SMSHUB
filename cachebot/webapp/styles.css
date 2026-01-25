@@ -929,7 +929,7 @@ body.modal-open #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
   position: relative;
   overflow: visible;
@@ -979,6 +979,15 @@ body.modal-open #app {
 .deal-pagination .btn.back-btn:hover {
   background: rgba(0, 0, 0, 0.92);
   color: #ffffff;
+}
+
+.deal-pagination .btn.next-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+  color: #ffffff;
+}
+
+.deal-pagination .btn:active {
+  transform: scale(0.96);
 }
 
 .deal-pagination .btn.jump-btn {

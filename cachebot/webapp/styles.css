@@ -610,12 +610,16 @@ body.modal-open #app {
 }
 
 .profile-balance-row.history-row {
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
   margin-top: 8px;
 }
 
 #balanceHistoryOpen {
   min-width: 220px;
+  grid-column: 2 / span 2;
+  justify-self: center;
 }
 
 .profile-title {

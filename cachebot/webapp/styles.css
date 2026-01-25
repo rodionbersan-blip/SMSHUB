@@ -655,6 +655,8 @@ body.modal-open #app {
   justify-content: space-between;
   gap: 10px;
   margin-top: -24px;
+  --action-btn-width: 140px;
+  --action-btn-gap: 10px;
 }
 
 .profile-balance-row:not(.history-row) {
@@ -662,23 +664,25 @@ body.modal-open #app {
 }
 
 .profile-balance-row.history-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
   margin-top: 0;
 }
 
 #balanceHistoryOpen {
-  width: 100%;
+  width: calc(var(--action-btn-width) + var(--action-btn-width) + var(--action-btn-gap));
   min-width: 0;
-  grid-column: 2 / span 2;
-  justify-self: stretch;
-  margin-left: 0;
-  transform: none;
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+}
+
+#profileWithdraw,
+#topupOpen {
+  width: var(--action-btn-width);
+  justify-content: center;
 }
 
 #profileBalance {

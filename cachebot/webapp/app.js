@@ -230,6 +230,7 @@
   const moderationActionReason = document.getElementById("moderationActionReason");
   const moderationActionDuration = document.getElementById("moderationActionDuration");
   const moderationActionCustomRow = document.getElementById("moderationActionCustomRow");
+  const moderationActionDurationRow = moderationActionDuration?.closest("label") || null;
   const moderationActionCustom = document.getElementById("moderationActionCustom");
   const moderationActionHint = document.getElementById("moderationActionHint");
   const moderationActionSubmit = document.getElementById("moderationActionSubmit");
@@ -2389,9 +2390,8 @@
     if (moderationActionHint) {
       moderationActionHint.textContent = "Причина обязательна.";
     }
-    moderationActionDuration
-      ?.closest(".form-row")
-      ?.classList.toggle("is-hidden", action === "warn");
+    moderationActionDurationRow?.classList.toggle("is-hidden", action === "warn");
+    moderationActionCustomRow?.classList.toggle("is-hidden", action === "warn");
     moderationActionModal.classList.add("open");
   };
 

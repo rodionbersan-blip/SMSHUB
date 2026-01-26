@@ -63,6 +63,15 @@ body {
   min-height: 100dvh;
 }
 
+:root[data-theme="light"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #f5f7fb;
+  z-index: -1;
+  pointer-events: none;
+}
+
 
 input,
 textarea,

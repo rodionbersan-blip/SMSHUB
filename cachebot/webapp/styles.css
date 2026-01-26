@@ -3379,12 +3379,20 @@ body.pin-lock {
   pointer-events: none;
 }
 
-:root[data-theme="dark"] .tab[data-view="support"] .nav-icon img,
-:root[data-theme="dark"] .tab[data-view="support"].active .nav-icon img,
-:root[data-theme="light"] .tab[data-view="support"] .nav-icon img,
+:root[data-theme="dark"] .tab[data-view="support"] .nav-icon img {
+  filter: brightness(0) invert(1) !important;
+}
+
+:root[data-theme="dark"] .tab[data-view="support"].active .nav-icon img {
+  filter: brightness(0) invert(0) !important;
+}
+
+:root[data-theme="light"] .tab[data-view="support"] .nav-icon img {
+  filter: brightness(0) invert(0) !important;
+}
+
 :root[data-theme="light"] .tab[data-view="support"].active .nav-icon img {
-  filter: none !important;
-  opacity: 1 !important;
+  filter: brightness(0) invert(1) !important;
 }
 .btn.loading {
   opacity: 0.7;

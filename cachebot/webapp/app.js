@@ -1242,15 +1242,25 @@
   const getRawInitDataFromUrl = () => {
     const query = window.location.search || "";
     if (!query) return "";
-    const raw = query.slice(1).split("&").find((part) => part.startsWith("initData="));
-    return raw ? raw.slice("initData=".length) : "";
+    const parts = query.slice(1).split("&");
+    const raw =
+      parts.find((part) => part.startsWith("initData=")) ||
+      parts.find((part) => part.startsWith("tgWebAppData="));
+    if (!raw) return "";
+    if (raw.startsWith("tgWebAppData=")) return raw.slice("tgWebAppData=".length);
+    return raw.slice("initData=".length);
   };
 
   const getRawInitDataFromHash = () => {
     const hash = window.location.hash || "";
     if (!hash) return "";
-    const raw = hash.slice(1).split("&").find((part) => part.startsWith("tgWebAppData="));
-    return raw ? raw.slice("tgWebAppData=".length) : "";
+    const parts = hash.slice(1).split("&");
+    const raw =
+      parts.find((part) => part.startsWith("tgWebAppData=")) ||
+      parts.find((part) => part.startsWith("initData="));
+    if (!raw) return "";
+    if (raw.startsWith("initData=")) return raw.slice("initData=".length);
+    return raw.slice("tgWebAppData=".length);
   };
 
   const decodeInitData = (raw) => {

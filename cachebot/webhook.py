@@ -1895,15 +1895,13 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
                 )
             elif action == "unban":
                 message = (
-                    "Ваш профиль разблокирован.\n"
-                    f"{moderator_line}\n"
-                    "Если есть вопросы, пишите в поддержку."
+                    "✅ Ваш профиль разблокирован.\n"
+                    f"{moderator_line}"
                 )
             else:
                 message = (
-                    "Ограничение сделок снято.\n"
-                    f"{moderator_line}\n"
-                    "Если есть вопросы, пишите в поддержку."
+                    "✅ Ограничение сделок снято.\n"
+                    f"{moderator_line}"
                 )
             try:
                 await bot.send_message(target_id, message)

@@ -1365,13 +1365,15 @@
       const moderation = state.profileModeration || {};
       const banned = !!moderation.banned;
       const dealsBlocked = !!moderation.deals_blocked;
-      const warnings = moderation.warnings ?? 0;
-      const statusParts = [
-        banned ? "Аккаунт заблокирован" : "Аккаунт активен",
-        dealsBlocked ? "Сделки запрещены" : "Сделки разрешены",
-        `Предупреждений: ${warnings}/3`,
-      ];
+      const statusParts = [];
+      if (banned) {
+        statusParts.push("Профиль заблокирован");
+      } else if (dealsBlocked) {
+        statusParts.push("Сделки отключены");
+      }
       profileStatus.textContent = statusParts.join(" • ");
+      profileStatus.classList.toggle("alert", banned || dealsBlocked);
+      profileStatus.classList.toggle("is-hidden", !statusParts.length);
     }
     state.profileStats = {
       total_deals: stats.total_deals ?? 0,
@@ -2277,15 +2279,13 @@
     }
     const statusParts = [];
     if (banned) {
-      statusParts.push("Пользователь заблокирован");
-    } else {
-      statusParts.push("Пользователь разблокирован");
+      statusParts.push("Профиль заблокирован");
+    } else if (dealsBlocked) {
+      statusParts.push("Сделки отключены");
     }
-    if (dealsBlocked) {
-      statusParts.push("Сделки запрещены");
-    }
-    statusParts.push(`Предупреждений: ${warnings}/3`);
     moderationUserStatus.textContent = statusParts.join(" • ");
+    moderationUserStatus.classList.toggle("alert", banned || dealsBlocked);
+    moderationUserStatus.classList.toggle("is-hidden", !statusParts.length);
     if (moderationBlockBtn) {
       moderationBlockBtn.textContent = dealsBlocked ? "Разрешить сделки" : "Запретить сделки";
     }
@@ -2299,7 +2299,7 @@
       if (!btn) return;
       btn.disabled = !canManage;
     });
-    if (!canManage && moderationUserStatus) {
+    if (!canManage && moderationUserStatus && statusParts.length) {
       moderationUserStatus.textContent = `${moderationUserStatus.textContent} • Недоступно для модерации`;
     }
     moderationUserCard.classList.remove("is-hidden");
@@ -4534,13 +4534,15 @@
       const moderation = state.profileModeration || {};
       const banned = !!moderation.banned;
       const dealsBlocked = !!moderation.deals_blocked;
-      const warnings = moderation.warnings ?? 0;
-      const statusParts = [
-        banned ? "Аккаунт заблокирован" : "Аккаунт активен",
-        dealsBlocked ? "Сделки запрещены" : "Сделки разрешены",
-        `Предупреждений: ${warnings}/3`,
-      ];
+      const statusParts = [];
+      if (banned) {
+        statusParts.push("Профиль заблокирован");
+      } else if (dealsBlocked) {
+        statusParts.push("Сделки отключены");
+      }
       profileQuickStatus.textContent = statusParts.join(" • ");
+      profileQuickStatus.classList.toggle("alert", banned || dealsBlocked);
+      profileQuickStatus.classList.toggle("is-hidden", !statusParts.length);
     }
     profileModal.classList.add("open");
   });

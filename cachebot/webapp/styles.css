@@ -2002,7 +2002,7 @@ body.modal-open #app {
   z-index: 50;
   touch-action: pan-y;
   opacity: 0;
-  transition: opacity 0.38s ease;
+  transition: opacity 0.3s ease;
 }
 
 .modal.open {
@@ -2127,14 +2127,26 @@ body.modal-open #app {
   border-radius: 26px;
   padding: 20px;
   box-shadow: var(--shadow);
-  transform: translateY(36px) scale(0.91);
+  transform: translateY(0) scale(0.86);
   opacity: 0;
-  transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.42s ease;
+  transition: opacity 0.25s ease;
 }
 
 .modal.open .modal-card {
-  transform: translateY(0) scale(1);
   opacity: 1;
+  animation: modalZoomIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes modalZoomIn {
+  0% {
+    transform: translateY(0) scale(0.86);
+  }
+  60% {
+    transform: translateY(0) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 .deal-alert {

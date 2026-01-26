@@ -681,6 +681,11 @@ body.modal-open #app {
     0 6px 14px rgba(16, 24, 36, 0.08);
 }
 
+:root[data-theme="light"] #view-admin.panel {
+  background: rgba(248, 250, 255, 0.92);
+  border-color: rgba(20, 28, 38, 0.16);
+}
+
 .view {
   display: none;
 }

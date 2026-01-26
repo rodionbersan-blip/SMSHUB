@@ -65,7 +65,6 @@ select {
 
 body.modal-open {
   overflow: hidden;
-  touch-action: none;
 }
 
 body.pin-lock #app {
@@ -1973,6 +1972,7 @@ body.modal-open #app {
     calc(20px + env(safe-area-inset-bottom, 0px))
     calc(16px + env(safe-area-inset-left, 0px));
   z-index: 50;
+  touch-action: pan-y;
 }
 
 .modal.open {
@@ -2090,6 +2090,8 @@ body.modal-open #app {
   max-height: calc(100dvh - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   background: var(--card);
   border-radius: 26px;
   padding: 20px;

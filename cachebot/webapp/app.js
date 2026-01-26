@@ -3931,11 +3931,15 @@
     if (!field) return;
     const card = field.closest(".modal-card");
     if (!card) return;
-    const cardRect = card.getBoundingClientRect();
-    const fieldRect = field.getBoundingClientRect();
-    const offset = fieldRect.top - cardRect.top - cardRect.height * offsetRatio;
+    let offsetTop = 0;
+    let node = field;
+    while (node && node !== card) {
+      offsetTop += node.offsetTop || 0;
+      node = node.offsetParent;
+    }
+    const targetTop = offsetTop - card.clientHeight * offsetRatio;
     card.scrollTo({
-      top: Math.max(0, card.scrollTop + offset),
+      top: Math.max(0, targetTop),
       behavior: "smooth",
     });
   };
@@ -3944,7 +3948,7 @@
     if (!p2pTerms) return;
     setTimeout(() => {
       scrollFieldIntoCard(p2pTerms, 0.25);
-    }, 240);
+    }, 320);
   };
 
   p2pTerms?.addEventListener("focus", scrollP2PTermsIntoView);

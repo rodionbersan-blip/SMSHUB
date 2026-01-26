@@ -3986,10 +3986,28 @@
     });
   };
 
+  const adjustP2PCreateCardForKeyboard = () => {
+    const card = p2pCreateModal?.querySelector?.(".modal-card");
+    if (!card) return;
+    const vv = window.visualViewport;
+    if (vv && vv.height) {
+      card.style.maxHeight = `${Math.max(240, vv.height - 24)}px`;
+    } else {
+      card.style.maxHeight = "";
+    }
+  };
+
+  const resetP2PCreateCardHeight = () => {
+    const card = p2pCreateModal?.querySelector?.(".modal-card");
+    if (!card) return;
+    card.style.maxHeight = "";
+  };
+
   const scrollP2PCreateToBottom = () => {
     const card = p2pCreateModal?.querySelector?.(".modal-card");
     if (!card) return;
     setTimeout(() => {
+      adjustP2PCreateCardForKeyboard();
       card.scrollTo({ top: card.scrollHeight, behavior: "smooth" });
     }, 320);
   };
@@ -4009,7 +4027,16 @@
   );
   p2pCreateInputs?.forEach((input) => {
     input.addEventListener("focus", scrollP2PCreateToBottom);
+    input.addEventListener("blur", resetP2PCreateCardHeight);
   });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      if (!p2pCreateModal?.classList?.contains("open")) return;
+      adjustP2PCreateCardForKeyboard();
+      scrollP2PCreateToBottom();
+    });
+  }
 
   const computeMaxLimit = () => {
     const volume = Number(p2pVolume?.value);

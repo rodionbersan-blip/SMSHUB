@@ -628,6 +628,16 @@ body.modal-open #app {
   filter: brightness(0) invert(1);
 }
 
+.tab.active .nav-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.tab.active .nav-icon img {
+  width: 16px;
+  height: 16px;
+}
+
 :root[data-theme="dark"] .tab[data-view="support"] .nav-icon img {
   filter: none;
 }

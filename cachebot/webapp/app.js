@@ -1239,10 +1239,24 @@
     return "Статус";
   };
 
+  const getRawInitDataFromUrl = () => {
+    const query = window.location.search || "";
+    if (!query) return "";
+    const raw = query.slice(1).split("&").find((part) => part.startsWith("initData="));
+    return raw ? raw.slice("initData=".length) : "";
+  };
+
+  const getRawInitDataFromHash = () => {
+    const hash = window.location.hash || "";
+    if (!hash) return "";
+    const raw = hash.slice(1).split("&").find((part) => part.startsWith("tgWebAppData="));
+    return raw ? raw.slice("tgWebAppData=".length) : "";
+  };
+
   const refreshInitData = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const initFromUrl = urlParams.get("initData");
-    const fresh = tg?.initData || initFromUrl || "";
+    const initFromUrl = getRawInitDataFromUrl();
+    const initFromHash = getRawInitDataFromHash();
+    const fresh = tg?.initData || initFromHash || initFromUrl || "";
     if (fresh) {
       state.initData = fresh;
       updateInitDebug();
@@ -3572,9 +3586,9 @@
       if (isMobile) {
         tg.expand();
       }
-      const urlParams = new URLSearchParams(window.location.search);
-      const initFromUrl = urlParams.get("initData");
-      state.initData = tg.initData || initFromUrl || "";
+      const initFromUrl = getRawInitDataFromUrl();
+      const initFromHash = getRawInitDataFromHash();
+      state.initData = tg.initData || initFromHash || initFromUrl || "";
       refreshInitData();
       const theme = detectTheme();
       applyTheme(theme);
@@ -3650,9 +3664,9 @@
           state.initRetryTimer = null;
           return;
         }
-        const urlParams = new URLSearchParams(window.location.search);
-        const initFromUrl = urlParams.get("initData");
-        state.initData = tg.initData || initFromUrl || "";
+        const initFromUrl = getRawInitDataFromUrl();
+        const initFromHash = getRawInitDataFromHash();
+        state.initData = tg.initData || initFromHash || initFromUrl || "";
         if (state.initData) {
           await bootstrapApp();
           if (state.bootstrapDone) {

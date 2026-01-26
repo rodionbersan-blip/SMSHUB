@@ -1159,9 +1159,13 @@ body.modal-open #app {
   padding: 0;
   font-size: 0;
   border-radius: 50%;
+  background: rgba(10, 12, 16, 0.9);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
   position: relative;
   overflow: visible;
 }
@@ -1175,9 +1179,6 @@ body.modal-open #app {
   border-radius: 50%;
   position: relative;
   overflow: visible;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .deal-pagination .btn.next-btn::before {
@@ -1195,8 +1196,8 @@ body.modal-open #app {
   content: "";
   width: 16px;
   height: 16px;
-  border-left: 5px solid currentColor;
-  border-bottom: 5px solid currentColor;
+  border-left: 5px solid #ffffff;
+  border-bottom: 5px solid #ffffff;
   border-radius: 4px;
   transform: rotate(45deg);
 }
@@ -1210,9 +1211,13 @@ body.modal-open #app {
     inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.deal-pagination .btn.back-btn:hover,
+.deal-pagination .btn.back-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+  color: #ffffff;
+}
+
 .deal-pagination .btn.next-btn:hover {
-  background: rgba(18, 22, 30, 0.86);
+  background: rgba(0, 0, 0, 0.92);
   color: #ffffff;
 }
 
@@ -1244,24 +1249,21 @@ body.modal-open #app {
     inset 0 -1px 0 rgba(255, 255, 255, 0.75);
 }
 
-:root[data-theme="light"] .deal-pagination .btn.back-btn:hover,
-:root[data-theme="light"] .deal-pagination .btn.next-btn:hover {
-  background: rgba(248, 250, 255, 0.98);
-  color: #0f1115;
+:root[data-theme="light"] .deal-pagination .btn.back-btn {
+  background: rgba(20, 24, 30, 0.9);
+  color: #ffffff;
 }
-
- 
 
 .deal-pagination .btn.back-btn:active {
   transform: scale(0.94);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-  background: rgba(18, 22, 30, 0.9);
+  background: rgba(0, 0, 0, 1);
 }
 
 .deal-pagination .btn.back-btn.is-pressed {
   transform: scale(0.94);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-  background: rgba(18, 22, 30, 0.9);
+  background: rgba(0, 0, 0, 1);
 }
 
 .deal-pagination .btn.back-btn::after {
@@ -1284,11 +1286,6 @@ body.modal-open #app {
 .deal-pagination .btn.back-btn.is-pressed::after {
   opacity: 1;
   transform: scale(1);
-}
-
-:root[data-theme="light"] .deal-pagination .btn.back-btn:active,
-:root[data-theme="light"] .deal-pagination .btn.back-btn.is-pressed {
-  background: rgba(248, 250, 255, 0.98);
 }
 
 .p2p-toolbar,
@@ -3178,7 +3175,6 @@ body.modal-open #app {
   align-items: stretch;
   justify-content: stretch;
   pointer-events: none;
-  touch-action: manipulation;
   padding: 0;
   background-color: #0b0714;
   background:
@@ -3330,7 +3326,6 @@ body.pin-lock {
   display: grid;
   place-items: center;
   gap: 2px;
-  touch-action: manipulation;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.08),
     0 10px 22px rgba(0, 0, 0, 0.25);

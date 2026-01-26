@@ -3986,6 +3986,14 @@
     });
   };
 
+  const scrollP2PCreateToBottom = () => {
+    const card = p2pCreateModal?.querySelector?.(".modal-card");
+    if (!card) return;
+    setTimeout(() => {
+      card.scrollTo({ top: card.scrollHeight, behavior: "smooth" });
+    }, 320);
+  };
+
   const scrollP2PTermsIntoView = () => {
     if (!p2pTerms) return;
     setTimeout(() => {
@@ -3993,8 +4001,15 @@
     }, 320);
   };
 
-  p2pTerms?.addEventListener("focus", scrollP2PTermsIntoView);
-  p2pTerms?.addEventListener("click", scrollP2PTermsIntoView);
+  p2pTerms?.addEventListener("focus", scrollP2PCreateToBottom);
+  p2pTerms?.addEventListener("click", scrollP2PCreateToBottom);
+
+  const p2pCreateInputs = p2pCreateModal?.querySelectorAll?.(
+    "input, textarea, select"
+  );
+  p2pCreateInputs?.forEach((input) => {
+    input.addEventListener("focus", scrollP2PCreateToBottom);
+  });
 
   const computeMaxLimit = () => {
     const volume = Number(p2pVolume?.value);

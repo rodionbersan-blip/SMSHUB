@@ -1998,6 +1998,12 @@
     p2pModalActions.appendChild(save);
     p2pModalActions.appendChild(del);
     p2pModal.classList.add("open");
+    const adEditTerms = document.getElementById("adEditTerms");
+    const scrollEditTerms = () => {
+      scrollFieldIntoCard(adEditTerms, 0.25);
+    };
+    adEditTerms?.addEventListener("focus", scrollEditTerms);
+    adEditTerms?.addEventListener("click", scrollEditTerms);
     const banksContainer = document.getElementById("adEditBanks");
     banksContainer.innerHTML = "";
     (p2pBanks?.querySelectorAll("input") || []).forEach((bankInput) => {
@@ -3921,21 +3927,23 @@
     }
   });
 
+  const scrollFieldIntoCard = (field, offsetRatio = 0.25) => {
+    if (!field) return;
+    const card = field.closest(".modal-card");
+    if (!card) return;
+    const cardRect = card.getBoundingClientRect();
+    const fieldRect = field.getBoundingClientRect();
+    const offset = fieldRect.top - cardRect.top - cardRect.height * offsetRatio;
+    card.scrollTo({
+      top: Math.max(0, card.scrollTop + offset),
+      behavior: "smooth",
+    });
+  };
+
   const scrollP2PTermsIntoView = () => {
     if (!p2pTerms) return;
     setTimeout(() => {
-      const card = p2pTerms.closest(".modal-card");
-      if (card) {
-        const cardTop = card.getBoundingClientRect().top;
-        const targetTop = p2pTerms.getBoundingClientRect().top;
-        const offset = targetTop - cardTop - 24;
-        card.scrollTo({
-          top: Math.max(0, card.scrollTop + offset),
-          behavior: "smooth",
-        });
-        return;
-      }
-      p2pTerms.scrollIntoView({ behavior: "smooth", block: "end" });
+      scrollFieldIntoCard(p2pTerms, 0.25);
     }, 240);
   };
 

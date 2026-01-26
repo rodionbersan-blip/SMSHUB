@@ -207,6 +207,21 @@
   const disputesTab = document.getElementById("disputesTab");
   const disputesCount = document.getElementById("disputesCount");
   const disputesList = document.getElementById("disputesList");
+  const moderationDisputesBtn = document.getElementById("moderationDisputesBtn");
+  const moderationUsersBtn = document.getElementById("moderationUsersBtn");
+  const moderationDisputesPanel = document.getElementById("moderationDisputesPanel");
+  const moderationUsersPanel = document.getElementById("moderationUsersPanel");
+  const moderationSearchInput = document.getElementById("moderationSearchInput");
+  const moderationSearchBtn = document.getElementById("moderationSearchBtn");
+  const moderationSearchHint = document.getElementById("moderationSearchHint");
+  const moderationUserCard = document.getElementById("moderationUserCard");
+  const moderationUserTitle = document.getElementById("moderationUserTitle");
+  const moderationUserMeta = document.getElementById("moderationUserMeta");
+  const moderationUserStats = document.getElementById("moderationUserStats");
+  const moderationWarnBtn = document.getElementById("moderationWarnBtn");
+  const moderationBlockBtn = document.getElementById("moderationBlockBtn");
+  const moderationBanBtn = document.getElementById("moderationBanBtn");
+  const moderationUserStatus = document.getElementById("moderationUserStatus");
   const adminTab = document.getElementById("adminTab");
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
@@ -275,6 +290,7 @@
     livePollInFlight: false,
     reviewsTargetUserId: null,
     canManageDisputes: false,
+    moderationUser: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -2203,6 +2219,84 @@
     });
   };
 
+  const setModerationTab = (tab) => {
+    if (moderationDisputesBtn) {
+      moderationDisputesBtn.classList.toggle("active", tab === "disputes");
+    }
+    if (moderationUsersBtn) {
+      moderationUsersBtn.classList.toggle("active", tab === "users");
+    }
+    moderationDisputesPanel?.classList.toggle("is-hidden", tab !== "disputes");
+    moderationUsersPanel?.classList.toggle("is-hidden", tab !== "users");
+  };
+
+  const renderModerationUser = (payload) => {
+    const profile = payload?.profile;
+    const stats = payload?.stats || {};
+    const moderation = payload?.moderation || {};
+    const warnings = Number(moderation.warnings || 0);
+    const dealsBlocked = !!moderation.deals_blocked;
+    const banned = !!moderation.banned;
+    if (!moderationUserCard) return;
+    const display = profile?.display_name || profile?.full_name || profile?.username || "Пользователь";
+    const username = profile?.username ? `@${profile.username}` : "—";
+    moderationUserTitle.textContent = display;
+    moderationUserMeta.innerHTML = `
+      <span>ID: ${profile?.user_id || "—"}</span>
+      <span>${username}</span>
+      <span>Роль: ${payload?.role || "—"}</span>
+    `;
+    moderationUserStats.innerHTML = `
+      <span>Сделок: ${stats.total_deals ?? 0}</span>
+      <span>Успешные: ${stats.success_percent ?? 0}%</span>
+      <span>Отзывы: ${stats.reviews_count ?? 0}</span>
+    `;
+    const statusParts = [`Предупреждений: ${warnings}/3`];
+    if (dealsBlocked) statusParts.push("Сделки запрещены");
+    if (banned) statusParts.push("БАН");
+    moderationUserStatus.textContent = statusParts.join(" • ");
+    if (moderationBlockBtn) {
+      moderationBlockBtn.textContent = dealsBlocked ? "Разрешить сделки" : "Запретить сделки";
+    }
+    if (moderationBanBtn) {
+      moderationBanBtn.textContent = banned ? "Разблокировать" : "Заблокировать";
+    }
+    moderationUserCard.classList.remove("is-hidden");
+    state.moderationUser = {
+      user_id: profile?.user_id,
+      moderation: { warnings, deals_blocked: dealsBlocked, banned },
+    };
+  };
+
+  const runModerationSearch = async () => {
+    if (!moderationSearchInput) return;
+    const query = moderationSearchInput.value.trim();
+    if (!query) {
+      if (moderationSearchHint) moderationSearchHint.textContent = "Введите @username или ID.";
+      return;
+    }
+    if (moderationSearchHint) moderationSearchHint.textContent = "Поиск...";
+    const payload = await fetchJson(`/api/admin/users/search?query=${encodeURIComponent(query)}`);
+    if (!payload?.ok) {
+      if (moderationSearchHint) moderationSearchHint.textContent = "Пользователь не найден.";
+      moderationUserCard?.classList.add("is-hidden");
+      return;
+    }
+    if (moderationSearchHint) moderationSearchHint.textContent = "";
+    renderModerationUser(payload.user);
+  };
+
+  const applyModerationAction = async (action) => {
+    const userId = state.moderationUser?.user_id;
+    if (!userId) return;
+    const payload = await fetchJson(`/api/admin/users/${userId}/moderation`, {
+      method: "POST",
+      body: JSON.stringify({ action }),
+    });
+    if (!payload?.ok) return;
+    renderModerationUser(payload.user);
+  };
+
   const loadAdmin = async () => {
     const summary = await fetchJson("/api/admin/summary");
     if (!summary?.ok || !summary.can_access) {
@@ -3391,6 +3485,7 @@
       }
       await loadBanks();
       await loadDisputes();
+      setModerationTab("disputes");
       await loadAdmin();
     };
 
@@ -4274,6 +4369,25 @@
     });
     adminModeratorUsername.value = "";
     await loadAdmin();
+  });
+
+  moderationDisputesBtn?.addEventListener("click", () => setModerationTab("disputes"));
+  moderationUsersBtn?.addEventListener("click", () => setModerationTab("users"));
+  moderationSearchBtn?.addEventListener("click", runModerationSearch);
+  moderationSearchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runModerationSearch();
+    }
+  });
+  moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn"));
+  moderationBlockBtn?.addEventListener("click", () => {
+    const blocked = state.moderationUser?.moderation?.deals_blocked;
+    applyModerationAction(blocked ? "unblock_deals" : "block_deals");
+  });
+  moderationBanBtn?.addEventListener("click", () => {
+    const banned = state.moderationUser?.moderation?.banned;
+    applyModerationAction(banned ? "unban" : "ban");
   });
 
   reviewsOpen?.addEventListener("click", async () => {

@@ -58,6 +58,9 @@ class StorageState:
     merchant_since: Dict[int, str]
     p2p_trading_enabled: Dict[int, bool]
     moderators: List[int]
+    user_warnings: Dict[int, int]
+    user_bans: List[int]
+    user_deal_blocks: List[int]
 
 
 class StateRepository:
@@ -102,6 +105,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -125,6 +131,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -135,6 +144,9 @@ class StateRepository:
         profiles: Dict[int, UserProfile],
         merchant_since: Dict[int, str],
         moderators: List[int],
+        user_warnings: Dict[int, int],
+        user_bans: List[int],
+        user_deal_blocks: List[int],
     ) -> None:
         async with self._lock:
             self._state = StorageState(
@@ -155,6 +167,9 @@ class StateRepository:
                 merchant_since=merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=moderators,
+                user_warnings=user_warnings,
+                user_bans=user_bans,
+                user_deal_blocks=user_deal_blocks,
             )
             self._write_locked()
 
@@ -178,6 +193,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -201,6 +219,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -229,6 +250,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -252,6 +276,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -275,6 +302,9 @@ class StateRepository:
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
             )
             self._write_locked()
 
@@ -304,6 +334,9 @@ class StateRepository:
                 str(uid): enabled for uid, enabled in self._state.p2p_trading_enabled.items()
             },
             "moderators": list(self._state.moderators),
+            "user_warnings": {str(uid): count for uid, count in self._state.user_warnings.items()},
+            "user_bans": list(self._state.user_bans),
+            "user_deal_blocks": list(self._state.user_deal_blocks),
         }
         tmp = self._path.with_suffix(".tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -329,6 +362,9 @@ class StateRepository:
                 merchant_since={},
                 p2p_trading_enabled={},
                 moderators=[],
+                user_warnings={},
+                user_bans=[],
+                user_deal_blocks=[],
             )
         raw = json.loads(self._path.read_text(encoding="utf-8"))
         deals = [Deal.from_dict(item) for item in raw.get("deals", [])]
@@ -365,6 +401,11 @@ class StateRepository:
             int(uid): bool(value) for uid, value in (raw.get("p2p_trading_enabled") or {}).items()
         }
         moderators = [int(uid) for uid in (raw.get("moderators") or [])]
+        user_warnings = {
+            int(uid): int(count) for uid, count in (raw.get("user_warnings") or {}).items()
+        }
+        user_bans = [int(uid) for uid in (raw.get("user_bans") or [])]
+        user_deal_blocks = [int(uid) for uid in (raw.get("user_deal_blocks") or [])]
         return StorageState(
             deals=deals,
             balances=balances,
@@ -383,4 +424,7 @@ class StateRepository:
             merchant_since=merchant_since,
             p2p_trading_enabled=p2p_trading_enabled,
             moderators=moderators,
+            user_warnings=user_warnings,
+            user_bans=user_bans,
+            user_deal_blocks=user_deal_blocks,
         )

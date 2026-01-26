@@ -28,6 +28,9 @@ class UserService:
             uid: datetime.fromisoformat(value) for uid, value in snapshot.merchant_since.items()
         }
         self._moderators = set(snapshot.moderators)
+        self._warnings: Dict[int, int] = getattr(snapshot, "user_warnings", {}).copy()
+        self._banned = set(getattr(snapshot, "user_bans", []))
+        self._deal_blocks = set(getattr(snapshot, "user_deal_blocks", []))
         self._lock = asyncio.Lock()
         now = datetime.now(timezone.utc)
         for uid, role in self._roles.items():
@@ -199,6 +202,63 @@ class UserService:
         records.sort(key=lambda rec: rec.merchant_since or datetime.min.replace(tzinfo=timezone.utc))
         return records
 
+    async def moderation_status(self, user_id: int) -> dict[str, int | bool]:
+        async with self._lock:
+            return {
+                "warnings": int(self._warnings.get(user_id, 0)),
+                "banned": user_id in self._banned,
+                "deals_blocked": user_id in self._deal_blocks,
+            }
+
+    async def add_warning(self, user_id: int) -> dict[str, int | bool]:
+        async with self._lock:
+            count = int(self._warnings.get(user_id, 0)) + 1
+            self._warnings[user_id] = count
+            if count >= 3:
+                self._banned.add(user_id)
+                self._deal_blocks.add(user_id)
+            await self._persist()
+            return {
+                "warnings": count,
+                "banned": user_id in self._banned,
+                "deals_blocked": user_id in self._deal_blocks,
+            }
+
+    async def set_banned(self, user_id: int, banned: bool) -> dict[str, int | bool]:
+        async with self._lock:
+            if banned:
+                self._banned.add(user_id)
+                self._deal_blocks.add(user_id)
+            else:
+                self._banned.discard(user_id)
+            await self._persist()
+            return {
+                "warnings": int(self._warnings.get(user_id, 0)),
+                "banned": user_id in self._banned,
+                "deals_blocked": user_id in self._deal_blocks,
+            }
+
+    async def set_deal_blocked(self, user_id: int, blocked: bool) -> dict[str, int | bool]:
+        async with self._lock:
+            if blocked:
+                self._deal_blocks.add(user_id)
+            else:
+                self._deal_blocks.discard(user_id)
+            await self._persist()
+            return {
+                "warnings": int(self._warnings.get(user_id, 0)),
+                "banned": user_id in self._banned,
+                "deals_blocked": user_id in self._deal_blocks,
+            }
+
+    async def can_trade(self, user_id: int) -> bool:
+        async with self._lock:
+            if user_id in self._banned:
+                return False
+            if user_id in self._deal_blocks:
+                return False
+            return True
+
     async def has_merchant_access(self, user_id: int) -> bool:
         async with self._lock:
             if self._roles.get(user_id) == UserRole.BUYER.value:
@@ -216,6 +276,9 @@ class UserService:
             profiles=self._profiles.copy(),
             merchant_since={uid: value.isoformat() for uid, value in self._merchant_since.items()},
             moderators=sorted(self._moderators),
+            user_warnings=self._warnings.copy(),
+            user_bans=sorted(self._banned),
+            user_deal_blocks=sorted(self._deal_blocks),
         )
 
 

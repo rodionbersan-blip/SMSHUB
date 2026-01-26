@@ -90,6 +90,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_delete("/api/admin/moderators/{user_id}", _api_admin_remove_moderator)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
+    app.router.add_get("/api/admin/users/search", _api_admin_user_search)
+    app.router.add_post("/api/admin/users/{user_id}/moderation", _api_admin_user_moderation)
     app.router.add_get("/api/reviews", _api_reviews_list)
     app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
@@ -488,6 +490,7 @@ async def _api_my_deals(request: web.Request) -> web.Response:
 async def _api_create_deal(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
+    await _ensure_trade_allowed(deps, user_id)
     role = await deps.user_service.role_of(user_id)
     if role != UserRole.SELLER:
         raise web.HTTPForbidden(text="Доступно только продавцу")
@@ -1094,6 +1097,8 @@ async def _api_p2p_public_ads(request: web.Request) -> web.Response:
     )
     payload = []
     for ad in ads:
+        if not await deps.user_service.can_trade(ad.owner_id):
+            continue
         ad, available = await _ensure_ad_availability(deps, ad)
         if not ad.active or available <= 0:
             continue
@@ -1119,6 +1124,7 @@ async def _api_p2p_my_ads(request: web.Request) -> web.Response:
 async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
+    await _ensure_trade_allowed(deps, user_id)
     try:
         body = await request.json()
     except Exception:
@@ -1245,10 +1251,13 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     bot = request.app["bot"]
     user, user_id = await _require_user(request)
+    await _ensure_trade_allowed(deps, user_id)
     ad_id = request.match_info["ad_id"]
     ad = await deps.advert_service.get_ad(ad_id)
     if not ad or not ad.active:
         raise web.HTTPNotFound(text="Объявление недоступно")
+    if not await deps.user_service.can_trade(ad.owner_id):
+        raise web.HTTPBadRequest(text="Объявление недоступно")
     if ad.owner_id == user_id:
         raise web.HTTPBadRequest(text="Нельзя создать сделку по своему объявлению")
     if not await deps.advert_service.trading_enabled(ad.owner_id):
@@ -1769,6 +1778,74 @@ async def _api_admin_merchant_revoke(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def _api_admin_user_search(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    query = (request.query.get("query") or "").strip()
+    if not query:
+        raise web.HTTPBadRequest(text="Нужно указать запрос")
+    profile = None
+    if query.isdigit():
+        profile = await deps.user_service.profile_of(int(query))
+    else:
+        profile = await deps.user_service.profile_by_username(query)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    role = await deps.user_service.role_of(profile.user_id)
+    merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
+    stats = await _user_stats(deps, profile.user_id)
+    moderation = await deps.user_service.moderation_status(profile.user_id)
+    payload = {
+        "profile": _profile_payload(profile, request=request, include_private=True),
+        "role": role.value if role else None,
+        "merchant_since": merchant_since.isoformat() if merchant_since else None,
+        "stats": stats,
+        "moderation": moderation,
+    }
+    return web.json_response({"ok": True, "user": payload})
+
+
+async def _api_admin_user_moderation(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    profile = await deps.user_service.profile_of(target_id)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    action = str(body.get("action") or "").strip().lower()
+    if action == "warn":
+        moderation = await deps.user_service.add_warning(target_id)
+    elif action == "ban":
+        moderation = await deps.user_service.set_banned(target_id, True)
+    elif action == "unban":
+        moderation = await deps.user_service.set_banned(target_id, False)
+    elif action == "block_deals":
+        moderation = await deps.user_service.set_deal_blocked(target_id, True)
+    elif action == "unblock_deals":
+        moderation = await deps.user_service.set_deal_blocked(target_id, False)
+    else:
+        raise web.HTTPBadRequest(text="Некорректное действие")
+    role = await deps.user_service.role_of(profile.user_id)
+    merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
+    stats = await _user_stats(deps, profile.user_id)
+    payload = {
+        "profile": _profile_payload(profile, request=request, include_private=True),
+        "role": role.value if role else None,
+        "merchant_since": merchant_since.isoformat() if merchant_since else None,
+        "stats": stats,
+        "moderation": moderation,
+    }
+    return web.json_response({"ok": True, "user": payload})
+
+
 async def _api_reviews_list(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -1957,6 +2034,20 @@ async def _has_dispute_access(user_id: int, deps: AppDeps) -> bool:
     if user_id in deps.config.admin_ids:
         return True
     return await deps.user_service.is_moderator(user_id)
+
+
+async def _has_moderation_access(user_id: int, deps: AppDeps) -> bool:
+    if user_id in deps.config.admin_ids:
+        return True
+    return await deps.user_service.is_moderator(user_id)
+
+
+async def _ensure_trade_allowed(deps: AppDeps, user_id: int) -> None:
+    status = await deps.user_service.moderation_status(user_id)
+    if status.get("banned"):
+        raise web.HTTPForbidden(text="Аккаунт заблокирован")
+    if status.get("deals_blocked"):
+        raise web.HTTPForbidden(text="Сделки запрещены модератором")
 
 
 def _avatar_dir(deps: AppDeps) -> Path:
@@ -2171,6 +2262,21 @@ def _parse_optional_decimal(value) -> Decimal | None:
 
 def _is_admin(user_id: int, deps: AppDeps) -> bool:
     return user_id in deps.config.admin_ids
+
+
+async def _user_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
+    deals = await deps.deal_service.list_user_deals(user_id)
+    total = len(deals)
+    success = sum(1 for deal in deals if deal.status == DealStatus.COMPLETED)
+    failed = sum(1 for deal in deals if deal.status in {DealStatus.CANCELED, DealStatus.EXPIRED})
+    success_percent = round((success / total) * 100) if total else 0
+    reviews = await deps.review_service.list_for_user(user_id)
+    return {
+        "total_deals": total,
+        "success_percent": success_percent,
+        "fail_percent": round((failed / total) * 100) if total else 0,
+        "reviews_count": len(reviews),
+    }
 
 
 async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:

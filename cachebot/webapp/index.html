@@ -56,7 +56,7 @@
           <span class="nav-icon">
             <img src="/app/assets/disputes-icon.png" alt="" />
           </span>
-          Споры
+          Модерация
         </button>
         <button class="tab nav-btn with-icon" data-view="admin" id="adminTab">
           <span class="nav-icon">
@@ -175,10 +175,37 @@
 
       <section class="panel view" id="view-disputes">
         <div class="panel-header">
-          <h2>Спорные ситуации</h2>
+          <h2>Модерация</h2>
           <span id="disputesCount" class="badge">0</span>
         </div>
-        <div id="disputesList" class="deal-list"></div>
+        <div class="moderation-tabs">
+          <button id="moderationDisputesBtn" class="btn pill active">Споры</button>
+          <button id="moderationUsersBtn" class="btn pill">Управление</button>
+        </div>
+        <div id="moderationDisputesPanel" class="moderation-panel">
+          <div id="disputesList" class="deal-list"></div>
+        </div>
+        <div id="moderationUsersPanel" class="moderation-panel is-hidden">
+          <div class="admin-card moderation-search">
+            <div class="profile-title">Поиск пользователя</div>
+            <div class="admin-row">
+              <input id="moderationSearchInput" placeholder="@username или ID" />
+              <button id="moderationSearchBtn" class="btn">Найти</button>
+            </div>
+            <div id="moderationSearchHint" class="admin-hint"></div>
+          </div>
+          <div id="moderationUserCard" class="admin-card moderation-user is-hidden">
+            <div class="profile-title" id="moderationUserTitle">Пользователь</div>
+            <div class="moderation-user-meta" id="moderationUserMeta"></div>
+            <div class="moderation-user-stats" id="moderationUserStats"></div>
+            <div class="moderation-user-actions">
+              <button id="moderationWarnBtn" class="btn warning">Предупреждение</button>
+              <button id="moderationBlockBtn" class="btn">Запретить сделки</button>
+              <button id="moderationBanBtn" class="btn danger">Заблокировать</button>
+            </div>
+            <div id="moderationUserStatus" class="admin-hint"></div>
+          </div>
+        </div>
       </section>
 
       <section class="panel view" id="view-admin">

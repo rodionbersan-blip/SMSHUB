@@ -963,6 +963,20 @@ body.modal-open #app {
   margin-top: 4px;
 }
 
+.deal-row-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deal-review-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ff9a2f;
+  white-space: nowrap;
+}
+
 .link {
   background: none;
   border: none;

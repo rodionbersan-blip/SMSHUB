@@ -1319,6 +1319,10 @@
     chunk.forEach((deal) => {
       const item = document.createElement("div");
       item.className = "deal-item";
+      const reviewBadge =
+        deal.status === "completed" && !deal.reviewed
+          ? '<span class="deal-review-badge">Оставьте отзыв</span>'
+          : "";
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Сделка #${deal.public_id}</div>
@@ -1327,7 +1331,9 @@
         <div class="deal-row">${formatAmount(deal.cash_rub, 2)}₽-${formatAmount(
         deal.usdt_amount
       )} USDT | 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
-        <div class="deal-row">Дата: ${formatDate(deal.created_at)}</div>
+        <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(
+          deal.created_at
+        )}</span>${reviewBadge}</div>
       `;
       item.addEventListener("click", () => openDealModal(deal.id));
       dealsList.appendChild(item);
@@ -2454,12 +2460,6 @@
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "✅ QR прикреплен и отправлен в чат.";
-      dealModalBody.appendChild(alert);
-    }
-    if (deal.status === "completed" && !deal.reviewed) {
-      const alert = document.createElement("div");
-      alert.className = "deal-alert";
-      alert.textContent = "Оцените сделку — кнопка внизу.";
       dealModalBody.appendChild(alert);
     }
     const ownerLink = dealModalBody.querySelector(".owner-link");

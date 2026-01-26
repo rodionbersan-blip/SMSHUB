@@ -1858,6 +1858,19 @@ body.modal-open #app {
   gap: 6px;
 }
 
+.moderation-user .profile-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.moderation-user .profile-title.is-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .moderation-user-line {
   display: flex;
   flex-wrap: wrap;
@@ -1869,6 +1882,12 @@ body.modal-open #app {
   font-size: 15px;
   font-weight: 700;
   color: var(--text);
+}
+
+.moderation-user-handle.is-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .moderation-user-meta {
@@ -2034,10 +2053,18 @@ body.modal-open #app {
 .admin-row {
   display: flex;
   gap: 8px;
+  flex-wrap: nowrap;
+  align-items: center;
 }
 
 .admin-row input {
   flex: 1;
+  min-width: 0;
+}
+
+#moderationSearchBtn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .admin-list {

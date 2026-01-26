@@ -1854,26 +1854,41 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         moderation = await deps.user_service.set_deal_blocked(target_id, False)
     else:
         raise web.HTTPBadRequest(text="Некорректное действие")
-        if action in {"ban", "block_deals"}:
-            bot = request.app.get("bot")
-            if bot:
-                handle = user.get("username")
-                moderator_name = f"@{handle}" if handle else (
-                    user.get("first_name") or user.get("last_name") or str(user_id)
-                )
-                duration_text = _format_duration(minutes) if until else "навсегда"
-                if action == "ban":
-                    action_line = "заблокировал профиль"
-                else:
-                    action_line = "ограничил сделки"
-                message = (
-                    f"Модератор {moderator_name} {action_line}.\n"
-                    f"Причина: {reason}\n"
-                    f"Срок: {duration_text}\n\n"
-                    "Если хотите оспорить, обратитесь в поддержку приложения."
-                )
-                with suppress(Exception):
-                    await bot.send_message(target_id, message)
+    notice_sent = False
+    notice_error: str | None = None
+    if action in {"ban", "block_deals", "warn"}:
+        bot = request.app.get("bot")
+        if not bot:
+            notice_error = "bot_not_configured"
+            logger.warning("Moderation notice not sent: bot not configured")
+        else:
+            handle = user.get("username")
+            moderator_name = f"@{handle}" if handle else (
+                user.get("first_name") or user.get("last_name") or str(user_id)
+            )
+            duration_text = _format_duration(minutes) if until else "навсегда"
+            if action == "ban":
+                action_line = "заблокировал профиль"
+                details = f"Срок: {duration_text}\n"
+            elif action == "block_deals":
+                action_line = "ограничил сделки"
+                details = f"Срок: {duration_text}\n"
+            else:
+                action_line = "вынес предупреждение"
+                warnings_total = moderation.get("warnings") if isinstance(moderation, dict) else None
+                details = f"Предупреждений: {warnings_total}/3\n" if warnings_total is not None else ""
+            message = (
+                f"Модератор {moderator_name} {action_line}.\n"
+                f"Причина: {reason}\n"
+                f"{details}\n"
+                "Если хотите оспорить, обратитесь в поддержку приложения."
+            )
+            try:
+                await bot.send_message(target_id, message)
+                notice_sent = True
+            except Exception as exc:
+                notice_error = str(exc)
+                logger.exception("Failed to send moderation notice to %s: %s", target_id, exc)
     role = await deps.user_service.role_of(profile.user_id)
     role_label = await _role_label(profile.user_id, deps)
     merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
@@ -1887,7 +1902,9 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         "moderation": moderation,
         "can_manage": True,
     }
-    return web.json_response({"ok": True, "user": payload})
+    return web.json_response(
+        {"ok": True, "user": payload, "notice": {"sent": notice_sent, "error": notice_error}}
+    )
 
 
 async def _api_reviews_list(request: web.Request) -> web.Response:

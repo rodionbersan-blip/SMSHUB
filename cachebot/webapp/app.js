@@ -2271,9 +2271,14 @@
     const display = profile?.display_name || profile?.full_name || profile?.username || "Пользователь";
     const username = profile?.username ? `@${profile.username}` : "—";
     moderationUserTitle.textContent = display;
+    moderationUserTitle.dataset.userId = profile?.user_id ? String(profile.user_id) : "";
+    moderationUserTitle.classList.toggle("is-clickable", !!profile?.user_id);
     if (moderationUserHandle) {
       moderationUserHandle.textContent = username;
-      moderationUserHandle.style.display = username && username !== "—" ? "" : "none";
+      const showHandle = username && username !== "—";
+      moderationUserHandle.style.display = showHandle ? "" : "none";
+      moderationUserHandle.dataset.userId = profile?.user_id ? String(profile.user_id) : "";
+      moderationUserHandle.classList.toggle("is-clickable", !!profile?.user_id);
     }
     const roleLabel = payload?.role_label || "Пользователь";
     moderationUserMeta.innerHTML = `
@@ -4504,6 +4509,18 @@
     if (event.key === "Enter") {
       event.preventDefault();
       runModerationSearch();
+    }
+  });
+  moderationUserTitle?.addEventListener("click", () => {
+    const targetId = moderationUserTitle.dataset.userId;
+    if (targetId) {
+      openUserProfile(targetId);
+    }
+  });
+  moderationUserHandle?.addEventListener("click", () => {
+    const targetId = moderationUserHandle.dataset.userId;
+    if (targetId) {
+      openUserProfile(targetId);
     }
   });
   moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn", moderationWarnBtn));

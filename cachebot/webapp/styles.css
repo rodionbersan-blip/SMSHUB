@@ -2241,9 +2241,6 @@ body.modal-open #app {
   0% {
     transform: translateY(0) scale(0.86);
   }
-  60% {
-    transform: translateY(0) scale(1.02);
-  }
   100% {
     transform: translateY(0) scale(1);
   }

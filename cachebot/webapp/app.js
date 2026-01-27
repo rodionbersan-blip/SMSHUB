@@ -219,6 +219,7 @@
   const moderationUserCard = document.getElementById("moderationUserCard");
   const moderationUserTitle = document.getElementById("moderationUserTitle");
   const moderationUserHandle = document.getElementById("moderationUserHandle");
+  const moderationUserTgBtn = document.getElementById("moderationUserTgBtn");
   const moderationUserMeta = document.getElementById("moderationUserMeta");
   const moderationUserStats = document.getElementById("moderationUserStats");
   const moderationWarnBtn = document.getElementById("moderationWarnBtn");
@@ -2320,6 +2321,9 @@
       moderationUserHandle.style.display = showHandle ? "" : "none";
       moderationUserHandle.dataset.userId = profile?.user_id ? String(profile.user_id) : "";
       moderationUserHandle.classList.toggle("is-clickable", !!profile?.user_id);
+    }
+    if (moderationUserTgBtn) {
+      moderationUserTgBtn.style.display = username && username !== "—" ? "" : "none";
     }
     const roleLabel = payload?.role_label || "Пользователь";
     moderationUserMeta.innerHTML = `
@@ -4637,13 +4641,19 @@
     }
   });
   moderationUserTitle?.addEventListener("click", () => {
-    const handle = moderationUserHandle?.textContent?.trim() || "";
-    const clean = handle.startsWith("@") ? handle.slice(1) : handle;
-    if (!clean) return;
-    window.open(`https://t.me/${clean}`, "_blank");
+    const targetId = moderationUserTitle.dataset.userId;
+    if (targetId) {
+      openUserProfile(targetId);
+    }
   });
   moderationUserHandle?.addEventListener("click", () => {
-    const username = moderationUserHandle.textContent?.trim() || "";
+    const targetId = moderationUserHandle.dataset.userId;
+    if (targetId) {
+      openUserProfile(targetId);
+    }
+  });
+  moderationUserTgBtn?.addEventListener("click", () => {
+    const username = moderationUserHandle?.textContent?.trim() || "";
     const clean = username.startsWith("@") ? username.slice(1) : username;
     if (!clean) return;
     window.open(`https://t.me/${clean}`, "_blank");

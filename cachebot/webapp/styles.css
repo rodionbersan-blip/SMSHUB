@@ -1876,6 +1876,13 @@ body.modal-open #app {
   align-items: center;
 }
 
+.moderation-user-line .icon-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 999px;
+}
+
 .moderation-user-handle {
   font-size: 15px;
   font-weight: 700;

@@ -1863,6 +1863,9 @@ body.modal-open #app {
   font-weight: 800;
   color: var(--text);
   margin-bottom: 0;
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
 }
 
 .moderation-user .profile-title.is-clickable {
@@ -1908,6 +1911,30 @@ body.modal-open #app {
   background: rgba(47, 127, 220, 0.16);
   border: 1px solid rgba(47, 127, 220, 0.28);
   color: #1b3a66;
+}
+
+#moderationWarnBtn,
+#moderationBlockBtn,
+#moderationBanBtn,
+#moderationAdsBtn {
+  color: #ffffff;
+  border: none;
+}
+
+#moderationWarnBtn {
+  background: #f59a23;
+}
+
+#moderationBlockBtn {
+  background: #d9791e;
+}
+
+#moderationBanBtn {
+  background: #e04b4b;
+}
+
+#moderationAdsBtn {
+  background: #2f7fdc;
 }
 
 .moderation-user-handle {

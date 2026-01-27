@@ -193,7 +193,7 @@ h2 {
 }
 
 body.modal-open #app {
-  filter: none;
+  filter: blur(8px);
   transition: none;
 }
 

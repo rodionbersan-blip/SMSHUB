@@ -2019,6 +2019,13 @@ body.modal-open .tabs {
   margin-top: 8px;
 }
 
+:root[data-theme="light"] .moderation-ads-list .deal-actions .btn {
+  background: rgba(47, 127, 220, 0.22);
+  border: 1px solid rgba(47, 127, 220, 0.45);
+  color: #1b3a66;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
 .moderation-user-actions .btn {
   flex: 1 1 150px;
   height: 38px;

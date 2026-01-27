@@ -657,22 +657,12 @@ body.modal-open .tabs {
   background: rgba(14, 18, 26, 0.9);
   opacity: 0;
   pointer-events: none;
-  display: none;
 }
 
 :root[data-theme="light"] body.modal-open .tabs {
   background: rgba(248, 248, 250, 0.9);
   opacity: 0;
   pointer-events: none;
-  display: none;
-}
-
-:root[data-theme="light"] body.modal-open {
-  background-attachment: scroll;
-}
-
-:root[data-theme="light"] body.modal-open::before {
-  opacity: 0;
 }
 
 .tabs-extra {

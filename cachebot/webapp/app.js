@@ -4486,7 +4486,6 @@
     window.visualViewport.addEventListener("resize", () => {
       if (!p2pCreateModal?.classList?.contains("open")) return;
       adjustP2PCreateCardForKeyboard();
-      scrollP2PCreateToBottom();
     });
   }
 

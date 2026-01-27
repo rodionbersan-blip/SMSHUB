@@ -4638,16 +4638,16 @@
     }
   });
   moderationUserTitle?.addEventListener("click", () => {
-    const targetId = moderationUserTitle.dataset.userId;
-    if (targetId) {
-      openUserProfile(targetId);
-    }
+    const handle = moderationUserHandle?.textContent?.trim() || "";
+    const clean = handle.startsWith("@") ? handle.slice(1) : handle;
+    if (!clean) return;
+    window.open(`https://t.me/${clean}`, "_blank");
   });
   moderationUserHandle?.addEventListener("click", () => {
-    const targetId = moderationUserHandle.dataset.userId;
-    if (targetId) {
-      openUserProfile(targetId);
-    }
+    const username = moderationUserHandle.textContent?.trim() || "";
+    const clean = username.startsWith("@") ? username.slice(1) : username;
+    if (!clean) return;
+    window.open(`https://t.me/${clean}`, "_blank");
   });
   moderationWarnBtn?.addEventListener("click", () => openModerationActionModal("warn"));
   moderationAdsBtn?.addEventListener("click", openModerationAdsModal);

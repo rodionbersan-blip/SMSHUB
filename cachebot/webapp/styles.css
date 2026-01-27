@@ -1867,8 +1867,6 @@ body.modal-open #app {
 
 .moderation-user .profile-title.is-clickable {
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .moderation-user-line {
@@ -1886,8 +1884,18 @@ body.modal-open #app {
 
 .moderation-user-handle.is-clickable {
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+}
+
+:root[data-theme="dark"] #moderationBlockBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #dfe7f5;
+}
+
+:root[data-theme="light"] #moderationBlockBtn {
+  background: rgba(47, 127, 220, 0.18);
+  border: 1px solid rgba(47, 127, 220, 0.3);
+  color: #1b3a66;
 }
 
 .moderation-user-meta {

@@ -4640,7 +4640,8 @@
       runModerationSearch();
     }
   });
-  moderationUserTitle?.addEventListener("click", () => {
+  moderationUserTitle?.addEventListener("click", (event) => {
+    if (event.target !== moderationUserTitle) return;
     const targetId = moderationUserTitle.dataset.userId;
     if (targetId) {
       openUserProfile(targetId);

@@ -1881,11 +1881,33 @@ body.modal-open #app {
   pointer-events: auto;
 }
 
+.moderation-user-line::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .moderation-user-line .icon-btn {
   height: 28px;
   padding: 0 12px;
   font-size: 12px;
   border-radius: 999px;
+  background: var(--bg);
+}
+
+.moderation-user-actions .btn,
+.moderation-user-line .icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e6ecf7;
+}
+
+:root[data-theme="light"] .moderation-user-actions .btn,
+:root[data-theme="light"] .moderation-user-line .icon-btn {
+  background: rgba(47, 127, 220, 0.16);
+  border: 1px solid rgba(47, 127, 220, 0.28);
+  color: #1b3a66;
 }
 
 .moderation-user-handle {
@@ -2103,8 +2125,16 @@ body.modal-open #app {
   font-size: 12px;
 }
 
-#moderationActionModal .modal-card {
+#moderationActionModal .modal-card,
+#moderationAdsModal .modal-card {
   max-width: 520px;
+}
+
+:root[data-theme="light"] #moderationActionModal .modal-card.glass,
+:root[data-theme="light"] #moderationAdsModal .modal-card.glass {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(45, 50, 60, 0.12);
+  box-shadow: 0 16px 40px rgba(12, 18, 28, 0.16);
 }
 
 #moderationActionModal .moderation-form {

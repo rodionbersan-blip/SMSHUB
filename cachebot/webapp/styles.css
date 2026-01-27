@@ -2588,6 +2588,13 @@ body.modal-open .tabs {
   opacity: 1;
 }
 
+/* Avoid double-blur stacking: keep blur only on modal overlay */
+.modal.open .modal-card,
+.modal.open .modal-card.glass {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 .proof-modal {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);

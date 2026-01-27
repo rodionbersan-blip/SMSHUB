@@ -143,6 +143,18 @@ class AdvertService:
             active = sum(1 for ad in ads if ad.active)
             return active, len(ads)
 
+    async def disable_user_ads(self, user_id: int) -> int:
+        async with self._lock:
+            updated = 0
+            for ad in list(self._adverts.values()):
+                if ad.owner_id != user_id or not ad.active:
+                    continue
+                self._adverts[ad.id] = replace(ad, active=False)
+                updated += 1
+            if updated:
+                await self._persist_locked()
+            return updated
+
     async def _persist_locked(self) -> None:
         await self._repository.persist_adverts(
             list(self._adverts.values()),

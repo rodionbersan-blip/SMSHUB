@@ -212,6 +212,7 @@
               <button id="moderationWarnBtn" class="btn warning">Предупреждение</button>
               <button id="moderationBlockBtn" class="btn">Запретить сделки</button>
               <button id="moderationBanBtn" class="btn danger">Заблокировать</button>
+              <button id="moderationAdsBtn" class="btn ghost">Объявления</button>
             </div>
           </div>
         </div>
@@ -580,6 +581,18 @@
         <div class="modal-actions">
           <button id="moderationActionSubmit" class="btn primary">Применить</button>
           <button id="moderationActionCancel" class="btn">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="moderationAdsModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title">Объявления пользователя</div>
+          <button id="moderationAdsClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body">
+          <div id="moderationAdsList" class="deal-list moderation-ads-list"></div>
         </div>
       </div>
     </div>

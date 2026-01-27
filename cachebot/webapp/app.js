@@ -224,6 +224,7 @@
   const moderationWarnBtn = document.getElementById("moderationWarnBtn");
   const moderationBlockBtn = document.getElementById("moderationBlockBtn");
   const moderationBanBtn = document.getElementById("moderationBanBtn");
+  const moderationAdsBtn = document.getElementById("moderationAdsBtn");
   const moderationUserStatus = document.getElementById("moderationUserStatus");
   const moderationActionModal = document.getElementById("moderationActionModal");
   const moderationActionTitle = document.getElementById("moderationActionTitle");
@@ -236,6 +237,9 @@
   const moderationActionSubmit = document.getElementById("moderationActionSubmit");
   const moderationActionCancel = document.getElementById("moderationActionCancel");
   const moderationActionClose = document.getElementById("moderationActionClose");
+  const moderationAdsModal = document.getElementById("moderationAdsModal");
+  const moderationAdsClose = document.getElementById("moderationAdsClose");
+  const moderationAdsList = document.getElementById("moderationAdsList");
   const adminTab = document.getElementById("adminTab");
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
@@ -307,6 +311,7 @@
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
+    moderationAdsCounts: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -2299,6 +2304,7 @@
     const profile = payload?.profile;
     const stats = payload?.stats || {};
     const moderation = payload?.moderation || {};
+    const ads = payload?.ads || {};
     const warnings = Number(moderation.warnings || 0);
     const dealsBlocked = !!moderation.deals_blocked;
     const banned = !!moderation.banned;
@@ -2324,6 +2330,7 @@
       <span>Сделок: ${stats.total_deals ?? 0}</span>
       <span>Успешные: ${stats.success_percent ?? 0}%</span>
       <span>Отзывы: ${stats.reviews_count ?? 0}</span>
+      <span>Объявления: ${ads.active ?? 0}/${ads.total ?? 0}</span>
     `;
     if (moderationWarnBtn) {
       moderationWarnBtn.textContent = `Предупреждение (${warnings}/3)`;
@@ -2350,6 +2357,12 @@
       if (!btn) return;
       btn.disabled = !canManage;
     });
+    if (moderationAdsBtn) {
+      const activeCount = ads.active ?? 0;
+      const totalCount = ads.total ?? 0;
+      moderationAdsBtn.textContent = `Объявления ${activeCount}/${totalCount}`;
+      moderationAdsBtn.disabled = !canManage;
+    }
     if (!canManage && moderationUserStatus && statusParts.length) {
       moderationUserStatus.textContent = `${moderationUserStatus.textContent} • Недоступно для модерации`;
     }
@@ -2361,6 +2374,7 @@
       user_id: profile?.user_id,
       moderation: { warnings, deals_blocked: dealsBlocked, banned },
     };
+    state.moderationAdsCounts = ads;
   };
 
   const runModerationSearch = async () => {
@@ -2430,6 +2444,77 @@
 
   const closeModerationActionModal = () => {
     moderationActionModal?.classList.remove("open");
+  };
+
+  const renderModerationAds = (ads = []) => {
+    if (!moderationAdsList) return;
+    moderationAdsList.innerHTML = "";
+    if (!ads.length) {
+      moderationAdsList.innerHTML = "<div class=\"deal-empty\">Объявлений нет.</div>";
+      return;
+    }
+    ads.forEach((ad) => {
+      const row = document.createElement("div");
+      row.className = "deal-item moderation-ad-item";
+      const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
+      const statusLabel = ad.active ? "Активно" : "Отключено";
+      row.innerHTML = `
+        <div class="deal-header">
+          <div class="deal-id">Объявление #${ad.public_id}</div>
+          <div class="deal-status ${ad.active ? "positive" : "negative"}">${statusLabel}</div>
+        </div>
+        <div class="deal-row">Сторона: ${sideLabel}</div>
+        <div class="deal-row">Цена: ${formatAmount(ad.price_rub)} RUB</div>
+        <div class="deal-row">Объём: ${formatAmount(ad.remaining_usdt)} / ${formatAmount(
+        ad.total_usdt
+      )} USDT</div>
+        <div class="deal-actions">
+          <button class="btn pill">${ad.active ? "Отключить" : "Включить"}</button>
+        </div>
+      `;
+      const toggleBtn = row.querySelector(".deal-actions .btn");
+      toggleBtn?.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const targetId = state.moderationUser?.user_id;
+        if (!targetId) return;
+        toggleBtn.classList.add("is-loading");
+        try {
+          const payload = await fetchJson(
+            `/api/admin/users/${targetId}/ads/${ad.id}/toggle`,
+            {
+              method: "POST",
+              body: JSON.stringify({ active: !ad.active }),
+            }
+          );
+          if (!payload?.ok) return;
+          renderModerationAds(
+            ads.map((item) => (item.id === ad.id ? payload.ad : item))
+          );
+          if (payload.counts && moderationAdsBtn) {
+            moderationAdsBtn.textContent = `Объявления ${payload.counts.active}/${payload.counts.total}`;
+          }
+        } finally {
+          toggleBtn.classList.remove("is-loading");
+        }
+      });
+      moderationAdsList.appendChild(row);
+    });
+  };
+
+  const openModerationAdsModal = async () => {
+    const userId = state.moderationUser?.user_id;
+    if (!userId) return;
+    const payload = await fetchJson(`/api/admin/users/${userId}/ads`);
+    if (!payload?.ok) return;
+    renderModerationAds(payload.ads || []);
+    if (payload.counts && moderationAdsBtn) {
+      moderationAdsBtn.textContent = `Объявления ${payload.counts.active}/${payload.counts.total}`;
+    }
+    moderationAdsModal?.classList.add("open");
+  };
+
+  const closeModerationAdsModal = () => {
+    moderationAdsModal?.classList.remove("open");
   };
 
   const submitModerationAction = async () => {
@@ -4565,6 +4650,8 @@
     }
   });
   moderationWarnBtn?.addEventListener("click", () => openModerationActionModal("warn"));
+  moderationAdsBtn?.addEventListener("click", openModerationAdsModal);
+  moderationAdsClose?.addEventListener("click", closeModerationAdsModal);
   moderationBlockBtn?.addEventListener("click", () => {
     const blocked = state.moderationUser?.moderation?.deals_blocked;
     if (blocked) {

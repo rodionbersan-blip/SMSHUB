@@ -88,6 +88,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/moderators", _api_admin_moderators)
     app.router.add_post("/api/admin/moderators", _api_admin_add_moderator)
     app.router.add_delete("/api/admin/moderators/{user_id}", _api_admin_remove_moderator)
+    app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
+    app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
     app.router.add_get("/api/admin/users/search", _api_admin_user_search)
@@ -1799,6 +1801,7 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
     merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
     stats = await _user_stats(deps, profile.user_id)
     moderation = await deps.user_service.moderation_status(profile.user_id)
+    ads_active, ads_total = await deps.advert_service.counts_for_user(profile.user_id)
     can_manage = await _can_manage_target(user_id, profile.user_id, deps)
     role_label = await _role_label(profile.user_id, deps)
     payload = {
@@ -1808,6 +1811,7 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": stats,
         "moderation": moderation,
+        "ads": {"active": ads_active, "total": ads_total},
         "can_manage": can_manage,
     }
     return web.json_response({"ok": True, "user": payload})
@@ -1846,6 +1850,7 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         moderation = await deps.user_service.add_warning(target_id)
     elif action == "ban":
         moderation = await deps.user_service.set_banned(target_id, True, until=until)
+        await deps.advert_service.disable_user_ads(target_id)
     elif action == "unban":
         moderation = await deps.user_service.set_banned(target_id, False)
     elif action == "block_deals":
@@ -1956,6 +1961,43 @@ async def _api_reviews_list(request: web.Request) -> web.Response:
     return web.json_response(
         {"ok": True, "reviews": payload, "positive": positive, "negative": negative}
     )
+
+
+async def _api_admin_user_ads(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    if not await _can_manage_target(user_id, target_id, deps):
+        raise web.HTTPForbidden(text="Недостаточно прав для управления этим пользователем")
+    ads = await deps.advert_service.list_user_ads(target_id)
+    payload = [await _ad_payload(deps, ad, include_owner=False, request=request) for ad in ads]
+    active, total = await deps.advert_service.counts_for_user(target_id)
+    return web.json_response({"ok": True, "ads": payload, "counts": {"active": active, "total": total}})
+
+
+async def _api_admin_user_ads_toggle(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    if not await _can_manage_target(user_id, target_id, deps):
+        raise web.HTTPForbidden(text="Недостаточно прав для управления этим пользователем")
+    ad_id = request.match_info["ad_id"]
+    ad = await deps.advert_service.get_ad(ad_id)
+    if not ad or ad.owner_id != target_id:
+        raise web.HTTPNotFound(text="Объявление не найдено")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    desired = body.get("active")
+    updated = await deps.advert_service.toggle_active(ad_id, bool(desired))
+    payload = await _ad_payload(deps, updated, include_owner=False, request=request)
+    active, total = await deps.advert_service.counts_for_user(target_id)
+    return web.json_response({"ok": True, "ad": payload, "counts": {"active": active, "total": total}})
 
 
 async def _api_reviews_add(request: web.Request) -> web.Response:

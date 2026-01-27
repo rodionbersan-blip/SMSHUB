@@ -2023,6 +2023,15 @@ body.modal-open #app {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.theme-switching .moderation-user-actions .btn,
+.theme-switching .moderation-user-line .icon-btn,
+.theme-switching #moderationWarnBtn,
+.theme-switching #moderationBlockBtn,
+.theme-switching #moderationBanBtn,
+.theme-switching #moderationAdsBtn {
+  transition: none !important;
+}
+
 .moderation-user-actions .btn.warning {
   border-color: rgba(255, 165, 70, 0.45);
   color: #ffb067;

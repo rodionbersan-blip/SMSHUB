@@ -1076,6 +1076,10 @@
 
   const applyTheme = (theme) => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.add("theme-switching");
+    window.setTimeout(() => {
+      document.documentElement.classList.remove("theme-switching");
+    }, 50);
     if (tg) {
       try {
         tg.setHeaderColor(theme === "dark" ? "#0e0f13" : "#f6f3ee");

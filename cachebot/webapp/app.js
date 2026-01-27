@@ -2320,7 +2320,7 @@
       const showHandle = username && username !== "—";
       moderationUserHandle.style.display = showHandle ? "" : "none";
       moderationUserHandle.dataset.userId = profile?.user_id ? String(profile.user_id) : "";
-      moderationUserHandle.classList.toggle("is-clickable", !!profile?.user_id);
+      moderationUserHandle.classList.remove("is-clickable");
     }
     if (moderationUserTgBtn) {
       moderationUserTgBtn.style.display = username && username !== "—" ? "" : "none";
@@ -4642,12 +4642,6 @@
   });
   moderationUserTitle?.addEventListener("click", () => {
     const targetId = moderationUserTitle.dataset.userId;
-    if (targetId) {
-      openUserProfile(targetId);
-    }
-  });
-  moderationUserHandle?.addEventListener("click", () => {
-    const targetId = moderationUserHandle.dataset.userId;
     if (targetId) {
       openUserProfile(targetId);
     }

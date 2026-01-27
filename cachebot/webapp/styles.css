@@ -1874,11 +1874,16 @@ body.modal-open #app {
   flex-wrap: wrap;
   gap: 8px 10px;
   align-items: center;
+  pointer-events: none;
+}
+
+.moderation-user-line > * {
+  pointer-events: auto;
 }
 
 .moderation-user-line .icon-btn {
   height: 28px;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 12px;
   border-radius: 999px;
 }
@@ -1889,9 +1894,6 @@ body.modal-open #app {
   color: var(--text);
 }
 
-.moderation-user-handle.is-clickable {
-  cursor: pointer;
-}
 
 :root[data-theme="dark"] #moderationBlockBtn {
   background: rgba(255, 255, 255, 0.08);

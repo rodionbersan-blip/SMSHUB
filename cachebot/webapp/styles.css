@@ -2570,9 +2570,9 @@ body.modal-open .tabs {
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(12, 12, 16, 0.5);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: rgba(12, 12, 16, 0.6);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   padding: calc(20px + env(safe-area-inset-top, 0px))
     calc(16px + env(safe-area-inset-right, 0px))
     calc(20px + env(safe-area-inset-bottom, 0px))

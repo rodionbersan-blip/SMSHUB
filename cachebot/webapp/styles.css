@@ -204,10 +204,6 @@ body.modal-open #app {
     background: rgba(12, 12, 16, 0.6);
   }
 
-  :root[data-theme="light"] body.modal-open .modal {
-    background: rgba(245, 247, 251, 0.6);
-  }
-
   body.modal-open .modal.open .modal-card,
   body.modal-open .modal.open .modal-card.glass {
     -webkit-backdrop-filter: blur(18px) saturate(1.1);
@@ -2599,10 +2595,6 @@ body.modal-open .tabs {
   touch-action: pan-y;
   opacity: 0;
   transition: opacity 0.3s ease;
-}
-
-:root[data-theme="light"] .modal {
-  background: rgba(245, 247, 251, 0.6);
 }
 
 .modal.open {

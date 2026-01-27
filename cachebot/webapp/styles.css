@@ -1919,22 +1919,28 @@ body.modal-open #app {
 #moderationAdsBtn {
   color: #ffffff;
   border: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 #moderationWarnBtn {
-  background: #f59a23;
+  background: rgba(245, 154, 35, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 #moderationBlockBtn {
-  background: #d9791e;
+  background: rgba(217, 121, 30, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 #moderationBanBtn {
-  background: #e04b4b;
+  background: rgba(224, 75, 75, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 #moderationAdsBtn {
-  background: #2f7fdc;
+  background: rgba(47, 127, 220, 0.65);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .moderation-user-handle {

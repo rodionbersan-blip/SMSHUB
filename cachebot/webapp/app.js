@@ -2446,7 +2446,11 @@
       moderationActionHint.textContent = "Причина обязательна.";
     }
     moderationActionDurationRow?.classList.toggle("is-hidden", action === "warn");
-    moderationActionCustomRow?.classList.toggle("is-hidden", action === "warn");
+    if (action === "warn") {
+      moderationActionCustomRow?.classList.add("is-hidden");
+    } else {
+      moderationActionCustomRow?.classList.add("is-hidden");
+    }
     moderationActionModal.classList.add("open");
   };
 
